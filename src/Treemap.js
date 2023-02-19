@@ -10,8 +10,8 @@ function Treemap(props) {
     const svgRef = React.useRef();
     /* const width = 954;
     const height = 924; */
-    const width = 600;
-    const height = 600;
+    const width = props.width;
+    const height = props.height;
     const library = new Library();
 
     React.useEffect(() => {

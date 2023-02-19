@@ -10,8 +10,8 @@ import { render } from 'react-dom';
 function BubbleMapTranslate(props) {
     const svgRef = React.useRef()
     //const width = 1200
-    const width = 600
-    const height = 600
+    const width = props.width;
+    const height = props.height;
     const dict_of_data = {4: data_4, 6: data_5, 5: data_6}
     const test_data = data_6
     const overTimeOptions = {"delete": 0, "add": 1, "transform": 2}
