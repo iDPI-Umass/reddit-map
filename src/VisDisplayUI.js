@@ -85,12 +85,12 @@ function VisDisplayUI() {
         <React.Fragment>
             <svg width={bubblemap_width + treemap_width} height={bubblemap_height + treemap_height}>
                 <g>
-                    <svg>
+                    <svg x={25} y={50}>
                         <Treemap labels={getLabelNodes} selected_labels={getSelectedNodes} is_selected={getIsSelected} selected_node_id={getSelectedNodeId} nodes={nodes} width={treemap_width} height={treemap_height}/>
                     </svg>
                 </g> 
                 <g>
-                    <svg x={treemap_width}>
+                    <svg x={treemap_width + 25} y={50}>
                         <BubbleMapTranslate treemap_labels={nodes} selected_labels_treemap={selected_nodes} is_selected_treemap={is_selected} selected_node_id_treemap={selected_node_id} set_zoom_info={getZoomInfo} zoom_info_treemap={zoom_info} width={bubblemap_width} height={bubblemap_height}/>
                     </svg>
                 </g>
