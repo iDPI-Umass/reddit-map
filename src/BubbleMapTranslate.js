@@ -110,7 +110,7 @@ function BubbleMapTranslate(props) {
         var g_slider = svg.append("g")
                         .attr("class", "controls")
                         .attr("id", "slider")
-                        .attr('transform', 'translate(' + width / 3 + ',500)').call(slider)
+                        .attr('transform', 'translate(' + width / 3 + ',375)').call(slider)
 
         const boundary_nodes = []
 

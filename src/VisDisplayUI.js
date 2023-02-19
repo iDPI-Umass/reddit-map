@@ -16,8 +16,10 @@ function VisDisplayUI() {
   const [is_selected, setIsSelected] = React.useState({});
   const [selected_node_id, setSelectedNodeId] = React.useState("");
   const [zoom_info, setZoomInfo] = React.useState(null)
-  const height = 600
-  const width = 600
+  const bubblemap_height = 550
+  const bubblemap_width = 800
+  const treemap_height = 450
+  const treemap_width = 450
 
   function getLabelNodes(nodes) {
     setLabels(nodes)
@@ -81,8 +83,21 @@ function VisDisplayUI() {
 
     return (
         <React.Fragment>
-            <Treemap labels={getLabelNodes} selected_labels={getSelectedNodes} is_selected={getIsSelected} selected_node_id={getSelectedNodeId} nodes={nodes} width={width} height={height}/>
-            <BubbleMapTranslate treemap_labels={nodes} selected_labels_treemap={selected_nodes} is_selected_treemap={is_selected} selected_node_id_treemap={selected_node_id} set_zoom_info={getZoomInfo} zoom_info_treemap={zoom_info} width={width} height={height}/>
+            <svg width={bubblemap_width + treemap_width} height={bubblemap_height + treemap_height}>
+                <g>
+                    <svg>
+                        <Treemap labels={getLabelNodes} selected_labels={getSelectedNodes} is_selected={getIsSelected} selected_node_id={getSelectedNodeId} nodes={nodes} width={treemap_width} height={treemap_height}/>
+                    </svg>
+                </g> 
+                <g>
+                    <svg x={treemap_width}>
+                        <BubbleMapTranslate treemap_labels={nodes} selected_labels_treemap={selected_nodes} is_selected_treemap={is_selected} selected_node_id_treemap={selected_node_id} set_zoom_info={getZoomInfo} zoom_info_treemap={zoom_info} width={bubblemap_width} height={bubblemap_height}/>
+                    </svg>
+                </g>
+                    
+                
+            </svg>
+            
         </React.Fragment>
     );
 }
