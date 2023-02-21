@@ -7,19 +7,34 @@ import Treemap from './Treemap';
 import BubbleMapTranslate from "./BubbleMapTranslate";
 import BubbleMap from "./BubbleMap";
 import VisPickerUI from './VisPickerUI';
+import Slider from './Slider';
+import data_4 from "./data/RC_2021-04_KMeans_Agglom_100_Clusters.json"
+import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
+import data_6 from "./data/RC_2021-06_KMeans_Agglom_100_Clusters_Cut_Tsne.json"
 
 
 function VisDisplayUI() {
 
+  const dict_of_data = {4: data_4, 6: data_5, 5: data_6}
   const [nodes, setLabels] = React.useState(null);
   const [selected_nodes, setSelectedNodes] = React.useState({});
   const [is_selected, setIsSelected] = React.useState({});
   const [selected_node_id, setSelectedNodeId] = React.useState("");
   const [zoom_info, setZoomInfo] = React.useState(null)
+  const [prev_data, setPrevData] = React.useState(null)
+  const [curr_data, setCurrData] = React.useState(data_5)
   const bubblemap_height = 550
   const bubblemap_width = 800
   const treemap_height = 450
   const treemap_width = 450
+
+  function getCurrData(data) {
+    setCurrData(data)
+  }
+
+  function getPrevData(data) {
+    setPrevData(data)
+  }
 
   function getLabelNodes(nodes) {
     setLabels(nodes)
@@ -93,6 +108,11 @@ function VisDisplayUI() {
                     <svg x={treemap_width + 25} y={50}>
                         <BubbleMapTranslate treemap_labels={nodes} selected_labels_treemap={selected_nodes} is_selected_treemap={is_selected} selected_node_id_treemap={selected_node_id} set_zoom_info={getZoomInfo} zoom_info_treemap={zoom_info} width={bubblemap_width} height={bubblemap_height}/>
                     </svg>
+                </g>
+                <g>
+                  <svg>
+                    <Slider prevData={getPrevData} currData={getCurrData} treemap_width={treemap_width} treemap_height={treemap_height} bubblemap_width={bubblemap_width} bubblemap_height={bubblemap_height}></Slider>
+                  </svg>
                 </g>
                     
                 
