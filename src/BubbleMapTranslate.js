@@ -3,7 +3,6 @@ import * as d3 from 'd3';
 import data_4 from "./data/RC_2021-04_KMeans_Agglom_100_Clusters.json"
 import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
 import data_6 from "./data/RC_2021-06_KMeans_Agglom_100_Clusters_Cut_Tsne.json"
-import { sliderBottom } from 'd3-simple-slider';
 
 import { render } from 'react-dom';
 
@@ -12,13 +11,12 @@ function BubbleMapTranslate(props) {
     //const width = 1200
     const width = props.width;
     const height = props.height;
-    const dict_of_data = {4: data_4, 6: data_5, 5: data_6}
-    const test_data = data_6
     const overTimeOptions = {"delete": 0, "add": 1, "transform": 2}
     //const months = [2021-04, 2021-05, 2021-06]
     
     // note: might need to make changes later to add more groupings to add interactions with other clusters
     React.useEffect(() => {
+        console.log("bubble currData", props.currData)
         
         var brush = d3.brush()                 // Add the brush feature using the d3.brush function
             .extent( [ [0,0], [width,height] ] ) // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
@@ -87,30 +85,21 @@ function BubbleMapTranslate(props) {
                 .attr("id", "text_highlight_label")
                 .attr("opacity", 0)
                 .text("")
-
+        
         var nodes = []
-        var arr_of_tsne_boundaries = []    
-        var arr_of_results = append_data(5, dict_of_data[5], nodes, arr_of_tsne_boundaries, svg, tooltip, dict_of_prev_subreddits_to_change)
-        nodes = arr_of_results[0]
-        dict_of_prev_subreddits_to_change = arr_of_results[1]
-        arr_of_tsne_boundaries = arr_of_results[2]   
-        var slider = sliderBottom()
-            .min(5)
-            .max(6)
-            .step(1)
-            .width(300)
-            .displayValue(true)
-            .on('onchange', (d) => {
-                var arr_of_results = append_data(d, dict_of_data[d], nodes, arr_of_tsne_boundaries, svg, tooltip, dict_of_prev_subreddits_to_change, highlight_label)
-                nodes = arr_of_results[0]
-                dict_of_prev_subreddits_to_change = arr_of_results[1]
-                arr_of_tsne_boundaries = arr_of_results[2]
-            })
+        var arr_of_tsne_boundaries = []
+        if (props.prevData != null) {    
+            var arr_of_prev_results = append_data(5, props.prevData, nodes, arr_of_tsne_boundaries, svg, tooltip, dict_of_prev_subreddits_to_change, false)
+            nodes = arr_of_prev_results[0]
+            dict_of_prev_subreddits_to_change = arr_of_prev_results[1]
+            arr_of_tsne_boundaries = arr_of_prev_results[2]   
+        }
 
-        var g_slider = svg.append("g")
-                        .attr("class", "controls")
-                        .attr("id", "slider")
-                        .attr('transform', 'translate(' + width / 3 + ',375)').call(slider)
+        var arr_of_curr_results = append_data(6, props.currData, nodes, arr_of_tsne_boundaries, svg, tooltip, dict_of_prev_subreddits_to_change, highlight_label, true)
+        nodes = arr_of_curr_results[0]
+        dict_of_prev_subreddits_to_change = arr_of_curr_results[1]
+        arr_of_tsne_boundaries = arr_of_curr_results[2]
+
 
         const boundary_nodes = []
 
@@ -259,8 +248,8 @@ function BubbleMapTranslate(props) {
         
         
         
-    }, [props.treemap_labels, props.selected_labels_treemap, props.is_selected_treemap, props.selected_node_id_treemap]);
-    function append_data(temp_data_num, data, prev_nodes, prev_arr_of_tsne_boundaries, svg, tooltip, dict_of_prev_subreddits_to_change, highlight_label) {
+    }, [props.currData, props.treemap_labels, props.selected_labels_treemap, props.is_selected_treemap, props.selected_node_id_treemap]);
+    function append_data(temp_data_num, data, prev_nodes, prev_arr_of_tsne_boundaries, svg, tooltip, dict_of_prev_subreddits_to_change, highlight_label, add_labels) {
         /* if (!svg.selectAll("circle").empty()) {
             svg.selectAll("circle").style("opacity", .25).style("stroke-opacity", 0)
         } */
@@ -356,34 +345,38 @@ function BubbleMapTranslate(props) {
         /* set_of_parents.forEach((parent) => {
             render_labels(tsne_remapped_x(parent.data.tsne_x), tsne_remapped_y(parent.data.tsne_y), svg, parent.data, highlight_label, tooltip, temp_data_num)
         }) */
-        if (props.treemap_labels != null) {
-            for (let i = 0; i < props.treemap_labels.length - 1; i++) {
-                let node = props.treemap_labels[i]
-                let render_node = null
-                if (node.parent != null) {
-                    if (node.data.node_id.includes("_")) {
-                        render_node = node.parent
+        if (add_labels) {
+            if (props.treemap_labels != null) {
+                for (let i = 0; i < props.treemap_labels.length - 1; i++) {
+                    let node = props.treemap_labels[i]
+                    let render_node = null
+                    if (node.parent != null) {
+                        if (node.data.node_id.includes("_")) {
+                            render_node = node.parent
+                        }
+                        else {
+                            render_node = node
+                        }
                     }
                     else {
                         render_node = node
                     }
+                    let render_node_data = render_node.data
+                    render_labels_treemap(tsne_remapped_x(render_node_data.tsne_x), tsne_remapped_y(render_node_data.tsne_y), svg, render_node_data, highlight_label, tooltip, temp_data_num)
+    
                 }
-                else {
-                    render_node = node
-                }
-                let render_node_data = render_node.data
-                render_labels_treemap(tsne_remapped_x(render_node_data.tsne_x), tsne_remapped_y(render_node_data.tsne_y), svg, render_node_data, highlight_label, tooltip, temp_data_num)
-
+            
             }
-        
+            Object.keys(props.selected_labels_treemap).forEach(function(node_id) {
+                if (node_id.includes("_")) {
+                    let node = props.selected_labels_treemap[node_id]
+                    svg.select("#circle_class_" + node.data.subreddit)
+                                .style("opacity", 1).style("stroke-opacity", 1)
+                }
+            });
+            
         }
-        Object.keys(props.selected_labels_treemap).forEach(function(node_id) {
-            if (node_id.includes("_")) {
-                let node = props.selected_labels_treemap[node_id]
-                svg.select("#circle_class_" + node.data.subreddit)
-                            .style("opacity", 1).style("stroke-opacity", 1)
-            }
-        });
+        
 /*         if (Object.keys(props.selected_labels_treemap).length != null ) {
             if (props.selected_treemap_label.data.node_id.includes("_")) {
                 if (props.is_selected_treemap) {
@@ -722,14 +715,10 @@ function BubbleMapTranslate(props) {
         node["clicked"] = false
         var format = d3.format(",");
         var g_text = null
-        if (node.node_id.includes("_")) {
-            g_text = svg.select("#g_text_class_" + temp_data_num + "_" + node.subreddit)
-        }
-        else {
-            g_text = svg.select("#g_text_class_" + temp_data_num + "_" + node.node_id)
-        }
+        g_text = svg.select("#g_text_class_" + temp_data_num + "_" + node.node_id)
 
         if (svg.select("#label_text_class_" + node.node_id).empty()) {
+            console.log("g_text: ", node.node_id, ".circle_text_class_" + temp_data_num, g_text)
             g_text.selectAll(".circle_text_class_" + temp_data_num)._groups[0].forEach(function(d) {
                 svg.select("#circle_class_" + d.classList[2])
                 .attr('fill', (d) => {
@@ -932,7 +921,7 @@ function BubbleMapTranslate(props) {
             if (node.data.node_id.includes("_")) {
                 svg.select("#" + prefix + "_" + node.parent.data.node_id)
                 .append("g")
-                    .attr("class", prefix + " circle_text_class_" + temp_data_num + " " + node.data.subreddit)
+                    .attr("class", prefix + " " + "circle_text_class_" + temp_data_num + " " + node.data.subreddit)
                     .attr("id", prefix + "_" + node.data.subreddit)
             }
             else {

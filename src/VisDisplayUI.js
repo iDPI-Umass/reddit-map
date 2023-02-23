@@ -15,25 +15,34 @@ import data_6 from "./data/RC_2021-06_KMeans_Agglom_100_Clusters_Cut_Tsne.json"
 
 function VisDisplayUI() {
 
-  const dict_of_data = {4: data_4, 6: data_5, 5: data_6}
   const [nodes, setLabels] = React.useState(null);
   const [selected_nodes, setSelectedNodes] = React.useState({});
   const [is_selected, setIsSelected] = React.useState({});
   const [selected_node_id, setSelectedNodeId] = React.useState("");
   const [zoom_info, setZoomInfo] = React.useState(null)
-  const [prev_data, setPrevData] = React.useState(null)
-  const [curr_data, setCurrData] = React.useState(data_5)
+  const [bubblemap_prev_data, setBubbleMapPrevData] = React.useState(null)
+  const [bubblemap_curr_data, setBubbleMapCurrData] = React.useState(data_5)
+  const [treemap_prev_data, setTreeMapPrevData] = React.useState(null)
+  const [treemap_curr_data, setTreeMapCurrData] = React.useState(data_5)
   const bubblemap_height = 550
   const bubblemap_width = 800
   const treemap_height = 450
   const treemap_width = 450
 
-  function getCurrData(data) {
-    setCurrData(data)
+  function getBubbleMapCurrData(data) {
+    setBubbleMapCurrData(data)
   }
 
-  function getPrevData(data) {
-    setPrevData(data)
+  function getBubbleMapPrevData(data) {
+    setBubbleMapPrevData(data)
+  }
+
+  function getTreeMapCurrData(data) {
+    setTreeMapCurrData(data)
+  }
+
+  function getTreeMapPrevData(data) {
+    setTreeMapPrevData(data)
   }
 
   function getLabelNodes(nodes) {
@@ -101,17 +110,17 @@ function VisDisplayUI() {
             <svg width={bubblemap_width + treemap_width} height={bubblemap_height + treemap_height}>
                 <g>
                     <svg x={25} y={50}>
-                        <Treemap labels={getLabelNodes} selected_labels={getSelectedNodes} is_selected={getIsSelected} selected_node_id={getSelectedNodeId} nodes={nodes} width={treemap_width} height={treemap_height}/>
+                        <Treemap prev_data={treemap_prev_data} curr_data={treemap_curr_data} prevDataFns={getBubbleMapPrevData} currDataFns={getBubbleMapCurrData} labels={getLabelNodes} selected_labels={getSelectedNodes} is_selected={getIsSelected} selected_node_id={getSelectedNodeId} nodes={nodes} width={treemap_width} height={treemap_height}/>
                     </svg>
                 </g> 
                 <g>
                     <svg x={treemap_width + 25} y={50}>
-                        <BubbleMapTranslate treemap_labels={nodes} selected_labels_treemap={selected_nodes} is_selected_treemap={is_selected} selected_node_id_treemap={selected_node_id} set_zoom_info={getZoomInfo} zoom_info_treemap={zoom_info} width={bubblemap_width} height={bubblemap_height}/>
+                        <BubbleMapTranslate prevData={bubblemap_prev_data} currData={bubblemap_curr_data} treemap_labels={nodes} selected_labels_treemap={selected_nodes} is_selected_treemap={is_selected} selected_node_id_treemap={selected_node_id} set_zoom_info={getZoomInfo} zoom_info_treemap={zoom_info} width={bubblemap_width} height={bubblemap_height}/>
                     </svg>
                 </g>
                 <g>
                   <svg>
-                    <Slider prevData={getPrevData} currData={getCurrData} treemap_width={treemap_width} treemap_height={treemap_height} bubblemap_width={bubblemap_width} bubblemap_height={bubblemap_height}></Slider>
+                    <Slider prevDataFns={getTreeMapPrevData} currDataFns={getTreeMapCurrData} treemap_width={treemap_width} treemap_height={treemap_height} bubblemap_width={bubblemap_width} bubblemap_height={bubblemap_height}></Slider>
                   </svg>
                 </g>
                     

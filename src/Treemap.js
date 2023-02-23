@@ -37,7 +37,8 @@ function Treemap(props) {
 
         
         // hierarchy 
-        const treemap_data = treemap(data_6)
+        console.log("treemap data: ", props.curr_data)
+        const treemap_data = treemap(props.curr_data)
         
         const node_id = d => d.ancestors().reverse().map(d => d.data.hasOwnProperty("subreddit_label")? 
             d.data.subreddit_label : 
@@ -184,7 +185,10 @@ function Treemap(props) {
                 .call(t => group1.transition(t)
                     .call(position, d.parent));
         }
-    }, []);
+        props.prevDataFns(props.prev_data)
+        props.currDataFns(props.curr_data)
+
+    }, [props.curr_data]);
 
     return (
         <React.Fragment>

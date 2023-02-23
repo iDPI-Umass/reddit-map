@@ -7,7 +7,7 @@ import { sliderBottom } from 'd3-simple-slider';
 
 function Slider(props) {
     const svgRef = React.useRef()
-    const dict_of_data = {4: data_4, 6: data_5, 5: data_6}
+    const dict_of_data = {4: data_4, 5: data_5, 6: data_6}
     const overTimeOptions = {"delete": 0, "add": 1, "transform": 2}
     const width = (props.treemap_width + props.bubblemap_width) / 3
     const height = Math.max(props.treemap_height, props.bubblemap_height)
@@ -21,8 +21,10 @@ function Slider(props) {
             .width(300)
             .displayValue(true)
             .on('onchange', (d) => {
-                props.prevData(props.currData)
-                props.currData(dict_of_data[d])
+                console.log("slider onchange")
+                props.prevDataFns(props.currData)
+                props.currDataFns(dict_of_data[d])
+                console.log("slider change done")
             })
 
     var g_slider = svg.append("g")
