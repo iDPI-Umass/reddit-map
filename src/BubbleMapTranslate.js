@@ -15,9 +15,7 @@ function BubbleMapTranslate(props) {
     //const months = [2021-04, 2021-05, 2021-06]
     
     // note: might need to make changes later to add more groupings to add interactions with other clusters
-    React.useEffect(() => {
-        console.log("bubble currData", props.currData)
-        
+    React.useEffect(() => {        
         var brush = d3.brush()                 // Add the brush feature using the d3.brush function
             .extent( [ [0,0], [width,height] ] ) // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
             .on("end", function (e) {
@@ -88,6 +86,7 @@ function BubbleMapTranslate(props) {
         
         var nodes = []
         var arr_of_tsne_boundaries = []
+        // TOOD: ADD YELLOWING FROM TREEMAP AND LOOK INTO SELECTIONS AND OTHER STUFF DISCUSSED IN MEETINGS
         if (props.prevData != null) {    
             var arr_of_prev_results = append_data(5, props.prevData, nodes, arr_of_tsne_boundaries, svg, tooltip, dict_of_prev_subreddits_to_change, false)
             nodes = arr_of_prev_results[0]
@@ -248,7 +247,7 @@ function BubbleMapTranslate(props) {
         
         
         
-    }, [props.currData, props.treemap_labels, props.selected_labels_treemap, props.is_selected_treemap, props.selected_node_id_treemap]);
+    }, [props.is_rendered, props.treemap_labels, props.selected_labels_treemap, props.is_selected_treemap, props.selected_node_id_treemap, props.highlight_label]);
     function append_data(temp_data_num, data, prev_nodes, prev_arr_of_tsne_boundaries, svg, tooltip, dict_of_prev_subreddits_to_change, highlight_label, add_labels) {
         /* if (!svg.selectAll("circle").empty()) {
             svg.selectAll("circle").style("opacity", .25).style("stroke-opacity", 0)
@@ -376,6 +375,24 @@ function BubbleMapTranslate(props) {
             });
             
         }
+        console.log("props.highlight_label bubble: ", props.highlight_label)
+        if (props.highlight_label != null) {
+            if (props.highlight_label.includes("_")) {
+                svg.select(".node_id_" + props.highlight_label)
+                .attr('fill', () => {
+                    return "yellow"});
+            }
+            else {
+                svg.select("#g_text_class_" + temp_data_num + "_" + props.highlight_label)
+                .selectAll(".circle_text_class_" + temp_data_num)._groups[0].forEach(function(d) {
+                    svg.select("#circle_class_" + d.classList[2])
+                    .attr('fill', () => {
+                        return "yellow"});
+                
+            })
+            }
+            
+        }
         
 /*         if (Object.keys(props.selected_labels_treemap).length != null ) {
             if (props.selected_treemap_label.data.node_id.includes("_")) {
@@ -399,65 +416,6 @@ function BubbleMapTranslate(props) {
 
     }
 
-    
-
-    function render_nodes(x, y, size, svg, node, tooltip, change, parent, temp_data_num) {
-        node["x"] = x
-        node["y"] = y
-        node["resized_subreddit_count"] = size
-        if (change == overTimeOptions["add"]) {
-            const circle = svg.select(".g_circle")
-            .append("circle")
-                .attr("class", "circle_class" + " " + node.subreddit + " " + "parent_" + temp_data_num + "_" + parent.node_id)
-                .attr("id", "circle_class_" + node.subreddit)
-                .data([node])
-                .attr("cx", x)
-                .attr("cy", y)
-                .attr("fill", node.color)
-                .attr("opacity", 0.25)
-                .attr("r", size)
-                .attr("stroke", "black")
-                .style("stroke-width", 1)
-                .style("stroke-opacity", 0)
-                
-            
-        circle.on("mouseover", (event) => {
-                tooltip.select("#text_tooltip")
-                    .style("opacity", 1)
-                    .attr("dx", (d3.pointer(event)[0]-25))
-                    .attr("dy", (d3.pointer(event)[1]-5))
-                    .text(node.subreddit)
-                const boundingBox = tooltip.select("#text_tooltip").node().getBBox()
-                tooltip.select("#rect_tooltip")
-                    .style("opacity", 1)
-                    .style("x", boundingBox.x - 2.5)
-                    .style("y", boundingBox.y - 2.5)
-                    .style("width", boundingBox.width + 5)
-                    .style("height", boundingBox.height + 5)
-                
-            })
-            .on("mouseout", () => {
-                tooltip.select("#rect_tooltip")
-                    .style("opacity", 0)
-                tooltip.select("#text_tooltip")
-                    .style("opacity", 0)
-            })
-        }
-        if (change == overTimeOptions["transform"]) {
-            svg.select("#circle_class_" + node.subreddit)
-                .classed("parent_" + temp_data_num + "_" + parent.node_id, true)
-                .transition()
-                .duration(5000)
-                .attr("cx", x)
-                .attr("cy", y)
-                .attr("fill", node.color)
-                .attr("r", size)
-        }
-        if (change == overTimeOptions["delete"]) {
-            svg.select("#circle_class_" + node.subreddit).remove()
-        }
-        
-    }
 
     function render_nodes_treemap(x, y, size, svg, node, tooltip, change, parent, temp_data_num) {
         node["x"] = x
@@ -466,7 +424,7 @@ function BubbleMapTranslate(props) {
         if (change == overTimeOptions["add"]) {
             const circle = svg.select(".g_circle")
             .append("circle")
-                .attr("class", "circle_class" + " " + node.subreddit + " " + "parent_" + temp_data_num + "_" + parent.node_id)
+                .attr("class", "circle_class" + " " + node.subreddit + " " +  "node_id_" + node.node_id + " " + "parent_" + temp_data_num + "_" + parent.node_id)
                 .attr("id", "circle_class_" + node.subreddit)
                 .data([node])
                 .attr("cx", x)
@@ -517,208 +475,15 @@ function BubbleMapTranslate(props) {
         
     }
 
-    function render_labels(x, y, svg, node, highlight_label, tooltip, temp_data_num) {
-        node["x"] = x
-        node["y"] = y
-        node["clicked"] = false
-        var format = d3.format(",");
-        var g_text = null
-        if (node.node_id.includes("_")) {
-            g_text = svg.select("#g_text_class_" + temp_data_num + "_" + node.subreddit)
-        }
-        else {
-            g_text = svg.select("#g_text_class_" + temp_data_num + "_" + node.node_id)
-        }
-
-        if (svg.select("#label_text_class_" + node.node_id).empty()) {
-            g_text.append("text")
-                .attr("class", "label_text_class")
-                .attr("id", "label_text_class_" + node.node_id)
-                .data([node])
-                .attr("dx", x)
-                .attr("dy", y)
-                .attr("fill", "black")
-                .attr("stroke", "black")
-                .style("stroke-width", .1)
-                .text(() => {
-                    if (node.node_id.includes("_")) {
-                        return node.subreddit
-                    }
-                    return node.taxonomy_label
-                })
-                .on("mouseover", (event) => {
-                    g_text.selectAll(".circle_text_class_" + temp_data_num)._groups[0].forEach(function(d) {
-                        svg.select("#circle_class_" + d.classList[2])
-                        .attr('fill', () => {
-                            return "yellow"});
-                        
-                    });
-                    /* svg.selectAll(".parent_" + temp_data_num + "_" + node.node_id)
-                    .attr('fill', () => {
-                        return "yellow"}); */
-                
-                   
-         
-                })
-                .on("mousemove", (event) => {
-                    /* svg.selectAll(".parent_" + temp_data_num + "_" + node.node_id)
-                    .attr('fill', () => {
-                        return "yellow"}); */
-
-                    g_text.selectAll(".circle_text_class_" + temp_data_num)._groups[0].forEach(function(d) {
-                        svg.select("#circle_class_" + d.classList[2])
-                        .attr('fill', () => {
-                            return "yellow"});
-                        
-                    });
-
-                })
-                .on("mouseout", (d) => {
-                    /* svg.selectAll(".parent_" + temp_data_num + "_" + node.node_id)
-                    .attr('fill', () => {
-                        return node.color}); */
-                    g_text.selectAll(".circle_text_class_" + temp_data_num)._groups[0].forEach(function(d) {
-                        svg.select("#circle_class_" + d.classList[2])
-                        .attr('fill', (d) => {
-                            return d.color});
-                        
-                    });
-
-                })
-                .on("click", (d, i) => {
-                    if (node.clicked == true) {
-                        g_text.selectAll(".circle_text_class_" + temp_data_num)._groups[0].forEach(function(d) {
-                            svg.select("#circle_class_" + d.classList[2])
-                            .style("opacity", .25).style("stroke-opacity", 0)  
-                        });
-                        // svg.selectAll(".parent_" + temp_data_num + "_" + node.node_id).style("opacity", .25).style("stroke-opacity", 0)
-                        node.clicked = false
-                    
-                    }
-                    else {
-                        g_text.selectAll(".circle_text_class_" + temp_data_num)._groups[0].forEach(function(d) {
-                            svg.select("#circle_class_" + d.classList[2])
-                            .style("opacity", 1).style("stroke-opacity", 1) 
-                        });
-                        //svg.selectAll(".parent_" + temp_data_num + "_" + node.node_id).style("opacity", 1).style("stroke-opacity", 1)
-                        node.clicked = true
-                    
-
-                    }
-                    
-                })
-
-        }
-        
-        
-        /* const labelBoundingBox = g_text.select("#label_text_class_" + node.node_id).node().getBBox()
-
-
-        g_text.append("rect")
-                .attr("class", "label_rect_class")
-                .attr("id", "label_rect_class_" + node.node_id)
-                .attr("fill", "transparent")
-                .style("x", labelBoundingBox.x - 2.5)
-                .style("y", labelBoundingBox.y - 2.5)
-                .style("width", labelBoundingBox.width + 5)
-                .style("height", labelBoundingBox.height + 5)
-                .on("mouseover", (event) => {
-                    svg.selectAll(".parent_" + node.node_id)
-                    .attr('fill', () => {
-                        return "yellow"});
-                    var top_subreddits = node.top_subreddit_labels.split(",")
-                    
-                    var label = ""
-                    top_subreddits.forEach((subreddit_label, i) => {
-                        label += subreddit_label 
-                        if (i != top_subreddits.length - 1) {
-                           label += "\n"
-                        }       
-                    })
-                    tooltip.select("#text_tooltip")
-                        .style("opacity", 1)
-                        .attr("dx", (d3.pointer(event)[0]-25))
-                        .attr("dy", (d3.pointer(event)[1]-500))
-                        .text(label)
-                    const toolTipBoundingBox = tooltip.select("#text_tooltip").node().getBBox()
-                    tooltip.select("#rect_tooltip")
-                        .style("opacity", 1)
-                        .style("x", toolTipBoundingBox.x - 2.5)
-                        .style("y", toolTipBoundingBox.y - 2.5)
-                        .style("width", toolTipBoundingBox.width + 5)
-                        .style("height", toolTipBoundingBox.height + 5)
-
-                    //highlight_label.select("#text_highlight_label")
-                    //.style("opacity", 1)
-                    //.attr("dx", x)
-                    //.attr("dy", y)
-                    //.attr("fill", "black")
-                    //.attr("stroke", "black")
-                    //.style("stroke-width", .1)
-                    //.text(node.taxonomy_label)
-                    //const boundingBox = highlight_label.select("#text_highlight_label").node().getBBox()
-                    //highlight_label.select("#rect_highlight_label")
-                        //.style("opacity", 1)
-                        //.style("x", boundingBox.x - 2.5)
-                        //.style("y", boundingBox.y - 2.5)
-                        //.style("width", boundingBox.width + 5)
-                        //.style("height", boundingBox.height + 5)
-                })
-                .on("mousemove", (event) => {
-                    svg.selectAll(".parent_" + node.node_id)
-                    .attr('fill', () => {
-                        return "yellow"});
-                    const toolTipBoundingBox = tooltip.select("#text_tooltip").node().getBBox()
-                    tooltip.select("#text_tooltip")
-                        .attr("dx", (d3.pointer(event)[0]-25))
-                        .attr("dy", (d3.pointer(event)[1]-5))
-                    tooltip.select("#rect_tooltip")
-                        .style("x", toolTipBoundingBox.x - 2.5)
-                        .style("y", toolTipBoundingBox.y - 2.5)
-                })
-                .on("mouseout", (d) => {
-                    svg.selectAll(".parent_" + node.node_id)
-                    .attr('fill', () => {
-                        return node.color});
-                    tooltip.select("#rect_tooltip")
-                        .style("opacity", 0)
-                    tooltip.select("#text_tooltip")
-                        .style("opacity", 0)
-                    //highlight_label.select("#rect_highlight_label")
-                    //.style("opacity", 0)
-                    //highlight_label.select("#text_highlight_label")
-                        //.style("opacity", 0)
-                })
-                .on("click", (d, i) => {
-                    if (node.clicked == true) {
-                        svg.selectAll(".parent_" + node.node_id).style("opacity", .25).style("stroke-opacity", 0)
-                        node.clicked = false
-                    
-                    }
-                    else {
-                        svg.selectAll(".parent_" + node.node_id).style("opacity", 1).style("stroke-opacity", 1)
-                        node.clicked = true
-                    
-
-                    }
-                    
-                }) */
-                
-                
-
-    }
-
 
     function render_labels_treemap(x, y, svg, node, highlight_label, tooltip, temp_data_num) {
         node["x"] = x
         node["y"] = y
         node["clicked"] = false
         var format = d3.format(",");
-        var g_text = null
-        g_text = svg.select("#g_text_class_" + temp_data_num + "_" + node.node_id)
+        var g_text = svg.select("#g_text_class_" + temp_data_num + "_" + node.node_id)
 
         if (svg.select("#label_text_class_" + node.node_id).empty()) {
-            console.log("g_text: ", node.node_id, ".circle_text_class_" + temp_data_num, g_text)
             g_text.selectAll(".circle_text_class_" + temp_data_num)._groups[0].forEach(function(d) {
                 svg.select("#circle_class_" + d.classList[2])
                 .attr('fill', (d) => {
@@ -751,9 +516,6 @@ function BubbleMapTranslate(props) {
                 .attr("stroke", "black")
                 .style("stroke-width", .1)
                 .text(() => {
-                    if (node.node_id.includes("_")) {
-                        return node.subreddit
-                    }
                     return node.taxonomy_label
                 })
                 .on("mouseover", (event) => {
@@ -887,20 +649,6 @@ function BubbleMapTranslate(props) {
         }
 
         return curr_max
-    }
-
-    function remap_point(point, min, max, min_range, max_range, margin, do_subtraction) {
-        const range = max_range - min_range;
-        const point_range = max - min
-        var remap_point = point
-        if (do_subtraction) {
-            remap_point = (range - margin) - (((point - min ) / point_range) * (range - margin))
-        }
-        else {
-            remap_point = min_range + (((point - min ) / point_range) * (range - margin))
-        }
-
-        return remap_point;
     }
     
     function create_group(svg, node, root, prefix, temp_data_num) {

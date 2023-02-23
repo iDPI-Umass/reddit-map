@@ -20,21 +20,17 @@ function VisDisplayUI() {
   const [is_selected, setIsSelected] = React.useState({});
   const [selected_node_id, setSelectedNodeId] = React.useState("");
   const [zoom_info, setZoomInfo] = React.useState(null)
-  const [bubblemap_prev_data, setBubbleMapPrevData] = React.useState(null)
-  const [bubblemap_curr_data, setBubbleMapCurrData] = React.useState(data_5)
-  const [treemap_prev_data, setTreeMapPrevData] = React.useState(null)
-  const [treemap_curr_data, setTreeMapCurrData] = React.useState(data_5)
+  const [prev_data, setTreeMapPrevData] = React.useState(null)
+  const [curr_data, setTreeMapCurrData] = React.useState(data_5)
+  const [is_rendered, setIsRendered] = React.useState(false)
+  const [highlight_label, setHighlighLabel] = React.useState(null)
   const bubblemap_height = 550
   const bubblemap_width = 800
   const treemap_height = 450
   const treemap_width = 450
 
-  function getBubbleMapCurrData(data) {
-    setBubbleMapCurrData(data)
-  }
-
-  function getBubbleMapPrevData(data) {
-    setBubbleMapPrevData(data)
+  function getIsRendered(is_rendered) {
+    setIsRendered(is_rendered)
   }
 
   function getTreeMapCurrData(data) {
@@ -85,6 +81,10 @@ function VisDisplayUI() {
     }
   }
 
+  function getHighlightLabel(highlight_label) {
+    setHighlighLabel(highlight_label)
+  }
+
   const bubble = <div className="App">
                     <VisPickerUI visFns={getVis}/>
                     <BubbleMap/>
@@ -105,22 +105,23 @@ function VisDisplayUI() {
 
     const [vis, setVis] = React.useState(bubbleTreemapSetting)
 
+    console.log("highlight_label vis: ", highlight_label)
     return (
         <React.Fragment>
             <svg width={bubblemap_width + treemap_width} height={bubblemap_height + treemap_height}>
                 <g>
                     <svg x={25} y={50}>
-                        <Treemap prev_data={treemap_prev_data} curr_data={treemap_curr_data} prevDataFns={getBubbleMapPrevData} currDataFns={getBubbleMapCurrData} labels={getLabelNodes} selected_labels={getSelectedNodes} is_selected={getIsSelected} selected_node_id={getSelectedNodeId} nodes={nodes} width={treemap_width} height={treemap_height}/>
+                        <Treemap prev_data={prev_data} curr_data={curr_data} setIsRendered={getIsRendered} is_rendered={is_rendered} labels={getLabelNodes} selected_labels={getSelectedNodes} is_selected={getIsSelected} selected_node_id={getSelectedNodeId} nodes={nodes} width={treemap_width} height={treemap_height} highlightLabel={getHighlightLabel}/>
                     </svg>
                 </g> 
                 <g>
                     <svg x={treemap_width + 25} y={50}>
-                        <BubbleMapTranslate prevData={bubblemap_prev_data} currData={bubblemap_curr_data} treemap_labels={nodes} selected_labels_treemap={selected_nodes} is_selected_treemap={is_selected} selected_node_id_treemap={selected_node_id} set_zoom_info={getZoomInfo} zoom_info_treemap={zoom_info} width={bubblemap_width} height={bubblemap_height}/>
+                        <BubbleMapTranslate is_rendered={is_rendered} prevData={prev_data} currData={curr_data} treemap_labels={nodes} selected_labels_treemap={selected_nodes} is_selected_treemap={is_selected} selected_node_id_treemap={selected_node_id} set_zoom_info={getZoomInfo} zoom_info_treemap={zoom_info} width={bubblemap_width} height={bubblemap_height} highlight_label={highlight_label}/>
                     </svg>
                 </g>
                 <g>
                   <svg>
-                    <Slider prevDataFns={getTreeMapPrevData} currDataFns={getTreeMapCurrData} treemap_width={treemap_width} treemap_height={treemap_height} bubblemap_width={bubblemap_width} bubblemap_height={bubblemap_height}></Slider>
+                    <Slider prevDataFns={getTreeMapPrevData} currDataFns={getTreeMapCurrData} currData={curr_data} treemap_width={treemap_width} treemap_height={treemap_height} bubblemap_width={bubblemap_width} bubblemap_height={bubblemap_height}></Slider>
                   </svg>
                 </g>
                     

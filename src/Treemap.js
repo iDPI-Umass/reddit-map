@@ -37,7 +37,6 @@ function Treemap(props) {
 
         
         // hierarchy 
-        console.log("treemap data: ", props.curr_data)
         const treemap_data = treemap(props.curr_data)
         
         const node_id = d => d.ancestors().reverse().map(d => d.data.hasOwnProperty("subreddit_label")? 
@@ -58,8 +57,7 @@ function Treemap(props) {
 
         let group = svg.append("g")
             .call(render, treemap_data);
-
-
+        
 
         function render(group, root) {
             var data = root.children.concat(root)
@@ -70,12 +68,13 @@ function Treemap(props) {
                 .selectAll("g")
                 .data(data)
                 .join("g")
-                /* .on("mouseover", (event, d) => {
-                    props.selected_label(d)                 
+                .on("mouseover", (event, d) => {
+                    props.highlightLabel(d.data.node_id)   
+                    console.log("mouseover: ", d.data.node_id)           
                 })
                 .on("mouseout", () => {
-                    props.selected_label(null)                 
-                }) */
+                    props.highlightLabel(null)                 
+                })
                 .on("click", (event, d) => {
                     d.data.clicked = !d.data.clicked
                     props.selected_labels(d)
@@ -83,6 +82,8 @@ function Treemap(props) {
                     props.selected_node_id(d.data.node_id)
                     
                 })
+
+                
                 
             node.filter(d => d === root ? d.parent : d.children)
                 .attr("cursor", "pointer")
@@ -119,6 +120,8 @@ function Treemap(props) {
                 .attr("opacity", 0.5)
                 .attr("stroke", "#fff")
                 
+
+                
         
             node.append("clipPath")
                 .attr("id", d => (d.clipUid = library.DOM.uid("clip")).id)
@@ -135,7 +138,7 @@ function Treemap(props) {
                 .attr("y", (d, i, nodes) => `${(i === nodes.length - 1) * 0.3 + 1.1 + i * 0.9}em`)
                 .attr("fill-opacity", (d, i, nodes) => i === nodes.length - 1 ? 0.7 : null)
                 .attr("font-weight", (d, i, nodes) => i === nodes.length - 1 ? "normal" : null)
-                .text(d => d);
+                .text(d => d)
             
             group.call(position, root);
             props.labels(data)
@@ -185,8 +188,8 @@ function Treemap(props) {
                 .call(t => group1.transition(t)
                     .call(position, d.parent));
         }
-        props.prevDataFns(props.prev_data)
-        props.currDataFns(props.curr_data)
+
+        props.setIsRendered(!props.is_rendered)
 
     }, [props.curr_data]);
 
