@@ -143,12 +143,12 @@ function BubbleMapTranslate(props) {
         function idled() { idleTimeout = null; }
         var initial_brush = {"min_x": min_x, "max_x": max_x, "min_y": min_y, "max_y": max_y}
         var stack_of_brushes = null
-        if (props.zoom_info_treemap == null) {
+        if (props.zoom_info == null) {
             stack_of_brushes = [initial_brush]
         }
         else {
 
-            stack_of_brushes = props.zoom_info_treemap
+            stack_of_brushes = props.zoom_info
         }
         
 
@@ -192,7 +192,7 @@ function BubbleMapTranslate(props) {
                 svg.select(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
                 
             }
-            props.set_zoom_info(stack_of_brushes)
+            props.setZoomInfo(stack_of_brushes)
 
             // Update axis and circle position
 
@@ -229,16 +229,16 @@ function BubbleMapTranslate(props) {
         }
 
 
-        if (props.zoom_info_treemap != null && props.zoom_info_treemap.length > 1) {
+        if (props.zoom_info != null && props.zoom_info.length > 1) {
             updateChartBrush(null)
             /* if (!idleTimeout) return idleTimeout = setTimeout(idled, 350);
-            var prev_brush = props.zoom_info_treemap.pop()
-            stack_of_brushes = props.zoom_info_treemap
+            var prev_brush = props.zoom_info.pop()
+            stack_of_brushes = props.zoom_info
             remapped_x.domain([ prev_brush["min_x"], prev_brush["max_x"] ])
             remapped_y.domain([ prev_brush["min_y"], prev_brush["max_y"] ])
             if (stack_of_brushes.length == 0) {
                 stack_of_brushes.push(initial_brush)
-                props.set_zoom_info(stack_of_brushes)
+                props.setZoomInfo(stack_of_brushes)
             }
              */
 
@@ -247,7 +247,7 @@ function BubbleMapTranslate(props) {
         
         
         
-    }, [props.is_rendered, props.treemap_labels, props.selected_labels_treemap, props.is_selected_treemap, props.selected_node_id_treemap, props.highlight_label]);
+    }, [props.is_rendered, props.labels, props.selected_labels, props.is_selected, props.selected_node_id, props.highlight_label]);
     function append_data(temp_data_num, data, prev_nodes, prev_arr_of_tsne_boundaries, svg, tooltip, dict_of_prev_subreddits_to_change, highlight_label, add_labels) {
         /* if (!svg.selectAll("circle").empty()) {
             svg.selectAll("circle").style("opacity", .25).style("stroke-opacity", 0)
@@ -345,9 +345,9 @@ function BubbleMapTranslate(props) {
             render_labels(tsne_remapped_x(parent.data.tsne_x), tsne_remapped_y(parent.data.tsne_y), svg, parent.data, highlight_label, tooltip, temp_data_num)
         }) */
         if (add_labels) {
-            if (props.treemap_labels != null) {
-                for (let i = 0; i < props.treemap_labels.length - 1; i++) {
-                    let node = props.treemap_labels[i]
+            if (props.labels != null) {
+                for (let i = 0; i < props.labels.length - 1; i++) {
+                    let node = props.labels[i]
                     let render_node = null
                     if (node.parent != null) {
                         if (node.data.node_id.includes("_")) {
@@ -366,9 +366,9 @@ function BubbleMapTranslate(props) {
                 }
             
             }
-            Object.keys(props.selected_labels_treemap).forEach(function(node_id) {
+            Object.keys(props.selected_labels).forEach(function(node_id) {
                 if (node_id.includes("_")) {
-                    let node = props.selected_labels_treemap[node_id]
+                    let node = props.selected_labels[node_id]
                     svg.select("#circle_class_" + node.data.subreddit)
                                 .style("opacity", 1).style("stroke-opacity", 1)
                 }
@@ -394,9 +394,9 @@ function BubbleMapTranslate(props) {
             
         }
         
-/*         if (Object.keys(props.selected_labels_treemap).length != null ) {
+/*         if (Object.keys(props.selected_labels).length != null ) {
             if (props.selected_treemap_label.data.node_id.includes("_")) {
-                if (props.is_selected_treemap) {
+                if (props.is_selected) {
                     svg.select("#circle_class_" + props.selected_treemap_label.data.subreddit)
                         .style("opacity", 1).style("stroke-opacity", 1)
                 }

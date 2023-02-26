@@ -69,17 +69,17 @@ function Treemap(props) {
                 .data(data)
                 .join("g")
                 .on("mouseover", (event, d) => {
-                    props.highlightLabel(d.data.node_id)   
+                    props.setHighlightLabel(d.data.node_id)   
                     console.log("mouseover: ", d.data.node_id)           
                 })
                 .on("mouseout", () => {
-                    props.highlightLabel(null)                 
+                    props.setHighlightLabel(null)                 
                 })
                 .on("click", (event, d) => {
                     d.data.clicked = !d.data.clicked
-                    props.selected_labels(d)
-                    props.is_selected(d.data.clicked)
-                    props.selected_node_id(d.data.node_id)
+                    props.setSelectedNodes(d)
+                    props.setIsSelected(d.data.clicked)
+                    props.setSelectedNodeId(d.data.node_id)
                     
                 })
 
@@ -141,7 +141,7 @@ function Treemap(props) {
                 .text(d => d)
             
             group.call(position, root);
-            props.labels(data)
+            props.setLabels(data)
             
 
         }
