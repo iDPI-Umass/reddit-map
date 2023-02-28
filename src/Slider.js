@@ -21,9 +21,9 @@ function Slider(props) {
             .width(300)
             .displayValue(true)
             .on('onchange', (d) => {
-                console.log("setting prev data: ", props.currData)
                 props.setPrevData(props.currData)
                 props.setCurrData(dict_of_data[d])
+                props.setNodeRender(false)
             })
 
     var g_slider = svg.append("g")

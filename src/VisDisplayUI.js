@@ -19,15 +19,22 @@ function VisDisplayUI() {
   const [selected_nodes, setSelected] = React.useState({});
   const [is_selected, setIsSelected] = React.useState({});
   const [selected_node_id, setSelectedNodeId] = React.useState("");
-  const [zoom_info, setZoomInfo] = React.useState(null)
+  const [stack_of_brushes, setZoomInfo] = React.useState(null)
   const [prev_data, setPrevData] = React.useState(null)
   const [curr_data, setCurrData] = React.useState(data_5)
-  const [is_rendered, setIsRendered] = React.useState(false)
   const [highlight_label, setHighlightLabel] = React.useState(null)
+  const [bubble_map_svg, setBubbleMapSvg] = React.useState(null)
+  const [initial_bubble_map_render, setInitialBubbleMapRender] = React.useState(false)
+  const [node_render, setNodeRender] = React.useState(false)
+  const [tsne_remapped, setTsneRemapped] = React.useState({})
+
   const bubblemap_height = 550
   const bubblemap_width = 800
   const treemap_height = 450
   const treemap_width = 450
+  const overTimeOptions = {"delete": 0, "add": 1, "transform": 2}
+  
+ 
 
   function setSelectedNodes(node) {
     if (node.data.clicked) {
@@ -41,28 +48,28 @@ function VisDisplayUI() {
     //setSelectedNodes(selected_nodes)
   }
 
-
-
-
-
-
-    console.log("highlight_label vis: ", highlight_label)
     return (
         <React.Fragment>
             <svg width={bubblemap_width + treemap_width} height={bubblemap_height + treemap_height}>
                 <g>
                     <svg x={25} y={50}>
-                        <Treemap prev_data={prev_data} curr_data={curr_data} setIsRendered={setIsRendered} is_rendered={is_rendered} setLabels={setLabels} setSelectedNodes={setSelectedNodes} setIsSelected={setIsSelected} setSelectedNodeId={setSelectedNodeId} width={treemap_width} height={treemap_height} setHighlightLabel={setHighlightLabel}/>
+                        <Treemap initial_bubble_map_render={initial_bubble_map_render} prev_data={prev_data} curr_data={curr_data} setLabels={setLabels} setSelectedNodes={setSelectedNodes} setIsSelected={setIsSelected} setSelectedNodeId={setSelectedNodeId} width={treemap_width} height={treemap_height} setHighlightLabel={setHighlightLabel}/>
                     </svg>
                 </g> 
                 <g>
                     <svg x={treemap_width + 25} y={50}>
-                        <BubbleMapTranslate is_rendered={is_rendered} prevData={prev_data} currData={curr_data} labels={labels} selected_labels={selected_nodes} is_selected={is_selected} selected_node_id={selected_node_id} setZoomInfo={setZoomInfo} zoom_info={zoom_info} width={bubblemap_width} height={bubblemap_height} highlight_label={highlight_label}/>
+                        <BubbleMapTranslate prev_data={prev_data} curr_data={curr_data} 
+                        initial_bubble_map_render={initial_bubble_map_render} setInitialBubbleMapRender={setInitialBubbleMapRender} 
+                        setNodeRender={setNodeRender} node_render={node_render} 
+                        tsne_remapped={tsne_remapped} setTsneRemapped={setTsneRemapped}
+                        width={bubblemap_width} height={bubblemap_height} 
+                        labels={labels}
+                        setZoomInfo={setZoomInfo} zoom_info={stack_of_brushes}/>
                     </svg>
                 </g>
                 <g>
                   <svg>
-                    <Slider setPrevData={setPrevData} setCurrData={setCurrData} currData={curr_data} treemap_width={treemap_width} treemap_height={treemap_height} bubblemap_width={bubblemap_width} bubblemap_height={bubblemap_height}></Slider>
+                    <Slider setNodeRender={setNodeRender} setPrevData={setPrevData} setCurrData={setCurrData} currData={curr_data} treemap_width={treemap_width} treemap_height={treemap_height} bubblemap_width={bubblemap_width} bubblemap_height={bubblemap_height}></Slider>
                   </svg>
                 </g>
                     
