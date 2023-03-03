@@ -11,45 +11,33 @@ import Slider from './Slider';
 import data_4 from "./data/RC_2021-04_KMeans_Agglom_100_Clusters.json"
 import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
 import data_6 from "./data/RC_2021-06_KMeans_Agglom_100_Clusters_Cut_Tsne.json"
+import Thumbnail from "react-webpage-thumbnail";
 
 
 function VisDisplayUI() {
 
-  const [nodes, setLabels] = React.useState(null);
-  const [selected_nodes, setSelectedNodes] = React.useState({});
+  const [labels, setLabels] = React.useState(null);
+  const [selected_nodes, setSelected] = React.useState({});
   const [is_selected, setIsSelected] = React.useState({});
   const [selected_node_id, setSelectedNodeId] = React.useState("");
-  const [zoom_info, setZoomInfo] = React.useState(null)
-  const [bubblemap_prev_data, setBubbleMapPrevData] = React.useState(null)
-  const [bubblemap_curr_data, setBubbleMapCurrData] = React.useState(data_5)
-  const [treemap_prev_data, setTreeMapPrevData] = React.useState(null)
-  const [treemap_curr_data, setTreeMapCurrData] = React.useState(data_5)
+  const [stack_of_brushes, setZoomInfo] = React.useState(null)
+  const [prev_data, setPrevData] = React.useState(null)
+  const [curr_data, setCurrData] = React.useState(data_5)
+  const [highlight_label, setHighlightLabel] = React.useState(null)
+  const [bubble_map_svg, setBubbleMapSvg] = React.useState(null)
+  const [initial_bubble_map_render, setInitialBubbleMapRender] = React.useState(false)
+  const [node_render, setNodeRender] = React.useState(false)
+  const [tsne_remapped, setTsneRemapped] = React.useState({})
+
   const bubblemap_height = 550
   const bubblemap_width = 800
   const treemap_height = 450
   const treemap_width = 450
+  const overTimeOptions = {"delete": 0, "add": 1, "transform": 2}
+  
+ 
 
-  function getBubbleMapCurrData(data) {
-    setBubbleMapCurrData(data)
-  }
-
-  function getBubbleMapPrevData(data) {
-    setBubbleMapPrevData(data)
-  }
-
-  function getTreeMapCurrData(data) {
-    setTreeMapCurrData(data)
-  }
-
-  function getTreeMapPrevData(data) {
-    setTreeMapPrevData(data)
-  }
-
-  function getLabelNodes(nodes) {
-    setLabels(nodes)
-  }
-
-  function getSelectedNodes(node) {
+  function setSelectedNodes(node) {
     if (node.data.clicked) {
       selected_nodes[node.data.node_id] = node
     }
@@ -61,71 +49,26 @@ function VisDisplayUI() {
     //setSelectedNodes(selected_nodes)
   }
 
-  function getIsSelected(is_selected) {
-    setIsSelected(is_selected)
-  }
-
-  function getSelectedNodeId(node_id) {
-    setSelectedNodeId(node_id)
-  }
-
-  function getZoomInfo(zoom_info) {
-    setZoomInfo(zoom_info)
-  }
-
-  function getVis(vis_num) {
-    if (vis_num == 0) {
-      setVis(bubblemapSetting)
-    }
-    if (vis_num == 1) {
-      setVis(treemapSetting)
-    }
-    if (vis_num == 2) {
-      setVis(bubbleTreemapSetting)
-    }
-  }
-
-  const bubble = <div className="App">
-                    <VisPickerUI visFns={getVis}/>
-                    <BubbleMap/>
-                  </div>
-  const bubblemapSetting = <div className="App">
-                    <VisPickerUI visFns={getVis}/>
-                    <BubbleMapTranslate treemap_labels={nodes} selected_labels_treemap={selected_nodes} is_selected_treemap={is_selected} selected_node_id_treemap={selected_node_id} set_zoom_info={getZoomInfo} zoom_info_treemap={zoom_info}/>
-                  </div>
-  const treemapSetting = <div className="App">
-                              <VisPickerUI visFns={getVis}/>
-                              <Treemap labels={getLabelNodes} selected_labels={getSelectedNodes} is_selected={getIsSelected} selected_node_id={getSelectedNodeId}/>
-                            </div>
-  const bubbleTreemapSetting = <div className="App">
-    <VisPickerUI visFns={getVis}/>
-    <Treemap labels={getLabelNodes} selected_labels={getSelectedNodes} is_selected={getIsSelected} selected_node_id={getSelectedNodeId} nodes={nodes}/>
-    <BubbleMapTranslate treemap_labels={nodes} selected_labels_treemap={selected_nodes} is_selected_treemap={is_selected} selected_node_id_treemap={selected_node_id} set_zoom_info={getZoomInfo} zoom_info_treemap={zoom_info}/>
-    </div>
-
-    const [vis, setVis] = React.useState(bubbleTreemapSetting)
 
     return (
         <React.Fragment>
-            <svg width={bubblemap_width + treemap_width} height={bubblemap_height + treemap_height}>
-                <g>
-                    <svg x={25} y={50}>
-                        <Treemap prev_data={treemap_prev_data} curr_data={treemap_curr_data} prevDataFns={getBubbleMapPrevData} currDataFns={getBubbleMapCurrData} labels={getLabelNodes} selected_labels={getSelectedNodes} is_selected={getIsSelected} selected_node_id={getSelectedNodeId} nodes={nodes} width={treemap_width} height={treemap_height}/>
-                    </svg>
-                </g> 
-                <g>
-                    <svg x={treemap_width + 25} y={50}>
-                        <BubbleMapTranslate prevData={bubblemap_prev_data} currData={bubblemap_curr_data} treemap_labels={nodes} selected_labels_treemap={selected_nodes} is_selected_treemap={is_selected} selected_node_id_treemap={selected_node_id} set_zoom_info={getZoomInfo} zoom_info_treemap={zoom_info} width={bubblemap_width} height={bubblemap_height}/>
-                    </svg>
-                </g>
-                <g>
-                  <svg>
-                    <Slider prevDataFns={getTreeMapPrevData} currDataFns={getTreeMapCurrData} treemap_width={treemap_width} treemap_height={treemap_height} bubblemap_width={bubblemap_width} bubblemap_height={bubblemap_height}></Slider>
-                  </svg>
-                </g>
+
+                    <Treemap initial_bubble_map_render={initial_bubble_map_render} prev_data={prev_data} curr_data={curr_data} setLabels={setLabels} setSelectedNodes={setSelectedNodes} setIsSelected={setIsSelected} setSelectedNodeId={setSelectedNodeId} width={treemap_width} height={treemap_height} setHighlightLabel={setHighlightLabel}/>
+
+
+                    <BubbleMapTranslate prev_data={prev_data} curr_data={curr_data} 
+                    initial_bubble_map_render={initial_bubble_map_render} setInitialBubbleMapRender={setInitialBubbleMapRender} 
+                    setNodeRender={setNodeRender} node_render={node_render} 
+                    tsne_remapped={tsne_remapped} setTsneRemapped={setTsneRemapped}
+                    width={bubblemap_width} height={bubblemap_height} 
+                    labels={labels}
+                    setZoomInfo={setZoomInfo} zoom_info={stack_of_brushes}
+                    treemap_width={treemap_width}/>
+
+                    <Slider setNodeRender={setNodeRender} setPrevData={setPrevData} setCurrData={setCurrData} currData={curr_data} treemap_width={treemap_width} treemap_height={treemap_height} bubblemap_width={bubblemap_width} bubblemap_height={bubblemap_height}></Slider>
+
                     
                 
-            </svg>
             
         </React.Fragment>
     );

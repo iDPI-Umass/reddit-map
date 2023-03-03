@@ -21,10 +21,9 @@ function Slider(props) {
             .width(300)
             .displayValue(true)
             .on('onchange', (d) => {
-                console.log("slider onchange")
-                props.prevDataFns(props.currData)
-                props.currDataFns(dict_of_data[d])
-                console.log("slider change done")
+                props.setPrevData(props.currData)
+                props.setCurrData(dict_of_data[d])
+                props.setNodeRender(false)
             })
 
     var g_slider = svg.append("g")
