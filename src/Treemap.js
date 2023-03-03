@@ -13,8 +13,13 @@ function Treemap(props) {
     const width = props.width;
     const height = props.height;
     const library = new Library();
+    
+
+
 
     React.useEffect(() => {
+
+        
         if (props.initial_bubble_map_render) {
             props.setLabels(null)
         
@@ -56,14 +61,50 @@ function Treemap(props) {
 
             
             const svg = d3.select(svgRef.current)
+                .attr("x", 25)
+                .attr("y", 50)
                 .attr("viewBox", [0.5, -30.5, width, height + 30])
                 .style("font", "10px sans-serif")
                 .style("float", "left").style("display", "inline-block");
+
 
             svg.selectAll("g").remove();
 
             let group = svg.append("g")
                 .call(render, treemap_data);
+
+            
+            /* var tooltip = svg.append("g").attr("id", "g_tooltip")
+            svg.select("#g_tooltip").append("rect")
+            .attr("opacity", 0)
+            .attr("id", "rect_tooltip")
+            .attr("x", 5)
+            .attr("y", 5)
+            .attr("width", 50)
+            .attr("height", 50)
+            .attr("fill", "white")
+            .attr("stroke", "black")
+            .attr("stroke-linejoin", "round")
+
+            svg.select("#g_tooltip")
+                .append("text")
+                    .attr("id", "text_tooltip")
+                    .attr("opacity", 0)
+                    .attr("fill", "black")
+                    .attr("x", 5)
+                    .attr("y", 5)
+                    .text("test") */
+
+            svg
+                .append("text")
+                    .attr("id", "text_tooltip")
+                    .attr("opacity", 0)
+                    .attr("fill", "black")
+                    .attr("x", 5)
+                    .attr("y", 5)
+                    .text("test")
+
+            
             
 
             function render(group, root) {
@@ -71,15 +112,70 @@ function Treemap(props) {
                 data.forEach((d) => {
                     d.data["clicked"] = false
                 })
+                function handleTooltip(event, d) {
+                    svg.select("#text_tooltip")
+                        .attr("x", (d3.pointer(event)[0]-25))
+                        .attr("y", (d3.pointer(event)[1]-5))
+                        .text(() => {
+                            if (d.data.node_id.includes("_")) {
+                                return `${node_id(d)}\n${format(d.data.subreddit_count)}`
+                            }
+                            return `${node_id(d)}\n${format(d.data.cluster_subreddit_count)}`
+                        })
+                    const boundingBox = svg.select("#text_tooltip").node().getBBox()
+                    let rect_tooltip = null
+                    if (svg.select("#rect_tooltip").empty()) {
+                        rect_tooltip = svg.append("rect")
+                            .attr("id", "rect_tooltip")
+                    }
+                    else {
+                        rect_tooltip = svg.select("#rect_tooltip")
+                    }
+                    rect_tooltip
+                        .attr("fill", "white")
+                        .attr("stroke", "black")
+                        .attr("stroke-linejoin", "round")
+                        .attr("opacity", 1)
+                        .attr("x", boundingBox.x - 2.5)
+                        .attr("y", boundingBox.y - 2.5)
+                        .attr("width", boundingBox.width + 5)
+                        .attr("height", boundingBox.height + 5)
+
+                    let text_tooltip = null
+                    if (svg.select("#temp_text_tooltip").empty()) {
+                        text_tooltip = svg.append("text")
+                            .attr("id", "temp_text_tooltip")
+                    }
+                    else {
+                        text_tooltip = svg.select("#temp_text_tooltip")
+                    }
+                    text_tooltip
+                        .attr("fill", "black")
+                        .attr("x", (d3.pointer(event)[0]-25))
+                        .attr("y", (d3.pointer(event)[1]-5))
+                        .text(() => {
+                            if (d.data.node_id.includes("_")) {
+                                return `${node_id(d)}\n\n${format(d.data.subreddit_count)}`
+                            }
+                            return `${node_id(d)}\n\n${format(d.data.cluster_subreddit_count)}`
+                        })
+
+                }
                 const node = group
                     .selectAll("g")
                     .data(data)
                     .join("g")
-                    .on("mouseover", (event, d) => {
-                        props.setHighlightLabel(d.data.node_id)   
+                    .on("mouseenter", (event, d) => {
+                        props.setHighlightLabel(d.data.node_id)
+                        handleTooltip(event, d)
+                    })
+                    .on("mousemove", (event, d) => {
+                        props.setHighlightLabel(d.data.node_id)
+                        handleTooltip(event, d)
                     })
                     .on("mouseout", () => {
-                        props.setHighlightLabel(null)                 
+                        svg.select("#rect_tooltip").remove()
+                        svg.select("#temp_text_tooltip").remove()               
                     })
                     .on("click", (event, d) => {
                         d.data.clicked = !d.data.clicked
@@ -102,13 +198,13 @@ function Treemap(props) {
                         }
                     });
             
-                node.append("title")
+                /* node.append("title")
                     .text((d) => {
                         if (d.data.node_id.includes("_")) {
                             return `${node_id(d)}\n${format(d.data.subreddit_count)}`
                         }
                         return `${node_id(d)}\n${format(d.data.cluster_subreddit_count)}`
-                    });
+                    }); */
             
             
             
@@ -150,6 +246,7 @@ function Treemap(props) {
                     //.attr("fill-opacity", (d, i, nodes) => i === nodes.length - 1 ? 0.7 : null)
                     .attr("font-weight", (d, i, nodes) => i === nodes.length - 1 ? "normal" : null)
                     .text(d => d)
+                    
                 
                 group.call(position, root);
                 props.setLabels(data)

@@ -123,6 +123,8 @@ function BubbleMapTranslate(props) {
 
         if (!props.initial_bubble_map_render) {
             svg = d3.select(svgRef.current)
+            .attr("x", props.treemap_width + 25)
+            .attr("y", 50)
             .attr("viewBox", [0.5, -30.5, width, height + 30])
             .style("font", "10px sans-serif")
             .style("float", "right");
@@ -491,6 +493,7 @@ function BubbleMapTranslate(props) {
         
 
         if (svg.select("#label_text_class_" + node.node_id).empty()) {
+            console.log("g_text: ", g_text)
             g_text.selectAll(".circle_text_class")._groups[0].forEach(function(d) {
                 svg.select("#circle_class_" + d.classList[2])
                 .attr('fill', (d) => {
