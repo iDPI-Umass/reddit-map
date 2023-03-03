@@ -95,17 +95,26 @@ function Treemap(props) {
                     .attr("y", 5)
                     .text("test") */
 
-            svg
+            function create_tooltip_text(prefix) {
+                svg
                 .append("text")
-                    .attr("id", "text_tooltip")
-                    .attr("opacity", 0)
+                    .attr("id", prefix + "text_tooltip")
                     .attr("fill", "black")
-                    .attr("x", 5)
-                    .attr("y", 5)
-                    .text("test")
+                    .append("tspan").attr("id", prefix + "tspan_node_id").attr("dx", "1em")
+                svg.select("#" + prefix + "text_tooltip")
+                    .append("tspan").attr("id", prefix + "tspan_count").attr("dx", "1em").attr("dy", "1.2em")
+            }
 
-            
-            
+            function edit_tooltip_text(prefix, x, y, node_id, count) {
+                svg.select("#" + prefix + "text_tooltip")
+                    .attr("x", x)
+                    .attr("y", y)
+                svg.select("#" + prefix + "tspan_node_id").text(node_id)
+                svg.select("#" + prefix + "tspan_count").attr("x", svg.select("#" + prefix + "text_tooltip").attr("x")).text(count)
+
+            }
+
+            create_tooltip_text("")
 
             function render(group, root) {
                 var data = root.children.concat(root)
@@ -113,15 +122,16 @@ function Treemap(props) {
                     d.data["clicked"] = false
                 })
                 function handleTooltip(event, d) {
-                    svg.select("#text_tooltip")
-                        .attr("x", (d3.pointer(event)[0]-25))
-                        .attr("y", (d3.pointer(event)[1]-5))
-                        .text(() => {
-                            if (d.data.node_id.includes("_")) {
-                                return `${node_id(d)}\n${format(d.data.subreddit_count)}`
-                            }
-                            return `${node_id(d)}\n${format(d.data.cluster_subreddit_count)}`
-                        })
+                    let get_node_id = `${node_id(d)}`
+                    let get_count = () => {
+                        if (d.data.node_id.includes("_")) {
+                            return `${format(d.data.subreddit_count)}`
+                        }
+                        return `${format(d.data.cluster_subreddit_count)}`
+                    }
+                    let pointer_x = d3.pointer(event)[0]-25
+                    let pointer_y = d3.pointer(event)[1]-5
+                    edit_tooltip_text("", pointer_x, pointer_y, get_node_id, get_count)
                     const boundingBox = svg.select("#text_tooltip").node().getBBox()
                     let rect_tooltip = null
                     if (svg.select("#rect_tooltip").empty()) {
@@ -143,22 +153,11 @@ function Treemap(props) {
 
                     let text_tooltip = null
                     if (svg.select("#temp_text_tooltip").empty()) {
-                        text_tooltip = svg.append("text")
-                            .attr("id", "temp_text_tooltip")
+                        create_tooltip_text("temp_")
                     }
                     else {
-                        text_tooltip = svg.select("#temp_text_tooltip")
+                        edit_tooltip_text("temp_", pointer_x, pointer_y, get_node_id, get_count)
                     }
-                    text_tooltip
-                        .attr("fill", "black")
-                        .attr("x", (d3.pointer(event)[0]-25))
-                        .attr("y", (d3.pointer(event)[1]-5))
-                        .text(() => {
-                            if (d.data.node_id.includes("_")) {
-                                return `${node_id(d)}\n\n${format(d.data.subreddit_count)}`
-                            }
-                            return `${node_id(d)}\n\n${format(d.data.cluster_subreddit_count)}`
-                        })
 
                 }
                 const node = group
