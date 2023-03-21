@@ -2,7 +2,6 @@ import React from 'react';
 import * as d3 from 'd3';
 import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
 import data_6 from "./data/RC_2021-06_KMeans_Agglom_100_Clusters_Cut_Tsne.json"
-
 import {Library} from '@observablehq/stdlib';
 
 
@@ -18,14 +17,13 @@ function Treemap(props) {
 
 
     React.useEffect(() => {
-
-        
+        console.log("RERENDER: ", props.rerender_treemap)
         if (props.initial_bubble_map_render) {
             props.setLabels(null)
         
             const x = d3.scaleLinear().rangeRound([0, width]);
             const y = d3.scaleLinear().rangeRound([0, height]);
-            const format = d3.format(",d");
+            
             function tile(node, x0, y0, x1, y1) {
                 d3.treemapBinary(node, 0, 0, width, height);
                 for (const child of node.children) {
@@ -47,23 +45,10 @@ function Treemap(props) {
             // hierarchy 
             const treemap_data = treemap(props.curr_data)
             
-            const node_id = d => d.ancestors().reverse().map((d) => {
-                if (d.data.node_id.includes("_")) {
-                    return d.data.subreddit
-                }
-                else {
-                    return d.data.taxonomy_label
-                }
-    
-            }).join(".") 
-            
-
-
-            
             const svg = d3.select(svgRef.current)
                 .attr("x", 25)
                 .attr("y", 50)
-                .attr("viewBox", [0.5, -30.5, width, height + 30])
+                .attr("viewBox", [0.5, -30.5, width , height + 30])
                 .style("font", "10px sans-serif")
                 .style("float", "left").style("display", "inline-block");
 
@@ -95,94 +80,69 @@ function Treemap(props) {
                     .attr("y", 5)
                     .text("test") */
 
-            function create_tooltip_text(prefix) {
-                svg
-                .append("text")
-                    .attr("id", prefix + "text_tooltip")
-                    .attr("fill", "black")
-                    .append("tspan").attr("id", prefix + "tspan_node_id").attr("dx", "1em")
-                svg.select("#" + prefix + "text_tooltip")
-                    .append("tspan").attr("id", prefix + "tspan_count").attr("dx", "1em").attr("dy", "1.2em")
-            }
+            
 
-            function edit_tooltip_text(prefix, x, y, node_id, count) {
-                svg.select("#" + prefix + "text_tooltip")
-                    .attr("x", x)
-                    .attr("y", y)
-                svg.select("#" + prefix + "tspan_node_id").text(node_id)
-                svg.select("#" + prefix + "tspan_count").attr("x", svg.select("#" + prefix + "text_tooltip").attr("x")).text(count)
-
-            }
-
-            create_tooltip_text("")
+            
 
             function render(group, root) {
                 var data = root.children.concat(root)
                 data.forEach((d) => {
                     d.data["clicked"] = false
                 })
-                function handleTooltip(event, d) {
-                    let get_node_id = `${node_id(d)}`
-                    let get_count = () => {
-                        if (d.data.node_id.includes("_")) {
-                            return `${format(d.data.subreddit_count)}`
-                        }
-                        return `${format(d.data.cluster_subreddit_count)}`
-                    }
-                    let pointer_x = d3.pointer(event)[0]-25
-                    let pointer_y = d3.pointer(event)[1]-5
-                    edit_tooltip_text("", pointer_x, pointer_y, get_node_id, get_count)
-                    const boundingBox = svg.select("#text_tooltip").node().getBBox()
-                    let rect_tooltip = null
-                    if (svg.select("#rect_tooltip").empty()) {
-                        rect_tooltip = svg.append("rect")
-                            .attr("id", "rect_tooltip")
-                    }
-                    else {
-                        rect_tooltip = svg.select("#rect_tooltip")
-                    }
-                    rect_tooltip
-                        .attr("fill", "white")
-                        .attr("stroke", "black")
-                        .attr("stroke-linejoin", "round")
-                        .attr("opacity", 1)
-                        .attr("x", boundingBox.x - 2.5)
-                        .attr("y", boundingBox.y - 2.5)
-                        .attr("width", boundingBox.width + 5)
-                        .attr("height", boundingBox.height + 5)
+                
 
-                    let text_tooltip = null
-                    if (svg.select("#temp_text_tooltip").empty()) {
-                        create_tooltip_text("temp_")
-                    }
-                    else {
-                        edit_tooltip_text("temp_", pointer_x, pointer_y, get_node_id, get_count)
-                    }
-
-                }
                 const node = group
                     .selectAll("g")
+                    .attr("class", "node_group")
                     .data(data)
                     .join("g")
                     .on("mouseenter", (event, d) => {
-                        props.setHighlightLabel(d.data.node_id)
-                        handleTooltip(event, d)
+                        //props.setHighlightLabel(d.data.node_id)
+                        props.setHandleTooltipEvent(event)
+                        props.setHandleTooltipNode(d)
+                        props.setTooltipIsMouseEnter(true)
+                        //props.setHighlightLabel(d)
                     })
                     .on("mousemove", (event, d) => {
-                        props.setHighlightLabel(d.data.node_id)
-                        handleTooltip(event, d)
+                        props.setHandleTooltipEvent(event)
+                        props.setHandleTooltipNode(d)
+                        props.setTooltipIsMouseEnter(false)
+                        /* if (d.data.node_id in props.node_id_to_nodes) {
+                            let arr_of_nodes = props.node_id_to_nodes[d.data.node_id]
+                            arr_of_nodes.forEach((n) => {
+                                n.attr('fill', () => {
+                                    return "yellow"});
+                            })
+                        }
+                        props.setHighlightLabel(d) */
                     })
-                    .on("mouseout", () => {
-                        svg.select("#rect_tooltip").remove()
-                        svg.select("#temp_text_tooltip").remove()               
+                    .on("mouseout", (event, d) => {
+                        props.setHandleTooltipEvent(null)
+                        props.setHandleTooltipNode(null)
+                        props.setTooltipIsMouseEnter(false)
+                        svg.selectAll("#g_rect_tooltip").remove()
+                        svg.selectAll("#rect_tooltip").remove()
+                        svg.selectAll("#text_tooltip").remove()   
+                        svg.selectAll("#thumbnail").remove()  
+                        svg.selectAll("#text_tooltip").attr("opacity", 0)  
+                        /* if (d.data.node_id in props.node_id_to_nodes) {
+                            let arr_of_nodes = props.node_id_to_nodes[d.data.node_id]
+                            arr_of_nodes.forEach((n) => {
+                                n.attr('fill', () => {
+                                    return d.data.color});
+                            })        
+                        }
+                        props.setHighlightLabel(null) */
                     })
                     .on("click", (event, d) => {
                         d.data.clicked = !d.data.clicked
-                        props.setSelectedNodes(d)
+                        /* props.setSelectedNodes(d)
                         props.setIsSelected(d.data.clicked)
-                        props.setSelectedNodeId(d.data.node_id)
+                        props.setSelectedNodeId(d.data.node_id) */
                         
                     })
+
+
 
                     
                     
@@ -235,6 +195,10 @@ function Treemap(props) {
                     .attr("xlink:href", d => d.leafUid.href);
             
                 node.append("text")
+                    .attr("id", (d) => {
+                        return "taxonomy_label_text_" + d.data.node_id
+                    })
+                    .attr("class", "taxonomy_label_text")
                     .attr("clip-path", d => d.clipUid)
                     .attr("font-weight", d => d === root ? "bold" : null)
                     .selectAll("tspan")
@@ -245,7 +209,33 @@ function Treemap(props) {
                     //.attr("fill-opacity", (d, i, nodes) => i === nodes.length - 1 ? 0.7 : null)
                     .attr("font-weight", (d, i, nodes) => i === nodes.length - 1 ? "normal" : null)
                     .text(d => d)
-                    
+                
+
+                /* data.forEach((n) => {
+                    let text_boundingBox = node.select("#taxonomy_label_text_" + n.data.node_id).node().getBBox()
+                    node.append("rect")
+                        .attr("x", text_boundingBox.x)
+                        .attr("y", text_boundingBox.y)
+                        .attr("width", text_boundingBox.width)
+                        .attr("height", text_boundingBox.height)
+                        .attr("opacity", 0)
+                }) */
+
+                /* node.selectAll(".taxonomy_label_text")
+                    .append("rect")
+                    .attr("x", (d) => {
+                        return node.select("#taxonomy_label_text_" + d.data.node_id).node().getBBox().x
+                    })
+                    .attr("y", (d) => {
+                        return node.select("#taxonomy_label_text_" + d.data.node_id).node().getBBox().y
+                    })
+                    .attr("width", (d) => {
+                        return node.select("#taxonomy_label_text_" + d.data.node_id).node().getBBox().width
+                    })
+                    .attr("height", (d) => {
+                        return node.select("#taxonomy_label_text_" + d.data.node_id).node().getBBox().height
+                    }) */
+
                 
                 group.call(position, root);
                 props.setLabels(data)
@@ -295,10 +285,15 @@ function Treemap(props) {
                     .call(t => group1.transition(t)
                         .call(position, d.parent));
             }
+            props.setTreemapSvg(svg)
+            console.log("RENDERED TREEMAP")
         }
 
         
-    }, [props.initial_bubble_map_render]);
+
+
+        
+    }, [props.initial_bubble_map_render, props.rerender_treemap]);
 
     return (
         <React.Fragment>

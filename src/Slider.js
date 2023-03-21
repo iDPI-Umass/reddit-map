@@ -21,19 +21,23 @@ function Slider(props) {
             .width(300)
             .displayValue(true)
             .on('onchange', (d) => {
-                props.setPrevData(props.currData)
-                props.setCurrData(dict_of_data[d])
-                props.setNodeRender(false)
+                if (JSON.stringify(props.currData) != JSON.stringify(dict_of_data[d])) {
+                    props.setPrevData(props.currData)
+                    props.setCurrData(dict_of_data[d])
+                    props.setRerenderTreemap(!props.rerender_treemap)
+                    props.setNodeRender(false)
+                }
+                
+                
             })
 
     var g_slider = svg.append("g")
                     .attr("class", "controls")
-                    .attr("id", "slider")
-                    .attr('transform', `translate(${width}, ${height})`).call(slider)
+                    .attr('transform', `translate(${30}, ${30})`).call(slider)
 
     return (
         <React.Fragment>
-            <svg ref={svgRef}></svg>
+            <svg ref={svgRef} width={width} height={height}></svg>
         </React.Fragment>
     );
 }

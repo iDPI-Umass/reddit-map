@@ -36,15 +36,12 @@ function BubbleMapTranslate(props) {
     var tsne_remapped_y = null
     var tsne_remapped_size = null
     let svg = null
+    
     //const months = [2021-04, 2021-05, 2021-06]
     
     // note: might need to make changes later to add more groupings to add interactions with other clusters
     React.useEffect(() => { 
         function updateChartBrush(e) {
-            console.log("remapped_x: ", remapped_x)
-            console.log("e: ",!e.selection, e)
-            console.log("stack of brushes: ", stack_of_brushes.length, stack_of_brushes)
-                
             // If no selection, back to initial coordinate. Otherwise, update X axis domain
             if (e == null) {
                 var prev_brush = stack_of_brushes.pop()
@@ -183,19 +180,45 @@ function BubbleMapTranslate(props) {
             
             var nodes = []
             var arr_of_tsne_boundaries = []
-            // TOOD: ADD YELLOWING FROM TREEMAP AND LOOK INTO SELECTIONS AND OTHER STUFF DISCUSSED IN MEETINGS
-            if (props.prev_data != null) {    
-
-                var arr_of_prev_results = append_data(props.prev_data, nodes, arr_of_tsne_boundaries, svg, tooltip, dict_of_prev_subreddits_to_change)
-                nodes = arr_of_prev_results[0]
-                dict_of_prev_subreddits_to_change = arr_of_prev_results[1]
-                arr_of_tsne_boundaries = arr_of_prev_results[2]   
+            let dict_of_subreddits_to_change = {}
+            var curr_root = d3.hierarchy(props.curr_data)
+            var curr_nodes = curr_root.descendants()
+            if (props.prev_data != null) {   
+                var prev_root = d3.hierarchy(props.prev_data)
+                var prev_nodes = prev_root.descendants()                
+                // TODO: CHANGE THE FOLLOWING SO YOU DON"T HAVE TO RECALC THE DATA EACH TIME
+                for (const prev_node in prev_nodes) {
+                    dict_of_prev_subreddits_to_change[prev_nodes[prev_node].data.subreddit] ={"node": prev_nodes[prev_node], "change": overTimeOptions["add"]}
+                }
+                for (const curr_node in curr_nodes) {
+                    if (curr_nodes[curr_node].data.hasOwnProperty("tsne_x") && curr_nodes[curr_node].data.node_id.includes("_")) {
+                        if (curr_nodes[curr_node].data.subreddit in dict_of_prev_subreddits_to_change) {
+                            dict_of_subreddits_to_change[curr_nodes[curr_node].data.subreddit] = {"node": curr_nodes[curr_node], "change": overTimeOptions["transform"]}
+                        }
+                        else {
+                            dict_of_subreddits_to_change[curr_nodes[curr_node].data.subreddit] ={"node": curr_nodes[curr_node], "change": overTimeOptions["add"]}
+                        }
+                        
+                    }
+                }
+                Object.keys(dict_of_prev_subreddits_to_change).forEach(function(prev_subreddit) {
+                    if (!(prev_subreddit in dict_of_subreddits_to_change)) {
+                        
+                        dict_of_subreddits_to_change[prev_subreddit] = {"node": dict_of_prev_subreddits_to_change[prev_subreddit]["node"], "change": overTimeOptions["delete"]}
+                    }
+                }); 
+                
             }
-
-            var arr_of_curr_results = append_data(props.curr_data, nodes, arr_of_tsne_boundaries, svg, tooltip, dict_of_prev_subreddits_to_change)
+            else {
+                for (const curr_node in curr_nodes) {
+                    dict_of_subreddits_to_change[curr_nodes[curr_node].data.subreddit] ={"node": curr_nodes[curr_node], "change": overTimeOptions["add"]}
+                }
+            }
+            var arr_of_curr_results = append_data(props.curr_data, nodes, arr_of_tsne_boundaries, svg, tooltip, dict_of_subreddits_to_change)
             nodes = arr_of_curr_results[0]
             dict_of_prev_subreddits_to_change = arr_of_curr_results[1]
             arr_of_tsne_boundaries = arr_of_curr_results[2]
+
 
 
             const boundary_nodes = []
@@ -219,19 +242,14 @@ function BubbleMapTranslate(props) {
                 .domain([min_y, max_y])
                 .range([ 0, height - margin - 100])
             initial_brush = {"min_x": min_x, "max_x": max_x, "min_y": min_y, "max_y": max_y}
-            console.log("remapped x initialized: ", min_x, max_x, min_y, max_y, remapped_x, d3.scaleLinear()
-                .domain([min_x, max_x])
-                .range([ 0, width - margin ]))
+ 
             if (props.zoom_info == null) {
                 stack_of_brushes = [initial_brush]
-                console.log("stack of brushes initialized when zoom info NULL")
             }
             else {
         
                 stack_of_brushes = props.zoom_info
-                console.log("stack of brushes initialized from zoom info")
             }
-            console.log("stack of brushes initial: ", stack_of_brushes)
                 
             function updateChart(e) {
                 // recover the new scale
@@ -264,6 +282,7 @@ function BubbleMapTranslate(props) {
              /* set_of_parents.forEach((parent) => {
                 render_labels(tsne_remapped_x(parent.data.tsne_x), tsne_remapped_y(parent.data.tsne_y), svg, parent.data, highlight_label, tooltip)
             }) */
+            let node_id_to_nodes = {}
             for (let i = 0; i < props.labels.length - 1; i++) {
                 let node = props.labels[i]
                 let render_node = null
@@ -281,9 +300,11 @@ function BubbleMapTranslate(props) {
                 let render_node_data = render_node.data
                 tsne_remapped_x = props.tsne_remapped["tsne_remapped_x"]
                 tsne_remapped_y = props.tsne_remapped["tsne_remapped_y"]
-                render_labels_treemap(tsne_remapped_x(render_node_data.tsne_x), tsne_remapped_y(render_node_data.tsne_y), svg, render_node_data, tooltip)
+                render_labels_treemap(tsne_remapped_x(render_node_data.tsne_x), tsne_remapped_y(render_node_data.tsne_y), svg, render_node_data, tooltip, node_id_to_nodes)
 
             }
+
+            props.setNodeIdToNodes(node_id_to_nodes)
             
             
             /* Object.keys(props.selected_labels).forEach(function(node_id) {
@@ -319,12 +340,13 @@ function BubbleMapTranslate(props) {
         
         
         
-    }, [props.node_render, props.labels, props.selected_labels, props.is_selected, props.selected_node_id, props.highlight_label]);
-    function append_data(data, prev_nodes, prev_arr_of_tsne_boundaries, svg, tooltip, dict_of_prev_subreddits_to_change) {
+    }, [props.node_render, props.labels]);
+    function append_data(data, prev_nodes, prev_arr_of_tsne_boundaries, svg, tooltip, dict_of_subreddits_to_change) {
         /* if (!svg.selectAll("circle").empty()) {
             svg.selectAll("circle").style("opacity", .25).style("stroke-opacity", 0)
         } */
         const root = d3.hierarchy(data);
+        svg.selectAll(".g_text_class").remove()
         if (svg.selectAll(".g_text_class").empty()) {
             root.eachBefore(node => create_group(svg, node, root, "g_text_class"))
         }
@@ -336,35 +358,6 @@ function BubbleMapTranslate(props) {
         for (let i = 0; i < leaves.length; i++) {
             set_of_parents.add(leaves[i].parent)
         }
-
-        var dict_of_subreddits_to_change = {}
-        
-        
-        for (const node in nodes) {
-            if (nodes[node].data.hasOwnProperty("tsne_x") && nodes[node].data.node_id.includes("_")) {
-                if (nodes[node].data.subreddit in dict_of_prev_subreddits_to_change) {
-                    if (dict_of_prev_subreddits_to_change[nodes[node].data.subreddit]["change"] != overTimeOptions["delete"]) {
-                        dict_of_subreddits_to_change[nodes[node].data.subreddit] = {"node": nodes[node], "change": overTimeOptions["transform"]}
-                    }
-                    else {
-                        dict_of_subreddits_to_change[nodes[node].data.subreddit] ={"node": nodes[node], "change": overTimeOptions["add"]}
-                    }
-                }
-                else {
-                    dict_of_subreddits_to_change[nodes[node].data.subreddit] ={"node": nodes[node], "change": overTimeOptions["add"]}
-                }
-                
-            }
-        }
-
-        Object.keys(dict_of_prev_subreddits_to_change).forEach(function(prev_subreddit) {
-            if (!(prev_subreddit in dict_of_subreddits_to_change) && dict_of_prev_subreddits_to_change[prev_subreddit]["change"] != overTimeOptions["delete"]) {
-                
-                dict_of_subreddits_to_change[prev_subreddit] = {"node": dict_of_prev_subreddits_to_change[prev_subreddit]["node"], "change": overTimeOptions["delete"]}
-            }
-        });
-
-        
 
         const arr_of_tsne_boundaries =  get_boundaries(nodes, "tsne_x");
 
@@ -483,17 +476,28 @@ function BubbleMapTranslate(props) {
     }
 
 
-    function render_labels_treemap(x, y, svg, node, tooltip) {
+    function render_labels_treemap(x, y, svg, node, tooltip, node_id_to_nodes) {
         node["x"] = x
         node["y"] = y
         node["clicked"] = false
         var format = d3.format(",");
 
         var g_text = svg.select("#g_text_class_" + node.node_id)
-        
+        g_text.selectAll(".circle_text_class")._groups[0].forEach(function(d) {
+                        svg.select("#circle_class_" + d.classList[2])
+                        .attr('fill', (d) => {
+                            return d.color});
+                        
+                    });        
 
         if (svg.select("#label_text_class_" + node.node_id).empty()) {
-            console.log("g_text: ", g_text)
+            g_text.selectAll(".circle_text_class")._groups[0].forEach(function(d) {
+                if (!(node.node_id in node_id_to_nodes)) {
+                    node_id_to_nodes[node.node_id] = {}
+                }
+                node_id_to_nodes[node.node_id][d.classList[2]] = svg.select("#circle_class_" + d.classList[2])
+                //props.setNodeIdToNodes(node.node_id, svg.select("#circle_class_" + d.classList[2]))
+            });
             g_text.selectAll(".circle_text_class")._groups[0].forEach(function(d) {
                 svg.select("#circle_class_" + d.classList[2])
                 .attr('fill', (d) => {
@@ -515,6 +519,7 @@ function BubbleMapTranslate(props) {
                     })
                 
             })
+            
             g_text.append("text")
                 .attr("class", "label_text_class")
                 .attr("id", "label_text_class_" + node.node_id)
@@ -589,7 +594,11 @@ function BubbleMapTranslate(props) {
                     
                 })
 
-        }        
+
+
+        }  
+        
+             
 
     }
 
