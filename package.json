@@ -8,6 +8,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "bootstrap": "^5.2.3",
+    "d3": "^7.8.2",
     "d3-simple-slider": "^1.10.4",
     "react": "^18.2.0",
     "react-bootstrap": "^2.7.1",
