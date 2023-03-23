@@ -9,8 +9,8 @@ import { render } from 'react-dom';
 function BubbleMapTranslate(props) {
     const svgRef = React.useRef()
     //const width = 1200
-    const width = props.width;
-    const height = props.height;
+    let width = props.width;
+    let height = props.height;
     const overTimeOptions = {"delete": 0, "add": 1, "transform": 2}
     var idleTimeout
     function idled() { idleTimeout = null; }
@@ -123,8 +123,28 @@ function BubbleMapTranslate(props) {
             .attr("x", props.treemap_width + 25)
             .attr("y", 50)
             .attr("viewBox", [0.5, -30.5, width, height + 30])
+            .attr("width", width)
+            .attr("height", height)
             .style("font", "10px sans-serif")
             .style("float", "right");
+
+            svg.on("mouseover", (event, d) => {
+                height += 100
+                width += 100
+                svg.attr("height", height).attr("width", width)
+            })
+            .on("mouseout", (event, d) => {
+                height -= 100
+                width -= 100
+                svg.attr("height", height).attr("width", width)
+            })
+
+            svg.on("mouseover", (event, d) => {
+                props.setResize(-100)
+            })
+            .on("mouseout", (event, d) => {
+                props.setResize(0)
+            })
 
             svg.selectAll("rect").remove();
             svg.selectAll("g").remove();
@@ -181,6 +201,7 @@ function BubbleMapTranslate(props) {
             var nodes = []
             var arr_of_tsne_boundaries = []
             let dict_of_subreddits_to_change = {}
+            console.log("bubble map data:" , props.curr_data)
             var curr_root = d3.hierarchy(props.curr_data)
             var curr_nodes = curr_root.descendants()
             if (props.prev_data != null) {   
@@ -283,6 +304,8 @@ function BubbleMapTranslate(props) {
                 render_labels(tsne_remapped_x(parent.data.tsne_x), tsne_remapped_y(parent.data.tsne_y), svg, parent.data, highlight_label, tooltip)
             }) */
             let node_id_to_nodes = {}
+            
+            //node_id_to_nodes[props.parent_label.data.node_id] = 
             for (let i = 0; i < props.labels.length - 1; i++) {
                 let node = props.labels[i]
                 let render_node = null
@@ -297,14 +320,13 @@ function BubbleMapTranslate(props) {
                 else {
                     render_node = node
                 }
-                let render_node_data = render_node.data
                 tsne_remapped_x = props.tsne_remapped["tsne_remapped_x"]
                 tsne_remapped_y = props.tsne_remapped["tsne_remapped_y"]
-                render_labels_treemap(tsne_remapped_x(render_node_data.tsne_x), tsne_remapped_y(render_node_data.tsne_y), svg, render_node_data, tooltip, node_id_to_nodes)
+                render_labels_treemap(tsne_remapped_x(render_node.data.tsne_x), tsne_remapped_y(render_node.data.tsne_y), svg, render_node, tooltip, node_id_to_nodes)
 
             }
 
-            props.setNodeIdToNodes(node_id_to_nodes)
+            props.setCurrNodeIdToNodes(node_id_to_nodes)
             
             
             /* Object.keys(props.selected_labels).forEach(function(node_id) {
@@ -335,6 +357,7 @@ function BubbleMapTranslate(props) {
     
             } */
             
+            props.setBubbleMapSvg(svg)
         }
         
         
@@ -482,21 +505,27 @@ function BubbleMapTranslate(props) {
         node["clicked"] = false
         var format = d3.format(",");
 
-        var g_text = svg.select("#g_text_class_" + node.node_id)
+        var g_text = svg.select("#g_text_class_" + node.data.node_id)
         g_text.selectAll(".circle_text_class")._groups[0].forEach(function(d) {
                         svg.select("#circle_class_" + d.classList[2])
                         .attr('fill', (d) => {
                             return d.color});
                         
                     });        
-
-        if (svg.select("#label_text_class_" + node.node_id).empty()) {
+                    
+        if (svg.select("#label_text_class_" + node.data.node_id).empty()) {
             g_text.selectAll(".circle_text_class")._groups[0].forEach(function(d) {
-                if (!(node.node_id in node_id_to_nodes)) {
-                    node_id_to_nodes[node.node_id] = {}
+                if (!(node.data.node_id in node_id_to_nodes)) {
+                    node_id_to_nodes[node.data.node_id] = {}
                 }
-                node_id_to_nodes[node.node_id][d.classList[2]] = svg.select("#circle_class_" + d.classList[2])
+                if (!(node.parent.data.node_id in node_id_to_nodes)) {
+                    node_id_to_nodes[node.parent.data.node_id] = {}
+                }
+                node_id_to_nodes[node.data.node_id][d.classList[2]] = {"selection": svg.select("#circle_class_" + d.classList[2]), "color": svg.select("#circle_class_" + d.classList[2]).attr("fill")}
+                node_id_to_nodes[node.parent.data.node_id][d.classList[2]] = {"selection": svg.select("#circle_class_" + d.classList[2]), "color": svg.select("#circle_class_" + d.classList[2]).attr("fill")}
                 //props.setNodeIdToNodes(node.node_id, svg.select("#circle_class_" + d.classList[2]))
+                props.setAllNodeIdToNodes(node.data.node_id, d.classList[2], {"selection": svg.select("#circle_class_" + d.classList[2]), "color": svg.select("#circle_class_" + d.classList[2]).attr("fill")})
+                props.setAllNodeIdToNodes(node.parent.data.node_id, d.classList[2], {"selection": svg.select("#circle_class_" + d.classList[2]), "color": svg.select("#circle_class_" + d.classList[2]).attr("fill")})
             });
             g_text.selectAll(".circle_text_class")._groups[0].forEach(function(d) {
                 svg.select("#circle_class_" + d.classList[2])
@@ -507,7 +536,7 @@ function BubbleMapTranslate(props) {
                             .style("opacity", 1)
                             .attr("dx", (d3.pointer(event)[0]-25))
                             .attr("dy", (d3.pointer(event)[1]-5))
-                            .text(d.subreddit + "\n" + node.taxonomy_label)
+                            .text(d.subreddit + "\n" + node.data.taxonomy_label)
                         const boundingBox = tooltip.select("#text_tooltip").node().getBBox()
                         tooltip.select("#rect_tooltip")
                             .style("opacity", 1)
@@ -522,7 +551,7 @@ function BubbleMapTranslate(props) {
             
             g_text.append("text")
                 .attr("class", "label_text_class")
-                .attr("id", "label_text_class_" + node.node_id)
+                .attr("id", "label_text_class_" + node.data.node_id)
                 .data([node])
                 .attr("dx", x)
                 .attr("dy", y)
@@ -530,7 +559,7 @@ function BubbleMapTranslate(props) {
                 .attr("stroke", "black")
                 .style("stroke-width", .1)
                 .text(() => {
-                    return node.taxonomy_label
+                    return node.data.taxonomy_label
                 })
                 .on("mouseover", (event) => {
                     g_text.selectAll(".circle_text_class")._groups[0].forEach(function(d) {
@@ -539,7 +568,7 @@ function BubbleMapTranslate(props) {
                             return "yellow"});
                         
                     });
-                    /* svg.selectAll(".parent_" + node.node_id)
+                    /* svg.selectAll(".parent_" + node.data.node_id)
                     .attr('fill', () => {
                         return "yellow"}); */
                 
@@ -547,7 +576,7 @@ function BubbleMapTranslate(props) {
          
                 })
                 .on("mousemove", (event) => {
-                    /* svg.selectAll(".parent_" + node.node_id)
+                    /* svg.selectAll(".parent_" + node.data.node_id)
                     .attr('fill', () => {
                         return "yellow"}); */
 
@@ -560,9 +589,9 @@ function BubbleMapTranslate(props) {
 
                 })
                 .on("mouseout", (d) => {
-                    /* svg.selectAll(".parent_" + node.node_id)
+                    /* svg.selectAll(".parent_" + node.data.node_id)
                     .attr('fill', () => {
-                        return node.color}); */
+                        return node.data.color}); */
                     g_text.selectAll(".circle_text_class")._groups[0].forEach(function(d) {
                         svg.select("#circle_class_" + d.classList[2])
                         .attr('fill', (d) => {
@@ -572,13 +601,13 @@ function BubbleMapTranslate(props) {
 
                 })
                 .on("click", (d, i) => {
-                    if (node.clicked == true) {
+                    if (node.data.clicked == true) {
                         g_text.selectAll(".circle_text_class")._groups[0].forEach(function(d) {
                             svg.select("#circle_class_" + d.classList[2])
                             .style("opacity", .25).style("stroke-opacity", 0)  
                         });
-                        // svg.selectAll(".parent_" + node.node_id).style("opacity", .25).style("stroke-opacity", 0)
-                        node.clicked = false
+                        // svg.selectAll(".parent_" + node.data.node_id).style("opacity", .25).style("stroke-opacity", 0)
+                        node.data.clicked = false
                     
                     }
                     else {
@@ -586,8 +615,8 @@ function BubbleMapTranslate(props) {
                             svg.select("#circle_class_" + d.classList[2])
                             .style("opacity", 1).style("stroke-opacity", 1) 
                         });
-                        //svg.selectAll(".parent_" + node.node_id).style("opacity", 1).style("stroke-opacity", 1)
-                        node.clicked = true
+                        //svg.selectAll(".parent_" + node.data.node_id).style("opacity", 1).style("stroke-opacity", 1)
+                        node.data.clicked = true
                     
 
                     }
@@ -713,7 +742,7 @@ function BubbleMapTranslate(props) {
 
     return (
         <React.Fragment>
-            <svg ref={svgRef} width={width} height={height}></svg>
+            <svg ref={svgRef}></svg>
         </React.Fragment>
     );
 }

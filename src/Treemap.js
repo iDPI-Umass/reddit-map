@@ -9,15 +9,15 @@ function Treemap(props) {
     const svgRef = React.useRef();
     /* const width = 954;
     const height = 924; */
-    const width = props.width;
-    const height = props.height;
+    let width = props.width;
+    let height = props.height;
     const library = new Library();
     
 
 
 
     React.useEffect(() => {
-        console.log("RERENDER: ", props.rerender_treemap)
+
         if (props.initial_bubble_map_render) {
             props.setLabels(null)
         
@@ -43,14 +43,30 @@ function Treemap(props) {
 
             
             // hierarchy 
+            console.log("tree data: ", props.curr_data)
             const treemap_data = treemap(props.curr_data)
             
             const svg = d3.select(svgRef.current)
                 .attr("x", 25)
                 .attr("y", 50)
+                .attr("height", height)
+                .attr("width", width)
                 .attr("viewBox", [0.5, -30.5, width , height + 30])
                 .style("font", "10px sans-serif")
-                .style("float", "left").style("display", "inline-block");
+                .style("float", "left").style("display", "inline-block")
+
+            
+            /* svg.on("mouseover", (event, d) => {
+                    height += 100
+                    width += 100
+                    svg.attr("height", height).attr("width", width)
+                })
+                .on("mouseout", (event, d) => {
+                    height -= 100
+                    width -= 100
+                    svg.attr("height", height).attr("width", width)
+                }) */
+
 
 
             svg.selectAll("g").remove();
@@ -107,14 +123,14 @@ function Treemap(props) {
                         props.setHandleTooltipEvent(event)
                         props.setHandleTooltipNode(d)
                         props.setTooltipIsMouseEnter(false)
-                        /* if (d.data.node_id in props.node_id_to_nodes) {
-                            let arr_of_nodes = props.node_id_to_nodes[d.data.node_id]
+                        /* if (d.data.node_id in props.all_node_id_to_nodes) {
+                            let arr_of_nodes = props.all_node_id_to_nodes[d.data.node_id]
                             arr_of_nodes.forEach((n) => {
                                 n.attr('fill', () => {
                                     return "yellow"});
                             })
-                        }
-                        props.setHighlightLabel(d) */
+                        } */
+                        props.setHighlightLabel(d)
                     })
                     .on("mouseout", (event, d) => {
                         props.setHandleTooltipEvent(null)
@@ -125,14 +141,14 @@ function Treemap(props) {
                         svg.selectAll("#text_tooltip").remove()   
                         svg.selectAll("#thumbnail").remove()  
                         svg.selectAll("#text_tooltip").attr("opacity", 0)  
-                        /* if (d.data.node_id in props.node_id_to_nodes) {
-                            let arr_of_nodes = props.node_id_to_nodes[d.data.node_id]
+                        /* if (d.data.node_id in props.all_node_id_to_nodes) {
+                            let arr_of_nodes = props.all_node_id_to_nodes[d.data.node_id]
                             arr_of_nodes.forEach((n) => {
                                 n.attr('fill', () => {
                                     return d.data.color});
                             })        
-                        }
-                        props.setHighlightLabel(null) */
+                        } */
+                        props.setHighlightLabel(null)
                     })
                     .on("click", (event, d) => {
                         d.data.clicked = !d.data.clicked
@@ -170,6 +186,9 @@ function Treemap(props) {
                 node.append("rect")
                     .attr("id", d => (d.leafUid = library.DOM.uid("leaf")).id)
                     .attr("fill", (d) => {
+                        if (d.data.taxonomy_label.length === 0) {
+                            return "white"
+                        }
                         return d.data.color
                         /* if(d === root) {
                             return "#fff"
@@ -236,15 +255,14 @@ function Treemap(props) {
                         return node.select("#taxonomy_label_text_" + d.data.node_id).node().getBBox().height
                     }) */
 
-                
                 group.call(position, root);
+                props.setParentLabel(root)
                 props.setLabels(data)
                 
 
             }
 
             function position(group, root) {
-    
                 group.selectAll("g")
                     .attr("transform", d => d === root ? `translate(0,-30)` : `translate(${x(d.x0)},${y(d.y0)})`)
                 .select("rect")
@@ -286,7 +304,6 @@ function Treemap(props) {
                         .call(position, d.parent));
             }
             props.setTreemapSvg(svg)
-            console.log("RENDERED TREEMAP")
         }
 
         
@@ -297,7 +314,7 @@ function Treemap(props) {
 
     return (
         <React.Fragment>
-            <svg ref={svgRef} width={width} height={height}></svg>
+            <svg ref={svgRef}></svg>
         </React.Fragment>
     );
 }

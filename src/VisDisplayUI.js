@@ -24,23 +24,36 @@ function VisDisplayUI() {
   const [prev_data, setPrevData] = React.useState(null)
   const [curr_data, setCurrData] = React.useState(data_5)
   const [highlight_label, setHighlightLabel] = React.useState(null)
+  const [prev_highlight_label, setPrevHighlightLabel] = React.useState(null)
   const [bubble_map_svg, setBubbleMapSvg] = React.useState(null)
   const [treemap_svg, setTreemapSvg] = React.useState(null)
   const [initial_bubble_map_render, setInitialBubbleMapRender] = React.useState(false)
   const [node_render, setNodeRender] = React.useState(false)
   const [tsne_remapped, setTsneRemapped] = React.useState({})
-  const [node_id_to_nodes, setNodeIdToNodesDict] = React.useState({})
+  const [all_node_id_to_nodes, setAllNodeIdToNodesDict] = React.useState({})
+  const [curr_node_id_to_nodes, setCurrNodeIdToNodes] = React.useState({})
   const [set_highlight_label_subreddit, setHighlightLabelSubreddit] = React.useState(null)
   const [set_highlight_label_cluster, setHighlightLabelCluster] = React.useState(null)
   const [handle_tooltip_event, setHandleTooltipEvent] = React.useState(null)
   const [handle_tooltip_node, setHandleTooltipNode] = React.useState(null)
   const [tooltip_is_mouse_enter, setTooltipIsMouseEnter] = React.useState(null)
   const [rerender_treemap, setRerenderTreemap] = React.useState(false)
+  const [resize, setResize] = React.useState(null)
+  const [is_bubble_map_increased, setIsBubbleMapIncreased] = React.useState(false)
+  const [is_highlighted, setIsHighlighted] = React.useState(false)
+  const [parent_label, setParentLabel] = React.useState(null)
+  const [color_dict, setColorDict] = React.useState({})
+  const [trigger_transition, setTriggerTransition] = React.useState(null)
+  if (color_dict.length == 0) {
+    console.log("len color dict: ")
+  }
 
-  const bubblemap_height = 550
-  const bubblemap_width = 800
-  const treemap_height = 450
-  const treemap_width = 450
+  const slider_height = 75
+  const treemap_height = window.innerHeight
+  const treemap_width = window.innerHeight
+  const bubblemap_height = window.innerHeight - slider_height
+  const bubblemap_width = window.innerWidth - treemap_width - 20
+  const [move_slider, setMoveSlider] = React.useState(bubblemap_width / 3)
   const overTimeOptions = {"delete": 0, "add": 1, "transform": 2}
   const format = d3.format(",d");
   const get_node_id = d => d.ancestors().reverse().map((d) => {
@@ -59,7 +72,7 @@ function VisDisplayUI() {
       return images
   }
   const re = new RegExp("dog.png")
-  const thumbnails = require.context('./data/screenshots_test', false, /dogs\.png/);
+  const thumbnails = importAll(require.context('./data/screenshots_test', false, /dogs\.png/));
   const arr_of_metadata = importAll(require.context('./data/subreddit_metadata', false, /\.(json)$/));
   let agg_metadata = {}
 
@@ -74,14 +87,19 @@ function VisDisplayUI() {
 
   //console.log("thumbnails: ", thumbnails)
 
-  /* thumbnails("./dogs.png").then((locale) => {
-    // do something with locale
-    console.log("locale: ", locale)
-  }); */
 
+  if (trigger_transition != null) {
+    if (JSON.stringify(curr_data) != JSON.stringify(trigger_transition)) {
+      setPrevData(curr_data)
+      console.log("WHAT IS PREV NOW: ", prev_data)
+      setCurrData(trigger_transition)
+      setRerenderTreemap(!rerender_treemap)
+      setNodeRender(false)
+    }
+    setTriggerTransition(null)
+  }
 
-
-
+  
 
   function add_general_tooltip_text(node, prefix, x, y, get_node_id, get_count, isMouseEnter) {
       let text_tooltip = null
@@ -223,7 +241,7 @@ function VisDisplayUI() {
               .attr("class", "tooltip_class")
           image = treemap_svg.append("image")
               .attr("id", prefix + "thumbnail")
-              .attr("class", "tooltip_class")
+              .attr("class", "tooltip_image_class")
       }
       else {
           tspan_description = treemap_svg.select("#" + prefix + "tspan_description")
@@ -250,12 +268,12 @@ function VisDisplayUI() {
                 num_of_words += 1
               }
               else {
-                num_of_words = 0
+                num_of_words = 1
                 if (arr_of_lines.length == 4) {
                   line += "..."
                 }
                 arr_of_lines.push(line)
-                line = ""
+                line = word + " "
               }
             }
             if (arr_of_lines.length < 5) {
@@ -273,11 +291,14 @@ function VisDisplayUI() {
           .attr("dx", "1em")
           .attr("class", "tooltip_class")
           .text(d => d) 
-      const boundingBox = treemap_svg.select("#text_tooltip").node().getBBox()
+      const boundingBox = treemap_svg.selectAll(".tooltip_class").node().getBBox()
+
+      
+      
+      
       image
-          .attr("x", x)
-          .attr("y", y + boundingBox.height)
-          .attr("dy", `${2.4 + final_dy}em`)
+          .attr("x", boundingBox.x)
+          .attr("y", boundingBox.y + boundingBox.height)
           .attr("dx", "1em")
           .attr("width", boundingBox.width)
           .attr("href", thumbnail)
@@ -312,7 +333,8 @@ function VisDisplayUI() {
     }
     let description = ""
     if (d.data.subreddit in agg_metadata) {
-        if ("description" in agg_metadata[d.data.subreddit]["about"]) {
+        //console.log(d.data.subreddit, agg_metadata[d.data.subreddit])
+        if ("about" in agg_metadata[d.data.subreddit] && "description" in agg_metadata[d.data.subreddit]["about"]) {
             description = agg_metadata[d.data.subreddit]["about"]["description"]
         }
         else {
@@ -329,12 +351,7 @@ function VisDisplayUI() {
     let prev_dy = add_general_tooltip_text(d, "", pointer_x, pointer_y, get_node_id, get_count, isMouseEnter)
     if (d.data.node_id.includes("_")) {
         let thumbnail = null
-        if (d.data.subreddit + ".png" in thumbnails) {
-            thumbnail = thumbnails[d.data.subreddit + ".png"]
-        }
-        else {
-            thumbnail = thumbnails["dogs.png"]
-        }
+        thumbnail = "https://ihopmeag.s3.us-east-2.amazonaws.com/reddit_images/" + d.data.subreddit + ".png"
         
         add_subreddit_level_tooltip_text("", pointer_x, pointer_y, description, thumbnail, prev_dy)
         // add_image("", pointer_x, pointer_y, thumbnail, isMouseEnter)
@@ -343,7 +360,7 @@ function VisDisplayUI() {
         add_top_level_tooltip_text(d, "", pointer_x, pointer_y, prev_dy)
     }
 
-    let boundingBox = treemap_svg.select("#text_tooltip").node().getBBox()
+    let boundingBox = treemap_svg.select(".tooltip_class").node().getBBox()
 
     let rect_tooltip = null
     if (treemap_svg.select("#rect_tooltip").empty()) {
@@ -354,7 +371,8 @@ function VisDisplayUI() {
         rect_tooltip = treemap_svg.select("#rect_tooltip")
     }
     
-    if (treemap_height - pointer_y < boundingBox.height) {
+    // TODO: FIX THIS
+    /* if (treemap_height - pointer_y < boundingBox.height) {
       treemap_svg.selectAll(".tooltip_class").attr("y", pointer_y - boundingBox.height)
     }
     if (treemap_width - (pointer_x + boundingBox.width) < 0) {
@@ -362,28 +380,31 @@ function VisDisplayUI() {
     }
     if (pointer_x - boundingBox.width < 0) {
       treemap_svg.selectAll(".tooltip_class").attr("x", -5)
-    }
+    } */
    
-    boundingBox = treemap_svg.select("#text_tooltip").node().getBBox()
+    boundingBox = treemap_svg.select(".tooltip_class").node().getBBox()
+
 
     rect_tooltip
         .attr("fill", "white")
-        .attr("stroke", "black")
+        .attr("stroke", "white")
         .attr("stroke-linejoin", "round")
         .attr("opacity", 1)
-        .attr("x", boundingBox.x)
-        .attr("y", boundingBox.y )
-        .attr("width", boundingBox.width)
+        .attr("x", boundingBox.x - 5)
+        .attr("y", boundingBox.y - 5)
+        .attr("width", boundingBox.width + 10)
+        .attr("rx", 5)
 
     if (d.data.node_id.includes("_")) {
-      rect_tooltip.attr("height", boundingBox.height + parseInt(treemap_svg.select("#thumbnail").attr("width")))
-    } 
+      rect_tooltip.attr("height", boundingBox.height + 10 + treemap_svg.select(".tooltip_image_class").node().getBBox().height)
+    }
     else {
-      rect_tooltip.attr("height", boundingBox.height)
+      rect_tooltip.attr("height", boundingBox.height + 10)
     }
 
     
   }
+  
  
 
   function setSelectedNodes(node) {
@@ -398,83 +419,168 @@ function VisDisplayUI() {
     //setSelectedNodes(selected_nodes)
   }
 
-  function setNodeIdToNodes(node_id, node) {
-    if (!(node_id in node_id_to_nodes)) {
-      node_id_to_nodes[node_id] = []
+  function setAllNodeIdToNodes(node_id, subreddit, node_dict) {
+    if (!(node_id in all_node_id_to_nodes)) {
+      all_node_id_to_nodes[node_id] = {}
     }
-    node_id_to_nodes[node_id].push(node)
+    all_node_id_to_nodes[node_id][subreddit] = node_dict
   }
+  
 
   if (handle_tooltip_event != null) {
     treemap_svg.append("g").attr("id", "g_rect_tooltip")
     handleTooltip(handle_tooltip_event, handle_tooltip_node, tooltip_is_mouse_enter)
   }
 
-  /* let highlight_label_cluster = null
-  let highlight_node = null
-  let highlight_label_subreddit = null
-
-  console.log("node_id_to_nodes: ", node_id_to_nodes)
-  console.log("highlight_label: ", highlight_label)
-  if (highlight_label != null) {
-    console.log("highlight_label.data.node_id: ", highlight_label.data.node_id)
-  }
-
-  if (Object.keys(node_id_to_nodes).length > 0 && highlight_label != null) {
-    console.log("WOOOHOOOOOOOOOOOOOOOO")
-    
+  function highlightNodes(highlight_label_cluster, highlight_node, highlight_label_subreddit, color_dict) {
+    //console.log("WOOOHOOOOOOOOOOOOOOOO")
+    setPrevHighlightLabel(highlight_label)
     if (highlight_label.data.node_id.includes("_")) {
-      console.log("WOOOHOOOOOO with underscore")
+      //console.log("WOOOHOOOOOO with underscore")
       highlight_label_cluster = highlight_label.data.node_id.split("_")[0]
       setHighlightLabelCluster(highlight_label_cluster)
-      if (highlight_label_cluster in node_id_to_nodes) {
-        console.log("we innnn")
-        highlight_node = node_id_to_nodes[highlight_label_cluster][highlight_label.data.subreddit]
-      
+      if (highlight_label_cluster in all_node_id_to_nodes) {
+        //console.log("we innnn")
+        highlight_node = all_node_id_to_nodes[highlight_label_cluster][highlight_label.data.subreddit]["selection"]
+        if (!(highlight_label_cluster in color_dict)) {
+          color_dict[highlight_label_cluster] = highlight_node.attr('fill')
+        }
+        
         highlight_node.attr('fill', () => {
           return "yellow"});
         highlight_label_subreddit = highlight_label.data.subreddit
         setHighlightLabelSubreddit(highlight_label_subreddit)
+        setIsHighlighted(true)
       }
       
     }
     else {
-      console.log("WOOOHOOOOOO with NOOOO underscore")
+      //console.log("WOOOHOOOOOO with NOOOO underscore")
       highlight_label_subreddit = null
       highlight_label_cluster = highlight_label.data.node_id
       setHighlightLabelCluster(highlight_label_cluster)
+      
       if (highlight_label_cluster in 
-        node_id_to_nodes) {
-        console.log("we in!")
-        let highlight_nodes = node_id_to_nodes[highlight_label_cluster]
-        console.log("highlight_nodesssssssss: ", highlight_nodes)
+        all_node_id_to_nodes) {
+        //console.log("we in!")
+        let highlight_nodes = all_node_id_to_nodes[highlight_label_cluster]
+        //console.log("highlight_nodesssssssss: ", highlight_nodes)
         Object.keys(highlight_nodes).forEach(function(subreddit) {
-          highlight_node = highlight_nodes[subreddit]
+          highlight_node = highlight_nodes[subreddit]["selection"]
+          if (!(subreddit in color_dict)) {
+            color_dict[subreddit] = highlight_node.attr('fill')
+          }
+          /* console.log("highlight_label_cluster and highlight node: ", subreddit, highlight_node)
+          console.log(color_dict) */
           highlight_node.attr('fill', () => {
             return "yellow"});
         })
       }
       setHighlightLabelSubreddit(null)
+      setIsHighlighted(true)
 
       
     }
-    
+
   }
 
-  if (Object.keys(node_id_to_nodes).length > 0 && highlight_label == null) {
-    console.log("NAAAAAAAAAH")
+  function dehighlightNodes(color_dict) {
+    setPrevHighlightLabel(highlight_label)
+    /* console.log("NAAAAAAAAAH")
     console.log("highlight_label_subreddit: ", set_highlight_label_subreddit)
-    console.log("highlight_label_cluster: ", set_highlight_label_cluster)
+    console.log("highlight_label_cluster: ", set_highlight_label_cluster) */
     if (set_highlight_label_subreddit == null) {
-
-      Object.keys(node_id_to_nodes[set_highlight_label_cluster]).forEach(function(subreddit) {
-        node_id_to_nodes[set_highlight_label_cluster][subreddit].attr('fill', () => {
-          return node_id_to_nodes[set_highlight_label_cluster][subreddit].data.color});
+      //console.log("all_node_id_to_nodes[set_highlight_label_cluster]: ", all_node_id_to_nodes[set_highlight_label_cluster])
+      Object.keys(all_node_id_to_nodes[set_highlight_label_cluster]).forEach(function(subreddit) {
+        //console.log("node_id_to_nodes[set_highlight_label_cluster][subreddit]: ", all_node_id_to_nodes[set_highlight_label_cluster][subreddit])
+        all_node_id_to_nodes[set_highlight_label_cluster][subreddit]["selection"].attr('fill', () => {
+          //console.log("all_node_id_to_nodes[set_highlight_label_cluster][subreddit][color]: ", all_node_id_to_nodes[set_highlight_label_cluster][subreddit])
+          if (!(set_highlight_label_cluster in curr_node_id_to_nodes)) {
+            return "#808080"
+          }
+          return color_dict[subreddit]});
       })
     }
     else {
-      node_id_to_nodes[set_highlight_label_cluster][set_highlight_label_subreddit].attr('fill', () => {
-        return node_id_to_nodes[set_highlight_label_cluster][set_highlight_label_subreddit].data.color});
+      all_node_id_to_nodes[set_highlight_label_cluster][set_highlight_label_subreddit]["selection"].attr('fill', () => {
+        if (!(set_highlight_label_cluster in curr_node_id_to_nodes)) {
+          return "#808080"
+        }
+        return color_dict[set_highlight_label_subreddit]});
+    }
+    setIsHighlighted(false)
+    
+  }
+
+  /* let highlight_label_cluster = null
+  let highlight_node = null
+  let highlight_label_subreddit = null
+
+  //console.log("all_node_id_to_nodes: ", all_node_id_to_nodes)
+  //console.log("highlight_label: ", highlight_label)
+
+  //console.log("prev highlight label: ", prev_highlight_label, highlight_label, is_highlighted)
+  if (Object.keys(all_node_id_to_nodes).length > 0 && highlight_label != null && (!is_highlighted || prev_highlight_label != highlight_label)) {
+    if (prev_highlight_label != null && prev_highlight_label != highlight_label) {
+      dehighlightNodes(color_dict)
+    }
+    highlightNodes(highlight_label_cluster, highlight_node, highlight_label_subreddit, color_dict)
+    
+  }
+
+  if (Object.keys(all_node_id_to_nodes).length > 0 && highlight_label == null && is_highlighted) {
+    dehighlightNodes(color_dict)
+  } */
+
+  /* if (curr_node_id_to_nodes != null) {
+    Object.keys(curr_node_id_to_nodes).forEach(function(node_id) {
+      if (id != highlight_label) {
+        curr_node_id_to_nodes[node_id]["selection"].attr("fill", )
+      }
+      highlight_node = highlight_nodes[subreddit]["selection"]
+      highlight_node.transition().attr('fill', () => {
+        return "yellow"});
+    })
+  } */
+
+  /* let is_treemap_resized = false
+  let is_bubble_map_resized = false
+  if (resize != null && bubble_map_svg != null && treemap_svg != null) {
+    console.log("resize: ", resize)
+    if (resize == 0 && is_bubble_map_increased) {
+      bubble_map_svg
+        .transition()
+        .duration(100)
+        .attr("height", bubblemap_height)
+        .attr("width", bubblemap_width)
+        is_treemap_resized = true
+      if (is_treemap_resized) {
+        treemap_svg
+          .transition()
+          .duration(100)
+          .attr("height", treemap_height)
+          .attr("width", treemap_width)
+      } 
+      setIsBubbleMapIncreased(false)
+      setMoveSlider(bubblemap_width / 3)
+    }
+    if (resize < 0 && !is_bubble_map_increased) {
+      treemap_svg
+          .transition()
+          .duration(100)
+          .attr("height", treemap_height - 100)
+          .attr("width", treemap_width - 100)
+      
+      is_bubble_map_resized = true
+      if (is_bubble_map_resized) {
+        bubble_map_svg
+          .transition()
+          .duration(100)
+          .attr("height", bubblemap_height + 100)
+          .attr("width", bubblemap_width)
+      }
+      setIsBubbleMapIncreased(true)
+      setMoveSlider((bubblemap_width + 100) / 3)
     }
   } */
 
@@ -482,17 +588,21 @@ function VisDisplayUI() {
     return (
         <React.Fragment>
 
+                    
+
                     <Treemap initial_bubble_map_render={initial_bubble_map_render} 
                     prev_data={prev_data} curr_data={curr_data} setLabels={setLabels} 
                     setSelectedNodes={setSelectedNodes} setIsSelected={setIsSelected} 
                     setSelectedNodeId={setSelectedNodeId} width={treemap_width} 
                     height={treemap_height} setHighlightLabel={setHighlightLabel}
-                    node_id_to_nodes={node_id_to_nodes}
+                    all_node_id_to_nodes={all_node_id_to_nodes}
                     setHandleTooltipEvent={setHandleTooltipEvent}
                     setHandleTooltipNode={setHandleTooltipNode}
                     setTooltipIsMouseEnter={setTooltipIsMouseEnter}
                     setTreemapSvg={setTreemapSvg}
-                    rerender_treemap={rerender_treemap}/>
+                    treemap_svg={treemap_svg}
+                    rerender_treemap={rerender_treemap}
+                    setParentLabel={setParentLabel}/>
 
 
                     <BubbleMapTranslate prev_data={prev_data} curr_data={curr_data} 
@@ -503,9 +613,22 @@ function VisDisplayUI() {
                     labels={labels}
                     setZoomInfo={setZoomInfo} zoom_info={stack_of_brushes}
                     treemap_width={treemap_width}
-                    setNodeIdToNodes={setNodeIdToNodesDict}/>
+                    setAllNodeIdToNodes={setAllNodeIdToNodes}
+                    resize={resize} setResize={setResize}
+                    setBubbleMapSvg={setBubbleMapSvg}
+                    parent_label={parent_label}
+                    setCurrNodeIdToNodes={setCurrNodeIdToNodes}/>
 
-                    <Slider setRerenderTreemap={setRerenderTreemap} rerender_treemap={rerender_treemap} setNodeRender={setNodeRender} setPrevData={setPrevData} setCurrData={setCurrData} currData={curr_data} treemap_width={treemap_width} treemap_height={treemap_height} bubblemap_width={bubblemap_width} bubblemap_height={bubblemap_height}></Slider>
+                    <Slider setRerenderTreemap={setRerenderTreemap} 
+                    rerender_treemap={rerender_treemap} setNodeRender={setNodeRender} 
+                    setPrevData={setPrevData} setCurrData={setCurrData} curr_data={curr_data} prev_data={prev_data}
+                    treemap_width={treemap_width} treemap_height={treemap_height} 
+                    bubblemap_width={bubblemap_width} bubblemap_height={bubblemap_height}
+                    move_slider={move_slider}
+                    slider_height={slider_height}
+                    setTriggerTransition={setTriggerTransition}></Slider>
+
+                    
 
                     
                 
