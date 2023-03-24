@@ -76,7 +76,8 @@ function BubbleMapTranslate(props) {
                 stack_of_brushes.push(new_brush)
                 remapped_x.domain([ new_brush["min_x"], new_brush["max_x"] ])
                 remapped_y.domain([ new_brush["min_y"], new_brush["max_y"] ])
-                svg.select(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
+                // This remove the grey brush area as soon as the selection has been done 
+                //svg.select(".brush").call(brush.move, null) // TODO decomment this to get brush functionality 
                 
             }
             props.setZoomInfo(stack_of_brushes)
@@ -167,13 +168,16 @@ function BubbleMapTranslate(props) {
                     .attr("opacity", 0)
                     .text("")
 
-            var brush = d3.brush()                 // Add the brush feature using the d3.brush function
+            // TODO decomment this to get brush functionality
+            /* var brush = d3.brush()                 // Add the brush feature using the d3.brush function
             .extent( [ [0,0], [width,height] ] ) // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
             .on("end", function (e) {
                 updateChartBrush(e)
 
-            })
-            svg.append("g").attr("class", "brush").call(brush);
+            }) */
+            svg.append("g").attr("class", "brush")
+                //.call(brush); // TODO decomment this to get brush functionality
+
             svg.select(".brush").append("g").attr("class", "g_circle")
             props.setInitialBubbleMapRender(true)
             
