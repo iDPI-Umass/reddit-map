@@ -300,25 +300,7 @@ function VisDisplayUI() {
           .attr("x", boundingBox.x)
           .attr("y", boundingBox.y + boundingBox.height)
           .attr("dx", "1em")
-          .attr("width", boundingBox.width)
-          .attr("href", thumbnail)
-  }
-
-  function add_image(prefix, x, y, thumbnail, isMouseEnter) {
-      let image = null
-      if (treemap_svg.select("#" + prefix + "thumbnail").empty()) {
-          image = treemap_svg.append("image")
-              .attr("id", prefix + "thumbnail")
-              .attr("class", "tooltip_class")
-      }
-      else {
-          image = treemap_svg.select("#" + prefix + "thumbnail")
-      }
-      const boundingBox = treemap_svg.select("#text_tooltip").node().getBBox()
-      image
-          .attr("x", x)
-          .attr("y", y)
-          .attr("width", boundingBox.width)
+          .attr("width", 300)
           .attr("href", thumbnail)
   }
   
@@ -383,6 +365,14 @@ function VisDisplayUI() {
     } */
    
     boundingBox = treemap_svg.select(".tooltip_class").node().getBBox()
+    let rect_width = 0
+
+    if (boundingBox.width > 300 || !d.data.node_id.includes("_")) {
+      rect_width = boundingBox.width
+    }
+    else {
+      rect_width = 300
+    }
 
 
     rect_tooltip
@@ -392,7 +382,7 @@ function VisDisplayUI() {
         .attr("opacity", 1)
         .attr("x", boundingBox.x - 5)
         .attr("y", boundingBox.y - 5)
-        .attr("width", boundingBox.width + 10)
+        .attr("width", rect_width + 10)
         .attr("rx", 5)
 
     if (d.data.node_id.includes("_")) {
