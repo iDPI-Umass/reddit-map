@@ -4,7 +4,6 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Tree from "./Tree"
 import Treemap from './Treemap';
-import BubbleMapTranslate from "./BubbleMapTranslate";
 import BubbleMap from "./BubbleMap";
 import VisPickerUI from './VisPickerUI';
 import Slider from './Slider';
@@ -595,7 +594,7 @@ function VisDisplayUI() {
                     setParentLabel={setParentLabel}/>
 
 
-                    <BubbleMapTranslate prev_data={prev_data} curr_data={curr_data} 
+                    <BubbleMap prev_data={prev_data} curr_data={curr_data} 
                     initial_bubble_map_render={initial_bubble_map_render} setInitialBubbleMapRender={setInitialBubbleMapRender} 
                     setNodeRender={setNodeRender} node_render={node_render} 
                     tsne_remapped={tsne_remapped} setTsneRemapped={setTsneRemapped}
