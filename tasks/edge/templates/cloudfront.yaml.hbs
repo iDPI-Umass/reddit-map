@@ -1,0 +1,205 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Frontend for Project GOBO
+Resources:
+
+  Certificate:
+    Type: "AWS::CertificateManager::Certificate"
+    Properties: 
+      DomainName: {{{ certificate.verification }}}
+      ValidationMethod: DNS
+      {{#if certificate.aliases}}
+      SubjectAlternativeNames:
+        {{#each certificate.aliases}}
+        - "{{{ . }}}"
+        {{/each}}
+      {{/if}}
+
+  CachePolicy:
+    Type: "AWS::CloudFront::CachePolicy"
+    Properties:
+      CachePolicyConfig:
+        Name: {{{ namespace }}}-{{{ name }}}-{{{ environment }}}-cache-policy
+        DefaultTTL: {{{ cache.ttl.default }}}
+        MinTTL: {{{ cache.ttl.min }}}
+        MaxTTL: {{{ cache.ttl.max }}}
+        ParametersInCacheKeyAndForwardedToOrigin:
+          CookiesConfig: 
+            CookieBehavior: none
+          EnableAcceptEncodingBrotli: {{{ cache.compress }}}
+          EnableAcceptEncodingGzip: {{{ cache.compress }}}
+          HeadersConfig:
+            {{#if cache.headers }}
+            HeaderBehavior: whitelist
+            Headers:
+              {{#each cache.headers}}
+              - {{{ . }}}
+              {{/each}}
+            {{else}}
+            HeaderBehavior: none
+            {{/if}}
+          QueryStringsConfig: 
+            QueryStringBehavior: {{{ cache.queries }}}
+
+  OriginRequestPolicy:
+    Type: "AWS::CloudFront::OriginRequestPolicy"
+    Properties:
+      OriginRequestPolicyConfig:
+        Name: {{{ namespace }}}-{{{ name }}}-{{{ environment }}}-origin-request-policy
+        CookiesConfig: 
+          CookieBehavior: none
+        HeadersConfig: 
+          HeaderBehavior: allViewer
+        QueryStringsConfig:
+          QueryStringBehavior: all
+
+  ResponseHeadersPolicy:
+    Type: "AWS::CloudFront::ResponseHeadersPolicy"
+    Properties:
+      ResponseHeadersPolicyConfig:
+        Name: {{{ namespace }}}-{{{ name }}}-{{{ environment }}}-response-headers-policy
+        CorsConfig: 
+          AccessControlAllowCredentials: true
+          AccessControlAllowHeaders:
+            Items: [ authorization ]
+          AccessControlAllowMethods: 
+            Items: [ GET, HEAD, PUT, POST, PATCH, DELETE, OPTIONS ]
+          AccessControlAllowOrigins: 
+            {{!-- TODO use the list of aliases here? --}}
+            Items: [ "*" ]
+          AccessControlExposeHeaders: 
+            Items:
+              - www-authenticate
+              - location
+              - credentials
+          {{!-- 
+
+            Chrome max is 7200
+            https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age#directives
+          
+          --}}
+          AccessControlMaxAgeSec: 7200
+          OriginOverride: false
+        CustomHeadersConfig:
+          Items: []
+        SecurityHeadersConfig: 
+          ContentSecurityPolicy: 
+            ContentSecurityPolicy: >-
+              default-src https: data: ;
+              script-src https: blob: 'unsafe-inline' 'unsafe-eval' ;
+              style-src https: 'unsafe-inline' ;
+            Override: false
+          ContentTypeOptions: 
+            Override: true
+          FrameOptions: 
+            FrameOption: DENY
+            Override: true
+          ReferrerPolicy: 
+            Override: true
+            ReferrerPolicy: no-referrer
+          StrictTransportSecurity: 
+            AccessControlMaxAgeSec: 63072000
+            IncludeSubdomains: true
+            Preload: true
+            Override: true
+        ServerTimingHeadersConfig: 
+          Enabled: false
+
+  Distribution:
+    Type: "AWS::CloudFront::Distribution"
+    DependsOn:
+      - CachePolicy
+      - OriginRequestPolicy
+      - ResponseHeadersPolicy
+      - Certificate
+    Properties:
+      DistributionConfig:
+        Aliases:
+        {{#each aliases}}
+          - '{{{ domain }}}'
+        {{/each}}
+        Comment: {{{ description }}} ({{{ environment }}})
+        DefaultCacheBehavior:
+          TargetOriginId: {{{ origins.[0].domain }}}
+          AllowedMethods: [ GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE ]
+          CachedMethods: [ GET, HEAD, OPTIONS ]
+          Compress: true
+          CachePolicyId: !Ref CachePolicy
+          OriginRequestPolicyId: !Ref OriginRequestPolicy
+          ResponseHeadersPolicyId: !Ref ResponseHeadersPolicy
+          ViewerProtocolPolicy: redirect-to-https
+          {{#if handlers }}
+          LambdaFunctionAssociations:
+            {{#each handlers}}
+            - EventType: {{{ event }}}
+              IncludeBody: {{{ includesBody }}}
+              LambdaFunctionARN: {{{ arn }}}
+            {{/each}}
+          {{/if}}
+
+        DefaultRootObject: ""
+        Enabled: true
+        HttpVersion: http2
+        IPV6Enabled: false
+        Origins:
+          {{#each origins}}
+          - Id: {{{ domain }}}
+            DomainName: {{{ domain }}}
+            CustomOriginConfig:
+              HTTPSPort: {{ custom.httpsPort }}
+              HTTPPort: {{ custom.httpPort }}
+              OriginKeepaliveTimeout: 60
+              {{#if custom.https }}
+              OriginProtocolPolicy: "https-only"
+              {{else}}
+              OriginProtocolPolicy: "http-only"
+              {{/if}}
+              OriginReadTimeout: 60
+              OriginSSLProtocols: [ "TLSv1.2" ]
+            {{#if headers}}
+            OriginCustomHeaders:
+              {{#each headers}}
+              - HeaderName: "{{{ name }}}"
+                HeaderValue: >-
+                  {{{ value }}}
+              {{/each}}
+            {{/if}}
+
+          {{/each}}
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          AcmCertificateArn: !Ref Certificate
+          MinimumProtocolVersion: "TLSv1.2_2021"
+          SslSupportMethod: "sni-only"
+      Tags:
+        - Key: component
+          Value: {{{ namespace }}}
+        - Key: environment
+          Value: {{{ environment }}}
+
+  {{#if dns}}
+  {{#each dns}}
+  RecordSet{{{ awsCase tld }}}:
+    Type: "AWS::Route53::RecordSetGroup"
+    DependsOn:
+      - Distribution
+    Properties:
+      Comment: >-
+        {{{ tld }}} alias for 
+        {{{ @root.namespace }}} {{{ @root.name }}} 
+        ({{{ @root.environment }}})
+      HostedZoneId: {{{ zone }}}
+      RecordSets:
+        {{#each aliases}}
+        - Name: '{{{ . }}}.'
+          Type: A
+          AliasTarget:
+            DNSName: !GetAtt [ Distribution, "DomainName" ]
+            EvaluateTargetHealth: false
+            HostedZoneId: Z2FDTNDATAQYW2
+        {{/each}}
+  {{/each}}
+  {{/if}}
+
+Outputs:
+  CloudFrontDistributions:
+    Value: !Ref Distribution

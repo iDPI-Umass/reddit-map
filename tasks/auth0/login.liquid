@@ -1,0 +1,64 @@
+<!DOCTYPE html><html>
+  <head>
+    {%- auth0:head -%}
+
+    <link href="https://gobo.social/_styles/themes.css" rel="stylesheet">
+    <link href="https://gobo.social/_styles/gobo-light-theme.css" rel="stylesheet">
+    <link href="https://gobo.social/_styles/fonts.css" rel="stylesheet">
+    <link href="https://gobo.social/_styles/reset.css" rel="stylesheet">
+
+    <style>
+      body {
+        display: flex;
+        align-items: stretch;
+      }
+
+      body > .left {
+        flex: 1 0 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: #FFFFFF;
+      }
+
+      body > .right {
+        display: none;
+      }
+
+      body main button {
+        border-radius: var(--sl-border-radius-pill) !important;
+      }
+
+      @media( min-width: 850px ) {
+        body > .left {
+          flex: 1 1 50%;
+        }
+
+        body > .right {
+          display: flex;
+          flex: 1 1 50%;
+          background: #F0F2F5;
+        }
+
+        body > .right > img {
+          height: 100%;
+          width: 100%;
+          object-fit: contain;
+          object-position: center center;
+        }
+      }
+     
+    </style>
+  </head>
+  <body>
+    <div class="left">
+      {%- auth0:widget -%}
+    </div>
+
+    <div class="right">
+      <img src="https://gobo.social/images/login.svg" alt="figure of people using the social web">
+    </div>
+    
+  </body>
+</html>
