@@ -7,8 +7,8 @@ import Treemap from './Treemap';
 import BubbleMap from "./BubbleMap";
 import VisPickerUI from './VisPickerUI';
 import Slider from './Slider';
-import data_4 from "./data/RC_2021-04_KMeans_Agglom_100_Clusters.json"
-import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
+import data_4 from "./data/RC_2021-04_KMeans_Agglom_100_Clusters_Updated_Mapping.json"
+import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Updated_Mapping.json"
 import data_6 from "./data/RC_2021-06_KMeans_Agglom_100_Clusters_Cut_Tsne.json"
 import Thumbnail from "react-webpage-thumbnail";
 
@@ -21,7 +21,7 @@ function VisDisplayUI() {
   const [selected_node_id, setSelectedNodeId] = React.useState("");
   const [stack_of_brushes, setZoomInfo] = React.useState(null)
   const [prev_data, setPrevData] = React.useState(null)
-  const [curr_data, setCurrData] = React.useState(data_5)
+  const [curr_data, setCurrData] = React.useState(data_4)
   const [highlight_label, setHighlightLabel] = React.useState(null)
   const [prev_highlight_label, setPrevHighlightLabel] = React.useState(null)
   const [bubble_map_svg, setBubbleMapSvg] = React.useState(null)
@@ -206,14 +206,14 @@ function VisDisplayUI() {
       }
 
       let top_index = 1
-      let arr_of_top_subreddit_label_to_index = {}
-      node.data.top_subreddit_labels.split(",").forEach((label) => {
-        arr_of_top_subreddit_label_to_index[label] = top_index
+      let arr_of_top_subreddits_by_comment_to_index = {}
+      node.data.top_subreddits_by_comment.split(",").forEach((label) => {
+        arr_of_top_subreddits_by_comment_to_index[label] = top_index
         top_index += 1
       })
       tspan_top_subreddits
           .selectAll("tspan")
-          .data(["Top subreddits based on number of comments: "].concat(node.data.top_subreddit_labels.split(",")))
+          .data(["Top subreddits based on number of comments: "].concat(node.data.top_subreddits_by_comment.split(",")))
           .join("tspan")
           .attr("x", x)
           .attr("y", y)
@@ -223,8 +223,8 @@ function VisDisplayUI() {
           })
           .attr("class", "tooltip_class")
           .text(d => {
-            if (d in arr_of_top_subreddit_label_to_index) {
-              return `${arr_of_top_subreddit_label_to_index[d]}. ${d}`
+            if (d in arr_of_top_subreddits_by_comment_to_index) {
+              return `${arr_of_top_subreddits_by_comment_to_index[d]}. ${d}`
             }
             return d
           })
@@ -307,10 +307,7 @@ function VisDisplayUI() {
   function handleTooltip(event, d, isMouseEnter) {
     
     let get_count = () => {
-        if (d.data.node_id.includes("_")) {
-            return `Number of comments: ${format(d.data.subreddit_count)}`
-        }
-        return `Number of comments: ${format(d.data.cluster_subreddit_count)}`
+        return `Number of comments: ${format(d.data.comment_count)}`
     }
     let description = ""
     if (d.data.subreddit in agg_metadata) {

@@ -1,7 +1,5 @@
 import React from 'react';
 import * as d3 from 'd3';
-import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
-import data_6 from "./data/RC_2021-06_KMeans_Agglom_100_Clusters_Cut_Tsne.json"
 import {Library} from '@observablehq/stdlib';
 
 
@@ -38,8 +36,8 @@ function Treemap(props) {
             const treemap = data => d3.treemap()
                 .tile(tile)
                 (d3.hierarchy(data)
-                .sum(d => Math.sqrt(d.subreddit_count))
-                .sort((a, b) => Math.sqrt(b.subreddit_count) - Math.sqrt(a.subreddit_count)));
+                .sum(d => Math.sqrt(d.comment_count))
+                .sort((a, b) => Math.sqrt(b.comment_count) - Math.sqrt(a.comment_count)));
 
             
             // hierarchy 
@@ -172,15 +170,6 @@ function Treemap(props) {
                             zoomin(d)
                         }
                     });
-            
-                /* node.append("title")
-                    .text((d) => {
-                        if (d.data.node_id.includes("_")) {
-                            return `${node_id(d)}\n${format(d.data.subreddit_count)}`
-                        }
-                        return `${node_id(d)}\n${format(d.data.cluster_subreddit_count)}`
-                    }); */
-            
             
             
                 node.append("rect")

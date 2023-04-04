@@ -1,8 +1,5 @@
 import React from 'react';
 import * as d3 from 'd3';
-import data_4 from "./data/RC_2021-04_KMeans_Agglom_100_Clusters.json"
-import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
-import data_6 from "./data/RC_2021-06_KMeans_Agglom_100_Clusters_Cut_Tsne.json"
 
 import { render } from 'react-dom';
 
@@ -447,7 +444,7 @@ function BubbleMapTranslate(props) {
     function render_nodes_treemap(x, y, size, svg, node, tooltip, change, parent) {
         node["x"] = x
         node["y"] = y
-        node["resized_subreddit_count"] = size
+        node["resized_comment_count"] = size
         if (change == overTimeOptions["add"]) {
             const circle = svg.select(".g_circle")
             .append("circle")
@@ -658,7 +655,7 @@ function BubbleMapTranslate(props) {
                     tsne_y = element.data.y;
                 }
                 
-                const size = element.data.subreddit_count;
+                const size = element.data.comment_count;
 
                 min_x = find_min(min_x, tsne_x)
                 max_x = find_max(max_x, tsne_x)

@@ -1,7 +1,7 @@
 import React from 'react';
 import * as d3 from 'd3';
-import data_4 from "./data/RC_2021-04_KMeans_Agglom_100_Clusters.json"
-import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
+import data_4 from "./data/RC_2021-04_KMeans_Agglom_100_Clusters_Updated_Mapping.json"
+import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Updated_Mapping.json"
 import data_6 from "./data/RC_2021-06_KMeans_Agglom_100_Clusters_Cut_Tsne.json"
 import { sliderBottom } from 'd3-simple-slider';
 
@@ -11,7 +11,7 @@ function Slider(props) {
     const overTimeOptions = {"delete": 0, "add": 1, "transform": 2}
     const width = (props.treemap_width + props.bubblemap_width) 
     const height = Math.max(props.treemap_height, props.bubblemap_height)
-    const times = d3.utcMonth.range(Date.UTC(2021, 4), Date.UTC(2021, 6))
+    const times = d3.utcMonth.range(Date.UTC(2021, 3), Date.UTC(2021, 5))
     const utcFormatter = d3.utcFormat("%Y-%m")
 
     React.useEffect(() => { 
