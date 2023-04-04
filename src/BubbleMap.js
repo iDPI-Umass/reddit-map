@@ -1,8 +1,5 @@
 import React from 'react';
 import * as d3 from 'd3';
-import data_4 from "./data/RC_2021-04_KMeans_Agglom_100_Clusters.json"
-import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
-import data_6 from "./data/RC_2021-06_KMeans_Agglom_100_Clusters_Cut_Tsne.json"
 
 import { render } from 'react-dom';
 
@@ -40,7 +37,12 @@ function BubbleMapTranslate(props) {
     //const months = [2021-04, 2021-05, 2021-06]
     
     // note: might need to make changes later to add more groupings to add interactions with other clusters
-    React.useEffect(() => { 
+    React.useEffect(() => {
+      // TODO: Find a more subtle way to signal that we're waiting for data to update asynchronously.
+      if ( props.curr_data == null ) {
+        return;
+      }
+
         function updateChartBrush(e) {
             // If no selection, back to initial coordinate. Otherwise, update X axis domain
             if (e == null) {

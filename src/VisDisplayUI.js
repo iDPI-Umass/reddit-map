@@ -8,9 +8,8 @@ import BubbleMap from "./BubbleMap";
 import VisPickerUI from './VisPickerUI';
 import Slider from './Slider';
 import data_4 from "./data/RC_2021-04_KMeans_Agglom_100_Clusters.json"
-import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
-import data_6 from "./data/RC_2021-06_KMeans_Agglom_100_Clusters_Cut_Tsne.json"
 import Thumbnail from "react-webpage-thumbnail";
+import { getJSON } from "./data-client";
 
 
 function VisDisplayUI() {
@@ -21,7 +20,8 @@ function VisDisplayUI() {
   const [selected_node_id, setSelectedNodeId] = React.useState("");
   const [stack_of_brushes, setZoomInfo] = React.useState(null)
   const [prev_data, setPrevData] = React.useState(null)
-  const [curr_data, setCurrData] = React.useState(data_5)
+  const [curr_data, setCurrData] = React.useState(data_4);
+  const [ nonce, setNonce ] = React.useState(null);
   const [highlight_label, setHighlightLabel] = React.useState(null)
   const [prev_highlight_label, setPrevHighlightLabel] = React.useState(null)
   const [bubble_map_svg, setBubbleMapSvg] = React.useState(null)
@@ -47,6 +47,24 @@ function VisDisplayUI() {
     console.log("len color dict: ")
   }
 
+  // React.useEffect(() => {
+  //   // TODO: Make this more integrated into the application load flow. We need
+  //   // to visually signal that we're pulling down data into the visualization interface.
+  //   const firstLoad = async function () {
+  //     if ( curr_data != null ) {
+  //       return;
+  //     }
+  //     // Based on the initial value provided to the curr_data useState.
+  //     const path = "RC_2021-04_KMeans_Agglom_100_Clusters.json";
+  //     const data = await getJSON( path );
+  //     console.log( "fetched data" );
+  //     setCurrData( data );
+  //   };
+
+  //   firstLoad();
+  // }, [ nonce ]);
+  
+
   const slider_height = 75
   const treemap_height = window.innerHeight
   const treemap_width = window.innerHeight
@@ -71,7 +89,7 @@ function VisDisplayUI() {
       return images
   }
   const re = new RegExp("dog.png")
-  const thumbnails = importAll(require.context('./data/screenshots_test', false, /dogs\.png/));
+  // const thumbnails = importAll(require.context('./data/screenshots_test', false, /dogs\.png/));
   const arr_of_metadata = importAll(require.context('./data/subreddit_metadata', false, /\.(json)$/));
   let agg_metadata = {}
 

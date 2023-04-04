@@ -1,0 +1,50 @@
+production-www:
+  namespace: redditmap
+  bucket-sync:
+    directory: build
+    bucket: redditmap.social
+  buckets:
+    - name: redditmap.social
+      website:
+        index: index.html
+        error: index.html
+    - name: www.redditmap.social
+      redirect: redditmap.social
+  edge:
+    name: www
+    certificate:
+      verification: redditmap.social
+    origins:
+      - domain: redditmap.social.s3-website-us-east-1.amazonaws.com
+        protocol: http     
+    aliases:
+      - redditmap.social
+      - www.redditmap.social
+    ttl:
+      default: 0
+      min: 0
+      max: 31536000 # 1 year
+
+production-data:
+  namespace: redditmap
+  bucket-sync:
+    directory: data-api
+    bucket: data.redditmap.social
+  buckets:
+    - name: data.redditmap.social
+      website:
+        index: index.html
+        error: index.html
+  edge:
+    name: data
+    certificate:
+      verification: redditmap.social
+    origins:
+      - domain: data.redditmap.social.s3-website-us-east-1.amazonaws.com
+        protocol: http     
+    aliases:
+      - data.redditmap.social
+    ttl:
+      default: 3600
+      min: 0
+      max: 31536000 # 1 year

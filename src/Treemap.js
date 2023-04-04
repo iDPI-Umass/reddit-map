@@ -1,7 +1,5 @@
 import React from 'react';
 import * as d3 from 'd3';
-import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
-import data_6 from "./data/RC_2021-06_KMeans_Agglom_100_Clusters_Cut_Tsne.json"
 import {Library} from '@observablehq/stdlib';
 
 

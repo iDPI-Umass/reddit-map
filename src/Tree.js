@@ -1,6 +1,8 @@
 import React from 'react';
 import * as d3 from 'd3';
-import data from "./data/RC_2021-05_KMeans_Agglom_100_Clusters.json"
+// import data from "./data/RC_2021-05_KMeans_Agglom_100_Clusters.json"
+
+const data = {};
 
 function Tree() {
     const svgRef = React.useRef()
