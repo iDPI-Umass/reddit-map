@@ -1,0 +1,37 @@
+sl-button::part(label) {
+  font-weight: var(--gobo-font-weight-bold);
+  padding: 0 var(--gobo-width-spacer);
+}
+
+sl-button.submit::part(base),
+sl-button.submit:hover::part(base) {
+  background: var(--gobo-color-primary);
+  border: none;
+}
+
+sl-button.submit::part(label),
+sl-button.submit:hover::part(label) {
+  color: var(--gobo-color-primary-text);
+}
+
+sl-button.cancel::part(base),
+sl-button.cancel:hover::part(base) {
+  background: var(--gobo-color-cancel);
+  border: 1px solid var(--gobo-color-cancel-text);
+}
+
+sl-button.cancel::part(label),
+sl-button.cancel:hover::part(label)  {
+  color: var(--gobo-color-cancel-text);
+}
+
+sl-button.action::part(base),
+sl-button.action:hover::part(base) {
+  background: var(--gobo-color-active);
+  border: none;
+}
+
+sl-button.action::part(label),
+sl-button.action:hover::part(label) {
+  color: var(--gobo-color-active-text);
+}

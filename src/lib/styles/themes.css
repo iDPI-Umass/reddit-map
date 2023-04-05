@@ -1,0 +1,88 @@
+/* Default to light mode */
+html {
+  --gobo-color-null: #F0F2F5;
+  --gobo-color-panel: #FFFFFF;
+  --gobo-border-panel: 1px solid #D8DEE6;
+  --gobo-color-border-panel: #D8DEE6;
+  --gobo-color-panel-focus: #F0F2F5;
+  --gobo-border-hr: 1px solid #D8DEE6;
+  --gobo-color-border-hr: #D8DEE6;
+  --gobo-color-primary: #E73F9C;
+  --gobo-color-text: #343434;
+  --gobo-color-text-muted: #67778E;
+  --gobo-color-text-menu: #313751;
+  --gobo-color-link: #3A88E2;
+  --gobo-color-background-badge: #313751;
+  --gobo-color-badge: #FFFFFF;
+  --gobo-color-button-lens: #313751;
+
+  --gobo-color-sl-panel-background: #FBFBFB;
+
+
+  --gobo-color-primary-text: #FFFFFF;
+  --gobo-color-active: #3a88e2;
+  --gobo-color-active-text: #FFFFFF;
+  --gobo-color-cancel: var(--gobo-color-panel);
+  --gobo-color-cancel-text: var(--gobo-color-text);
+  --gobo-color-danger: #D52828;
+}
+
+html.gobo-theme-dark {
+  --gobo-color-null: #454C6C;
+  --gobo-color-panel: #313751;
+  --gobo-color-border-panel: #282D43;
+  --gobo-color-panel-focus: #454C6C;
+  --gobo-border-panel: 1px solid #282D43;
+  --gobo-border-hr: 1px solid #313751;
+  --gobo-color-border-hr: #313751;
+  --gobo-color-primary: #E73F9C;
+  --gobo-color-text: #FFFFFF;
+  --gobo-color-text-muted: #9EACC8;
+  --gobo-color-text-menu: #FFFFFF;
+  --gobo-color-link: #49C3F2;
+  --gobo-color-background-badge: #9EACC8;
+  --gobo-color-badge: #313751;
+  --gobo-color-button-lens: #9EACC8;
+
+
+  --gobo-color-sl-panel-background: #131620;
+}
+
+html.gobo-font-arial {
+  --gobo-font-family: "Arial";
+}
+
+/* Spacings */
+html {
+  --gobo-max-width-primary: 41rem;
+  --gobo-width-spacer: 1.5625rem;
+  --gobo-width-spacer-half: calc(0.5 * var(--gobo-width-spacer));
+  --gobo-height-spacer: 1.3125rem;
+  --gobo-height-spacer-half: calc(0.5 * var(--gobo-height-spacer));
+  --gobo-border-radius: 0.625rem;
+  
+  --gobo-width-spacer-flex: var(--gobo-width-spacer-half);
+  --gobo-height-spacer-flex: var(--gobo-height-spacer-half);
+}
+
+@media( min-width: 750px ) {
+  html {
+    --gobo-width-spacer-flex: var(--gobo-width-spacer);
+    --gobo-height-spacer-flex: var(--gobo-height-spacer);
+  }
+}
+
+
+/* Fonts */
+html {
+  --gobo-font-family: "Roboto";
+  --gobo-font-weight-black: 900;
+  --gobo-font-weight-bold: 700;
+  --gobo-font-weight-medium: 500;
+  --gobo-font-weight-regular: 400; 
+
+  --gobo-font-size-x-large: 1.25rem;
+  --gobo-font-size-large: 1rem;
+  --gobo-font-size-copy: 0.9375rem;
+  --gobo-font-size-detail: 0.875rem;
+}

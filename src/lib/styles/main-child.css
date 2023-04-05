@@ -1,0 +1,42 @@
+/* Baseline styles for the wraper div that makes up a page in some layouts */
+
+.main-child {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  padding: 0 4px 5rem 4px;
+  max-width: var(--gobo-max-width-primary);
+}
+
+@media ( min-width: 750px ) {
+  .main-child {
+    padding: var(--gobo-height-spacer) var(--gobo-width-spacer) 0 var(--gobo-width-spacer);
+  }
+}
+
+.main-child > header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  padding-top: 4px;
+  max-width: var(--gobo-max-width-primary);
+  padding-bottom: 0.25rem;
+  border-bottom: var(--gobo-border-hr);
+  margin-bottom: var(--gobo-height-spacer);
+}
+
+.main-child > header h1 {
+  font-size: var(--gobo-font-size-x-large);
+  font-weight: var(--gobo-font-weight-black);
+  color: var(--gobo-color-text-menu);
+}
+
+.main-child > header sl-icon-button {
+  font-size: 1.25rem;
+}
+
+.main-child > header sl-icon-button::part(base) {
+  color: var(--gobo-color-text-muted);
+}

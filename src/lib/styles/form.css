@@ -1,0 +1,79 @@
+.gobo-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  max-width: var(--gobo-max-width-primary);
+  margin: 0 0 var(--gobo-height-spacer) 0;
+  padding: var(--gobo-height-spacer-flex) var(--gobo-width-spacer-flex);
+  background: var(--gobo-color-panel);
+  border: var(--gobo-border-panel);
+  border-radius: var(--gobo-border-radius);
+}
+
+.gobo-form h1 {
+  font-size: var(--sl-font-size-x-large);
+  margin-bottom: 2rem;
+}
+
+.gobo-form h2 {
+  font-size: var(--sl-font-size-medium);
+  font-weight: var(--sl-font-weight-bold);
+  margin-bottom: 1rem;
+}
+
+.gobo-form > * {
+  margin-bottom: var(--gobo-height-spacer);
+}
+
+.gobo-form > :last-child {
+  margin-bottom: 0;
+}
+
+.gobo-form a {
+  text-decoration: none;
+}
+
+.gobo-form sl-divider {
+  margin-bottom: 1rem;
+}
+
+.gobo-form sl-button {
+  align-self: flex-end;
+}
+
+.gobo-form sl-input::part(base) {
+  border-radius: var(--gobo-border-radius);
+}
+
+.gobo-form sl-select::part(combobox) {
+  font-weight: var(--gobo-font-weight-medium);
+}
+
+.gobo-form sl-divider {
+  --color: var(--gobo-color-border-panel);
+}
+
+.gobo-form sl-radio-group sl-radio:last-child {
+  margin-bottom: 0;
+}
+
+.gobo-form .buttons {
+  width: 100%;
+  margin-top: 2rem;
+  padding-top: var(--gobo-height-spacer);
+  border-top: var(--gobo-border-panel);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  margin-bottom: 0;
+}
+
+/* TODO: We can do better than this once Firefox supports :has by default. */
+.gobo-form .buttons.two-button {
+  justify-content: space-between;
+}
+
+.gobo-form .buttons sl-button {
+  margin-bottom: 0;
+}

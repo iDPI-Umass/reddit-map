@@ -1,0 +1,17 @@
+html {
+  --gobo-color-mastodon: #6364FF;
+  --gobo-color-reddit: #ff4500;
+  --gobo-color-twitter: #1d9bf0;
+}
+
+sl-icon.mastodon {
+  color: var(--gobo-color-mastodon);
+}
+
+sl-icon.reddit {
+  color: var(--gobo-color-reddit);
+}
+
+sl-icon.twitter {
+  color: var(--gobo-color-twitter);
+}

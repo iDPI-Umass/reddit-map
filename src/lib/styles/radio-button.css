@@ -1,0 +1,11 @@
+sl-radio-group > sl-radio-button:first-child::part(base) {
+  border-radius: var(--sl-border-radius-medium), 0, 0, var(--sl-border-radius-medium);
+}
+
+sl-radio-group > sl-radio-button:last-child::part(base) {
+  border-radius: 0, var(--sl-border-radius-medium), var(--sl-border-radius-medium), 0;
+}
+
+sl-radio-group > sl-radio-button::part(base) {
+  border-radius: 0;
+}

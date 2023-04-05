@@ -1,0 +1,108 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+}
+html, body {
+  height: 100vh;
+  background: var(--gobo-color-null);
+  color: var(--gobo-color-text);
+}
+html {
+  background: var(--gobo-color-primary);
+}
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+input, button, textarea, select {
+  font: inherit;
+}
+p, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+}
+#root, #__next {
+  isolation: isolate;
+}
+
+:not(:defined) {
+  visibility: hidden;
+}
+
+body {
+  font-family: var(--gobo-font-family);
+  line-height: var(--sl-line-height-dense);
+  letter-spacing: var(--sl-letter-spacing-normal);
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  -moz-font-feature-settings: "kern" 1; 
+  -ms-font-feature-settings: "kern" 1; 
+  -o-font-feature-settings: "kern" 1; 
+  -webkit-font-feature-settings: "kern" 1; 
+  font-feature-settings: "kern" 1;
+  font-kerning: normal;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  font-weight: var(--gobo-font-weight-black);
+}
+
+h1 {
+  font-size: var(--gobo-font-size-x-large);
+}
+h2, h3, h4, h5, h6 {
+  font-size: var(--gobo-font-size-large);
+}
+
+p {
+  font-size: var(--gobo-font-size-copy);
+  overflow-wrap: anywhere;
+}
+
+a, a:hover, a:visited {
+  display: inline-block;
+  text-decoration: underline;
+  font-weight: var(--sl-font-weight-normal);
+  color: var(--gobo-color-link);
+}
+
+p > a, p > a:hover, p > a:visited {
+  display: inline;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--gobo-color-primary);
+  border-radius: var(--sl-border-radius-medium);
+}
+
+@supports not selector(:focus-visible) {
+  a:focus {
+    outline: 2px solid var(--gobo-color-primary);
+    border-radius: var(--sl-border-radius-medium);
+  }
+}
+
+p > a:focus-visible {
+  outline: 2px solid var(--gobo-color-primary);
+  border-radius: var(--sl-border-radius-medium);
+}
+
+@supports not selector(:focus-visible) {
+  p > a:focus {
+    outline: 2px solid var(--gobo-color-primary);
+    border-radius: var(--sl-border-radius-medium);
+  }
+}
+
+.page-wrapper {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+
+.hidden {
+  display: none;
+}

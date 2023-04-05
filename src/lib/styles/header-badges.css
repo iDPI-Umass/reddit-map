@@ -1,0 +1,68 @@
+ /* .viewheader {
+    margin: var(--gobo-height-spacer) 0;
+    max-width: var(--gobo-max-width-primary);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+  }
+
+  .viewheader sl-button::part(base) {
+    height: 2.1875rem;
+    background-color: var(--gobo-color-panel);
+    border: var(--gobo-border-panel);
+    color: var(--gobo-color-button-lens);
+  }
+
+  .viewheader sl-button::part(label) {
+    font-size: var(--gobo-font-size-detail);
+    font-weight: var(--gobo-font-weight-medium);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .viewheader > .identities-button {
+    margin-right: 1rem;
+  }
+
+  
+  .viewheader .identities-button sl-icon {
+    width: 1.25rem;
+  }
+
+  .viewheader .lenses-button sl-icon {
+    width: 0.75rem;
+  }
+
+  .viewheader sl-button sl-badge {
+    translate: 30% -30%;
+    border-radius: var(--sl-border-radius-pill);
+  }
+
+  .viewheader sl-button sl-badge::part(base) {
+    background-color: var(--gobo-color-background-badge);
+    color: var(--gobo-color-badge);
+    border: none;
+  } */
+
+
+
+
+  /* <!-- <div class="viewheader">
+  <sl-button
+    class="identities-button"
+    pill>
+    Identities
+    <sl-icon slot="prefix" src="/icons/identities.svg"></sl-icon>
+    <sl-badge pill>3</sl-badge>
+  </sl-button>
+
+  <sl-button
+    class="lenses-button"
+    pill>
+    Lenses
+    <sl-icon slot="prefix" src="/icons/filter.svg"></sl-icon>
+    <sl-badge pill>3</sl-badge>
+  </sl-button>
+</div> --> */
