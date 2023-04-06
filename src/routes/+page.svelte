@@ -1,9 +1,9 @@
 <script>
-  import TreeMap from "$lib/components/TreeMap.svelte";
-  import BubbleMap from "$lib/components/BubbleMap.svelte";
+  import Treemap from "$lib/components/Treemap.svelte";
+  import Bubblemap from "$lib/components/Bubblemap.svelte";
   import { sourceStore } from "../lib/stores/source";
 
-  sourceStore.pull( "2021-04" );
+  sourceStore.push( "2021-04" );
 
 </script>
 
@@ -13,12 +13,11 @@
 
 <main>
   <section class="left">
-    <TreeMap></TreeMap>
+    <Treemap></Treemap>
   </section>
 
   <section class="right">
-    <svg></svg>
-    <!-- <BubbleMap></BubbleMap> -->
+    <Bubblemap></Bubblemap>
     <svg></svg>
   </section>
   

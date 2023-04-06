@@ -20,7 +20,7 @@ const createStore = function () {
 
   return {
     subscribe,
-    resize: function () {
+    push: function () {
       debouncedUpdate();
     }
   };

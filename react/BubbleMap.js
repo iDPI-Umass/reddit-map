@@ -370,6 +370,9 @@ function BubbleMapTranslate(props) {
         
         
     }, [props.node_render, props.labels]);
+
+
+    
     function append_data(data, prev_nodes, prev_arr_of_tsne_boundaries, svg, tooltip, dict_of_subreddits_to_change) {
         /* if (!svg.selectAll("circle").empty()) {
             svg.selectAll("circle").style("opacity", .25).style("stroke-opacity", 0)

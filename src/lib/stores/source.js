@@ -8,7 +8,7 @@ const createStore = function () {
 
   return {
     subscribe,
-    pull: async function ( name ) {
+    push: async function ( name ) {
       const value = await Cluster.get( name );
       update( function () {
         return value;

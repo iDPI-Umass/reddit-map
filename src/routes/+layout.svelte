@@ -27,7 +27,7 @@
     
     beforeUpdate( function() {
       window.addEventListener( "resize", function () {
-        resizeStore.resize();
+        resizeStore.push();
       });
 
       unsubscribeTheme = themeStore.subscribe( function ( config ) {
