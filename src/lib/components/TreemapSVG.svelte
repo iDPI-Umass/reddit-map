@@ -3,9 +3,9 @@
   import { onDestroy, onMount } from "svelte";
   import { sourceStore } from "$lib/stores/source.js";
   import { resizeStore } from "$lib/stores/resize.js";
-  import TreemapEngine from "$lib/helpers/treemap/index.js";
+  import * as Treemap from "$lib/helpers/treemap-svg/index.js";
 
-  let treemap, frame, engine;
+  let treemap, frame;
   let source, unsubscribeSource;
   let unsubscribeResize;
   let hidden = true;
@@ -14,15 +14,12 @@
     if ( source == null ) {
         return;
     }
-    engine.size( frame );
-    engine.loadData( source );
-    engine.render();
+    Treemap.prepare( treemap, frame );
+    Treemap.render( source );
     hidden = false;
   };
   
   onMount(() => {
-    engine = TreemapEngine.create({ canvas: treemap });
-
     unsubscribeSource = sourceStore.subscribe( function ( _source ) {
       source = _source;
       render();
@@ -50,10 +47,10 @@
     <Spinner></Spinner>
   {/if}
 
-  <canvas 
+  <svg 
     bind:this={treemap}
     class:hidden="{hidden === true}">
-  </canvas>
+  </svg>
 </div>
 
 
