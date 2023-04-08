@@ -1,9 +1,10 @@
 import * as d3 from "d3";
 import * as h from "./helpers";
-import { animate, easeIn } from "popmotion";
+import { animate, cubicBezier } from "popmotion";
 import { Library } from "@observablehq/stdlib";
 
 const library = new Library();
+const ease = cubicBezier( 0.42, 0.0, 0.58, 1.0 );
 
 
 class TreemapEngine {
@@ -242,7 +243,7 @@ class TreemapEngine {
       from: 0,
       to: 1,
       duration: 650,
-      ease: easeIn,
+      ease: ease,
       onUpdate: ratio => {
         const x0 = start.x0 + ( ratio * dx0 );
         const x1 = start.x1 + ( ratio * dx1 );
@@ -314,7 +315,7 @@ class TreemapEngine {
       from: 0,
       to: 1,
       duration: 650,
-      ease: easeIn,
+      ease: ease,
       onUpdate: ratio => {
         const x0 = start.x0 + ( ratio * dx0 );
         const x1 = start.x1 + ( ratio * dx1 );
