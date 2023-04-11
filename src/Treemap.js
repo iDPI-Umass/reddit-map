@@ -71,6 +71,8 @@ function Treemap(props) {
 
             svg.selectAll("g").remove();
 
+            console.log("treemap data: ", treemap_data)
+
             let group = svg.append("g")
                 .call(render, treemap_data);
 
@@ -186,6 +188,7 @@ function Treemap(props) {
                 node.append("rect")
                     .attr("id", d => (d.leafUid = library.DOM.uid("leaf")).id)
                     .attr("fill", (d) => {
+                        console.log(d.data.node_id)
                         if (d.data.taxonomy_label.length === 0) {
                             return "white"
                         }

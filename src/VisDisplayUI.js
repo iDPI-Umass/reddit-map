@@ -590,43 +590,43 @@ function VisDisplayUI() {
 
                     
 
-                    <Treemap initial_bubble_map_render={initial_bubble_map_render} 
-                    prev_data={prev_data} curr_data={curr_data} setLabels={setLabels} 
-                    setSelectedNodes={setSelectedNodes} setIsSelected={setIsSelected} 
-                    setSelectedNodeId={setSelectedNodeId} width={treemap_width} 
-                    height={treemap_height} setHighlightLabel={setHighlightLabel}
-                    all_node_id_to_nodes={all_node_id_to_nodes}
-                    setHandleTooltipEvent={setHandleTooltipEvent}
-                    setHandleTooltipNode={setHandleTooltipNode}
-                    setTooltipIsMouseEnter={setTooltipIsMouseEnter}
-                    setTreemapSvg={setTreemapSvg}
-                    treemap_svg={treemap_svg}
-                    rerender_treemap={rerender_treemap}
-                    setParentLabel={setParentLabel}/>
+          <Treemap initial_bubble_map_render={initial_bubble_map_render} 
+          prev_data={prev_data} curr_data={curr_data} setLabels={setLabels} 
+          setSelectedNodes={setSelectedNodes} setIsSelected={setIsSelected} 
+          setSelectedNodeId={setSelectedNodeId} width={treemap_width} 
+          height={treemap_height} setHighlightLabel={setHighlightLabel}
+          all_node_id_to_nodes={all_node_id_to_nodes}
+          setHandleTooltipEvent={setHandleTooltipEvent}
+          setHandleTooltipNode={setHandleTooltipNode}
+          setTooltipIsMouseEnter={setTooltipIsMouseEnter}
+          setTreemapSvg={setTreemapSvg}
+          treemap_svg={treemap_svg}
+          rerender_treemap={rerender_treemap}
+          setParentLabel={setParentLabel}/>
 
 
-                    <BubbleMapTranslate prev_data={prev_data} curr_data={curr_data} 
-                    initial_bubble_map_render={initial_bubble_map_render} setInitialBubbleMapRender={setInitialBubbleMapRender} 
-                    setNodeRender={setNodeRender} node_render={node_render} 
-                    tsne_remapped={tsne_remapped} setTsneRemapped={setTsneRemapped}
-                    width={bubblemap_width} height={bubblemap_height} 
-                    labels={labels}
-                    setZoomInfo={setZoomInfo} zoom_info={stack_of_brushes}
-                    treemap_width={treemap_width}
-                    setAllNodeIdToNodes={setAllNodeIdToNodes}
-                    resize={resize} setResize={setResize}
-                    setBubbleMapSvg={setBubbleMapSvg}
-                    parent_label={parent_label}
-                    setCurrNodeIdToNodes={setCurrNodeIdToNodes}/>
+          <BubbleMap prev_data={prev_data} curr_data={curr_data} 
+          initial_bubble_map_render={initial_bubble_map_render} setInitialBubbleMapRender={setInitialBubbleMapRender} 
+          setNodeRender={setNodeRender} node_render={node_render} 
+          tsne_remapped={tsne_remapped} setTsneRemapped={setTsneRemapped}
+          width={bubblemap_width} height={bubblemap_height} 
+          labels={labels}
+          setZoomInfo={setZoomInfo} zoom_info={stack_of_brushes}
+          treemap_width={treemap_width}
+          setAllNodeIdToNodes={setAllNodeIdToNodes}
+          resize={resize} setResize={setResize}
+          setBubbleMapSvg={setBubbleMapSvg}
+          parent_label={parent_label}
+          setCurrNodeIdToNodes={setCurrNodeIdToNodes}/>
 
-                    <Slider setRerenderTreemap={setRerenderTreemap} 
-                    rerender_treemap={rerender_treemap} setNodeRender={setNodeRender} 
-                    setPrevData={setPrevData} setCurrData={setCurrData} curr_data={curr_data} prev_data={prev_data}
-                    treemap_width={treemap_width} treemap_height={treemap_height} 
-                    bubblemap_width={bubblemap_width} bubblemap_height={bubblemap_height}
-                    move_slider={move_slider}
-                    slider_height={slider_height}
-                    setTriggerTransition={setTriggerTransition}></Slider>
+          <Slider setRerenderTreemap={setRerenderTreemap} 
+          rerender_treemap={rerender_treemap} setNodeRender={setNodeRender} 
+          setPrevData={setPrevData} setCurrData={setCurrData} curr_data={curr_data} prev_data={prev_data}
+          treemap_width={treemap_width} treemap_height={treemap_height} 
+          bubblemap_width={bubblemap_width} bubblemap_height={bubblemap_height}
+          move_slider={move_slider}
+          slider_height={slider_height}
+          setTriggerTransition={setTriggerTransition}></Slider>
 
                     
 

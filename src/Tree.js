@@ -1,11 +1,11 @@
 import React from 'react';
 import * as d3 from 'd3';
-import data from "./data/RC_2021-05_KMeans_Agglom_100_Clusters.json"
+import data from "./data/RC_2021-04_KMeans_Agglom_100_Clusters_Updated_Mapping.json"
 
 function Tree() {
     const svgRef = React.useRef()
-    const width = 1500
-    var height = 800
+    const width = window.innerWidth + 7000
+    let height = window.innerHeight
     const padding = 35;
 
     React.useEffect(() => {
@@ -90,7 +90,10 @@ function Tree() {
             .attr("paint-order", "stroke")
             .attr("stroke", halo)
             .attr("stroke-width", haloWidth)
-            .text((d, i) => L[i]);
+            .text((d, i) => {
+                console.log(L[i], d)
+                return L[i]
+            });
 
 
 
