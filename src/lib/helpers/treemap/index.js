@@ -19,9 +19,9 @@ class TreemapEngine {
   }
 
   size ( frame ) {
-    this.parentHeight = 30;
-    this.width = frame.clientWidth;
-    this.height = frame.clientHeight;
+    this.parentHeight = 30 * 2;
+    this.width = frame.clientWidth * 2;
+    this.height = frame.clientHeight * 2;
 
     this.resetScale();
   
@@ -101,17 +101,17 @@ class TreemapEngine {
     const x1 = this.scaleX( 1 );
     const y0 = 0;
     const y1 = this.parentHeight;
-    const tx = 2;
-    const ty = 14;
+    const tx = 4;   // 2 * 2
+    const ty = 28;  // 14 * 2
 
     this.context.fillStyle = fill;
     this.context.fillRect( x0, y0, x1, y1 );
 
-    this.context.lineWidth = "1px";
+    this.context.lineWidth = "2px";
     this.context.strokeStyle = border;
     this.context.strokeRect( x0, y0, x1, y1 );
 
-    this.context.font = "12px Roboto";
+    this.context.font = "24px Roboto";
     this.context.fontKerning = "normal";
     this.context.fillStyle = h.chooseFontColor( fill );
     this.context.fillText( label, tx, ty, this.width );
@@ -145,8 +145,8 @@ class TreemapEngine {
     const y0 = this.scaleY( leaf.y0 );
 
     const width = x1 - x0;
-    const tx = x0 + 2;
-    const ty = y0 + 14;
+    const tx = x0 + 4;  // 2 * 2
+    const ty = y0 + 28; // 14 * 2
 
     this.context.fillStyle = h.chooseFontColor( fill );
     this.context.fillText( label, tx, ty, width );
@@ -154,9 +154,9 @@ class TreemapEngine {
 
   drawLeaves () {
     const border = "#FFFFFF";
-    this.context.lineWidth = "1px";
+    this.context.lineWidth = "2px";
     this.context.strokeStyle = border;
-    this.context.font = "12px Roboto";
+    this.context.font = "24px Roboto";
     this.context.fontKerning = "normal";
 
     for ( const leaf of this.view ) {
@@ -176,15 +176,15 @@ class TreemapEngine {
 
   
   findNode ( event ) {
-    if ( event.offsetY <= this.parentHeight ) {
+    if ( event.offsetY <= (this.parentHeight / 2) ) {
       return { 
         isParent: true,
         node: this.parent
       };
     }
 
-    const x = this.scaleX.invert( event.offsetX );
-    const y = this.scaleY.invert( event.offsetY );
+    const x = this.scaleX.invert( event.offsetX * 2 );
+    const y = this.scaleY.invert( event.offsetY * 2 );
 
     const node = this.view.find( function ( node ) {
       return ( node.x0 <= x ) && 
