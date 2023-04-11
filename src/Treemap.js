@@ -1,7 +1,5 @@
 import React from 'react';
 import * as d3 from 'd3';
-import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
-import data_6 from "./data/RC_2021-06_KMeans_Agglom_100_Clusters_Cut_Tsne.json"
 import {Library} from '@observablehq/stdlib';
 
 
@@ -38,13 +36,13 @@ function Treemap(props) {
             const treemap = data => d3.treemap()
                 .tile(tile)
                 (d3.hierarchy(data)
-                .sum(d => Math.sqrt(d.subreddit_count))
-                .sort((a, b) => Math.sqrt(b.subreddit_count) - Math.sqrt(a.subreddit_count)));
+                .sum(d => Math.sqrt(d.comment_count))
+                .sort((a, b) => Math.sqrt(b.comment_count) - Math.sqrt(a.comment_count)));
 
             
             // hierarchy 
-            console.log("tree data: ", props.curr_data)
             const treemap_data = treemap(props.curr_data)
+            props.setRoot(treemap_data)
             
             const svg = d3.select(svgRef.current)
                 .attr("x", 25)
@@ -71,7 +69,6 @@ function Treemap(props) {
 
             svg.selectAll("g").remove();
 
-            console.log("treemap data: ", treemap_data)
 
             let group = svg.append("g")
                 .call(render, treemap_data);
@@ -178,9 +175,9 @@ function Treemap(props) {
                 /* node.append("title")
                     .text((d) => {
                         if (d.data.node_id.includes("_")) {
-                            return `${node_id(d)}\n${format(d.data.subreddit_count)}`
+                            return `${node_id(d)}\n${format(d.data.comment_count)}`
                         }
-                        return `${node_id(d)}\n${format(d.data.cluster_subreddit_count)}`
+                        return `${node_id(d)}\n${format(d.data.comment_count)}`
                     }); */
             
             
@@ -188,9 +185,11 @@ function Treemap(props) {
                 node.append("rect")
                     .attr("id", d => (d.leafUid = library.DOM.uid("leaf")).id)
                     .attr("fill", (d) => {
-                        console.log(d.data.node_id)
                         if (d.data.taxonomy_label.length === 0) {
                             return "white"
+                        }
+                        if (parseInt(d.data.level) > 1) {
+                            return "#808080"
                         }
                         return d.data.color
                         /* if(d === root) {
@@ -207,6 +206,12 @@ function Treemap(props) {
                     })
                     .attr("opacity", 0.5)
                     .attr("stroke", "#fff")
+                    .on("click", (event, d) => {
+                        if (d.data.node_id.includes("_")) {
+                            window.open("https://www.reddit.com/r/" + d.data.subreddit + "/", "_blank")
+                        }
+                        
+                    })
                     
 
                     
@@ -222,12 +227,12 @@ function Treemap(props) {
                     })
                     .attr("class", "taxonomy_label_text")
                     .attr("clip-path", d => d.clipUid)
-                    .attr("font-weight", d => d === root ? "bold" : null)
                     .selectAll("tspan")
                     .data(d => (d.data.hasOwnProperty("children") ? d.data.taxonomy_label : d.data.subreddit).split(/(?=[A-Z][^A-Z])/g))
                     .join("tspan")
                     .attr("x", 3)
                     .attr("y", (d, i, nodes) => `${(i === nodes.length - 1) * 0.3 + 1.1 + i * 0.9}em`)
+                    .attr("font-size", "1.5em")
                     //.attr("fill-opacity", (d, i, nodes) => i === nodes.length - 1 ? 0.7 : null)
                     .attr("font-weight", (d, i, nodes) => i === nodes.length - 1 ? "normal" : null)
                     .text(d => d)

@@ -4,13 +4,11 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Tree from "./Tree"
 import Treemap from './Treemap';
-import BubbleMapTranslate from "./BubbleMapTranslate";
 import BubbleMap from "./BubbleMap";
 import VisPickerUI from './VisPickerUI';
 import Slider from './Slider';
-import data_4 from "./data/RC_2021-04_KMeans_Agglom_100_Clusters.json"
-import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
-import data_6 from "./data/RC_2021-06_KMeans_Agglom_100_Clusters_Cut_Tsne.json"
+import data_4 from "./data/RC_2021-04_KMeans_Agglom_100_Clusters_Updated_Mapping.json"
+import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Updated_Mapping.json"
 import Thumbnail from "react-webpage-thumbnail";
 
 
@@ -22,7 +20,7 @@ function VisDisplayUI() {
   const [selected_node_id, setSelectedNodeId] = React.useState("");
   const [stack_of_brushes, setZoomInfo] = React.useState(null)
   const [prev_data, setPrevData] = React.useState(null)
-  const [curr_data, setCurrData] = React.useState(data_5)
+  const [curr_data, setCurrData] = React.useState(data_4)
   const [highlight_label, setHighlightLabel] = React.useState(null)
   const [prev_highlight_label, setPrevHighlightLabel] = React.useState(null)
   const [bubble_map_svg, setBubbleMapSvg] = React.useState(null)
@@ -35,6 +33,7 @@ function VisDisplayUI() {
   const [set_highlight_label_subreddit, setHighlightLabelSubreddit] = React.useState(null)
   const [set_highlight_label_cluster, setHighlightLabelCluster] = React.useState(null)
   const [handle_tooltip_event, setHandleTooltipEvent] = React.useState(null)
+  const [root, setRoot] = React.useState(null)
   const [handle_tooltip_node, setHandleTooltipNode] = React.useState(null)
   const [tooltip_is_mouse_enter, setTooltipIsMouseEnter] = React.useState(null)
   const [rerender_treemap, setRerenderTreemap] = React.useState(false)
@@ -44,9 +43,6 @@ function VisDisplayUI() {
   const [parent_label, setParentLabel] = React.useState(null)
   const [color_dict, setColorDict] = React.useState({})
   const [trigger_transition, setTriggerTransition] = React.useState(null)
-  if (color_dict.length == 0) {
-    console.log("len color dict: ")
-  }
 
   const slider_height = 75
   const treemap_height = window.innerHeight
@@ -82,16 +78,11 @@ function VisDisplayUI() {
       })
   })
 
-  //console.log(thumbnails)
-  //console.log(thumbnails.keys())
-
-  //console.log("thumbnails: ", thumbnails)
 
 
   if (trigger_transition != null) {
     if (JSON.stringify(curr_data) != JSON.stringify(trigger_transition)) {
       setPrevData(curr_data)
-      console.log("WHAT IS PREV NOW: ", prev_data)
       setCurrData(trigger_transition)
       setRerenderTreemap(!rerender_treemap)
       setNodeRender(false)
@@ -109,6 +100,7 @@ function VisDisplayUI() {
           text_tooltip = treemap_svg.append("text")
               .attr("id", prefix + "text_tooltip")
               .attr("class", "tooltip_class")
+              .attr("font-size", "1.3em")
           tspan_node_id = text_tooltip.append("tspan")
               .attr("id", prefix + "tspan_node_id")
               .attr("class", "tooltip_class")
@@ -208,13 +200,13 @@ function VisDisplayUI() {
 
       let top_index = 1
       let arr_of_top_subreddit_label_to_index = {}
-      node.data.top_subreddit_labels.split(",").forEach((label) => {
+      node.data.top_subreddits_by_comment.split(",").forEach((label) => {
         arr_of_top_subreddit_label_to_index[label] = top_index
         top_index += 1
       })
       tspan_top_subreddits
           .selectAll("tspan")
-          .data(["Top subreddits based on number of comments: "].concat(node.data.top_subreddit_labels.split(",")))
+          .data(["Top subreddits based on number of comments: "].concat(node.data.top_subreddits_by_comment.split(",")))
           .join("tspan")
           .attr("x", x)
           .attr("y", y)
@@ -323,17 +315,20 @@ function VisDisplayUI() {
   }
   
 
-  function handleTooltip(event, d, isMouseEnter) {
+  function handleTooltip(event, d, root, isMouseEnter) {
     
     let get_count = () => {
-        if (d.data.node_id.includes("_")) {
-            return `Number of comments: ${format(d.data.subreddit_count)}`
-        }
-        return `Number of comments: ${format(d.data.cluster_subreddit_count)}`
+      if (d.data.node_id.includes("_")) {
+        return `Number of comments: ${format(d.data.comment_count)}, Percentage of Cluster: ${(d.data.comment_count/parseInt(d.parent.data.comment_count) * 100).toFixed(2) + '%'}`
+      }
+      else {
+        return `Number of comments: ${format(d.data.comment_count)}, 
+        Percentage of Reddit: ${(d.data.comment_count/parseInt(root.data.comment_count) * 100).toFixed(2) + '%'}`
+      }
+      
     }
     let description = ""
     if (d.data.subreddit in agg_metadata) {
-        //console.log(d.data.subreddit, agg_metadata[d.data.subreddit])
         if ("about" in agg_metadata[d.data.subreddit] && "description" in agg_metadata[d.data.subreddit]["about"]) {
             description = agg_metadata[d.data.subreddit]["about"]["description"]
         }
@@ -372,15 +367,28 @@ function VisDisplayUI() {
     }
     
     // TODO: FIX THIS
-    /* if (treemap_height - pointer_y < boundingBox.height) {
-      treemap_svg.selectAll(".tooltip_class").attr("y", pointer_y - boundingBox.height)
+    if (d.data.node_id.includes("_") && treemap_height - pointer_y < boundingBox.height + boundingBox.width) {
+      console.log("DDDDDDDD")
+      treemap_svg.selectAll(".tooltip_class").attr("y", pointer_y - boundingBox.height - 300)
+      treemap_svg.selectAll(".tooltip_image_class").attr("y", pointer_y - 280)
+    }
+
+    if (!d.data.node_id.includes("_") && treemap_height - pointer_y < boundingBox.height) {
+      console.log("y ", pointer_y - boundingBox.height)
+      treemap_svg.selectAll(".tooltip_class").attr("y", pointer_y - boundingBox.height - 50)
+      treemap_svg.selectAll(".tooltip_image_class").attr("y", pointer_y - boundingBox.height - 44)
+
     }
     if (treemap_width - (pointer_x + boundingBox.width) < 0) {
+      console.log("x ", pointer_x - boundingBox.width - 10)
       treemap_svg.selectAll(".tooltip_class").attr("x", pointer_x - boundingBox.width - 10)
+      treemap_svg.selectAll(".tooltip_image_class").attr("x", pointer_x - boundingBox.width + 2)
     }
     if (pointer_x - boundingBox.width < 0) {
       treemap_svg.selectAll(".tooltip_class").attr("x", -5)
-    } */
+      //treemap_svg.selectAll(".tooltip_class").attr("y", pointer_y - 10)
+      treemap_svg.selectAll(".tooltip_image_class").attr("x", 8)
+    } 
    
     boundingBox = treemap_svg.select(".tooltip_class").node().getBBox()
 
@@ -405,8 +413,6 @@ function VisDisplayUI() {
     
   }
   
- 
-
   function setSelectedNodes(node) {
     if (node.data.clicked) {
       selected_nodes[node.data.node_id] = node
@@ -429,18 +435,15 @@ function VisDisplayUI() {
 
   if (handle_tooltip_event != null) {
     treemap_svg.append("g").attr("id", "g_rect_tooltip")
-    handleTooltip(handle_tooltip_event, handle_tooltip_node, tooltip_is_mouse_enter)
+    handleTooltip(handle_tooltip_event, handle_tooltip_node, root, tooltip_is_mouse_enter)
   }
 
   function highlightNodes(highlight_label_cluster, highlight_node, highlight_label_subreddit, color_dict) {
-    //console.log("WOOOHOOOOOOOOOOOOOOOO")
     setPrevHighlightLabel(highlight_label)
     if (highlight_label.data.node_id.includes("_")) {
-      //console.log("WOOOHOOOOOO with underscore")
       highlight_label_cluster = highlight_label.data.node_id.split("_")[0]
       setHighlightLabelCluster(highlight_label_cluster)
       if (highlight_label_cluster in all_node_id_to_nodes) {
-        //console.log("we innnn")
         highlight_node = all_node_id_to_nodes[highlight_label_cluster][highlight_label.data.subreddit]["selection"]
         if (!(highlight_label_cluster in color_dict)) {
           color_dict[highlight_label_cluster] = highlight_node.attr('fill')
@@ -455,23 +458,18 @@ function VisDisplayUI() {
       
     }
     else {
-      //console.log("WOOOHOOOOOO with NOOOO underscore")
       highlight_label_subreddit = null
       highlight_label_cluster = highlight_label.data.node_id
       setHighlightLabelCluster(highlight_label_cluster)
       
       if (highlight_label_cluster in 
         all_node_id_to_nodes) {
-        //console.log("we in!")
         let highlight_nodes = all_node_id_to_nodes[highlight_label_cluster]
-        //console.log("highlight_nodesssssssss: ", highlight_nodes)
         Object.keys(highlight_nodes).forEach(function(subreddit) {
           highlight_node = highlight_nodes[subreddit]["selection"]
           if (!(subreddit in color_dict)) {
             color_dict[subreddit] = highlight_node.attr('fill')
           }
-          /* console.log("highlight_label_cluster and highlight node: ", subreddit, highlight_node)
-          console.log(color_dict) */
           highlight_node.attr('fill', () => {
             return "yellow"});
         })
@@ -486,15 +484,9 @@ function VisDisplayUI() {
 
   function dehighlightNodes(color_dict) {
     setPrevHighlightLabel(highlight_label)
-    /* console.log("NAAAAAAAAAH")
-    console.log("highlight_label_subreddit: ", set_highlight_label_subreddit)
-    console.log("highlight_label_cluster: ", set_highlight_label_cluster) */
     if (set_highlight_label_subreddit == null) {
-      //console.log("all_node_id_to_nodes[set_highlight_label_cluster]: ", all_node_id_to_nodes[set_highlight_label_cluster])
       Object.keys(all_node_id_to_nodes[set_highlight_label_cluster]).forEach(function(subreddit) {
-        //console.log("node_id_to_nodes[set_highlight_label_cluster][subreddit]: ", all_node_id_to_nodes[set_highlight_label_cluster][subreddit])
         all_node_id_to_nodes[set_highlight_label_cluster][subreddit]["selection"].attr('fill', () => {
-          //console.log("all_node_id_to_nodes[set_highlight_label_cluster][subreddit][color]: ", all_node_id_to_nodes[set_highlight_label_cluster][subreddit])
           if (!(set_highlight_label_cluster in curr_node_id_to_nodes)) {
             return "#808080"
           }
@@ -516,10 +508,6 @@ function VisDisplayUI() {
   let highlight_node = null
   let highlight_label_subreddit = null
 
-  //console.log("all_node_id_to_nodes: ", all_node_id_to_nodes)
-  //console.log("highlight_label: ", highlight_label)
-
-  //console.log("prev highlight label: ", prev_highlight_label, highlight_label, is_highlighted)
   if (Object.keys(all_node_id_to_nodes).length > 0 && highlight_label != null && (!is_highlighted || prev_highlight_label != highlight_label)) {
     if (prev_highlight_label != null && prev_highlight_label != highlight_label) {
       dehighlightNodes(color_dict)
@@ -546,7 +534,6 @@ function VisDisplayUI() {
   /* let is_treemap_resized = false
   let is_bubble_map_resized = false
   if (resize != null && bubble_map_svg != null && treemap_svg != null) {
-    console.log("resize: ", resize)
     if (resize == 0 && is_bubble_map_increased) {
       bubble_map_svg
         .transition()
@@ -602,7 +589,8 @@ function VisDisplayUI() {
           setTreemapSvg={setTreemapSvg}
           treemap_svg={treemap_svg}
           rerender_treemap={rerender_treemap}
-          setParentLabel={setParentLabel}/>
+          setParentLabel={setParentLabel}
+          setRoot={setRoot}/>
 
 
           <BubbleMap prev_data={prev_data} curr_data={curr_data} 
