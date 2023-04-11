@@ -228,7 +228,7 @@ function Treemap(props) {
                     .attr("class", "taxonomy_label_text")
                     .attr("clip-path", d => d.clipUid)
                     .selectAll("tspan")
-                    .data(d => (d.data.hasOwnProperty("children") ? d.data.taxonomy_label : d.data.subreddit).split(/(?=[A-Z][^A-Z])/g))
+                    .data(d => (d.data.hasOwnProperty("children") ? d.data.taxonomy_label : d.data.subreddit).split(" "))
                     .join("tspan")
                     .attr("x", 3)
                     .attr("y", (d, i, nodes) => `${(i === nodes.length - 1) * 0.3 + 1.1 + i * 0.9}em`)
