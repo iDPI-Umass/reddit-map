@@ -11,7 +11,6 @@ import data_4 from "./data/RC_2021-04_KMeans_Agglom_100_Clusters_Updated_Mapping
 import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Updated_Mapping.json"
 import Thumbnail from "react-webpage-thumbnail";
 
-
 function VisDisplayUI() {
 
   const [labels, setLabels] = React.useState(null);
@@ -43,6 +42,11 @@ function VisDisplayUI() {
   const [parent_label, setParentLabel] = React.useState(null)
   const [color_dict, setColorDict] = React.useState({})
   const [trigger_transition, setTriggerTransition] = React.useState(null)
+  const [min_x, setMinX] = React.useState(null)
+  const [min_y, setMinY] = React.useState(null)
+  const [max_x, setMaxX] = React.useState(null)
+  const [max_y, setMaxY] = React.useState(null)
+
 
   const slider_height = 75
   const treemap_height = window.innerHeight
@@ -368,19 +372,16 @@ function VisDisplayUI() {
     
     // TODO: FIX THIS
     if (d.data.node_id.includes("_") && treemap_height - pointer_y < boundingBox.height + boundingBox.width) {
-      console.log("DDDDDDDD")
       treemap_svg.selectAll(".tooltip_class").attr("y", pointer_y - boundingBox.height - 300)
       treemap_svg.selectAll(".tooltip_image_class").attr("y", pointer_y - 280)
     }
 
     if (!d.data.node_id.includes("_") && treemap_height - pointer_y < boundingBox.height) {
-      console.log("y ", pointer_y - boundingBox.height)
       treemap_svg.selectAll(".tooltip_class").attr("y", pointer_y - boundingBox.height - 50)
       treemap_svg.selectAll(".tooltip_image_class").attr("y", pointer_y - boundingBox.height - 44)
 
     }
     if (treemap_width - (pointer_x + boundingBox.width) < 0) {
-      console.log("x ", pointer_x - boundingBox.width - 10)
       treemap_svg.selectAll(".tooltip_class").attr("x", pointer_x - boundingBox.width - 10)
       treemap_svg.selectAll(".tooltip_image_class").attr("x", pointer_x - boundingBox.width + 2)
     }
@@ -504,7 +505,7 @@ function VisDisplayUI() {
     
   }
 
-  /* let highlight_label_cluster = null
+  let highlight_label_cluster = null
   let highlight_node = null
   let highlight_label_subreddit = null
 
@@ -518,7 +519,7 @@ function VisDisplayUI() {
 
   if (Object.keys(all_node_id_to_nodes).length > 0 && highlight_label == null && is_highlighted) {
     dehighlightNodes(color_dict)
-  } */
+  } 
 
   /* if (curr_node_id_to_nodes != null) {
     Object.keys(curr_node_id_to_nodes).forEach(function(node_id) {
@@ -571,7 +572,7 @@ function VisDisplayUI() {
     }
   } */
 
-
+  console.log("min x: ", min_x, max_x, min_y, max_y)
     return (
         <React.Fragment>
 
@@ -605,7 +606,11 @@ function VisDisplayUI() {
           resize={resize} setResize={setResize}
           setBubbleMapSvg={setBubbleMapSvg}
           parent_label={parent_label}
-          setCurrNodeIdToNodes={setCurrNodeIdToNodes}/>
+          setCurrNodeIdToNodes={setCurrNodeIdToNodes}
+          setMinX={setMinX} min_x={min_x}
+          setMinY={setMinY} min_y={min_y}
+          setMaxX={setMaxX} min_x={max_x}
+          setMaxY={setMaxY} min_y={max_y}/>
 
           <Slider setRerenderTreemap={setRerenderTreemap} 
           rerender_treemap={rerender_treemap} setNodeRender={setNodeRender} 
