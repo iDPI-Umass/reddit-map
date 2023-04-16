@@ -19,9 +19,10 @@ class TreemapEngine {
   }
 
   size ( frame ) {
-    this.parentHeight = 30 * 2;
-    this.width = frame.clientWidth * 2;
-    this.height = frame.clientHeight * 2;
+    this.resolutionScale = 2;
+    this.parentHeight = 30 * this.resolutionScale;
+    this.width = frame.clientWidth * this.resolutionScale;
+    this.height = frame.clientHeight * this.resolutionScale;
 
     this.resetScale();
   
@@ -64,6 +65,7 @@ class TreemapEngine {
   tagLeaves ( children ) {
     for ( const child of children ) {
       child.data.leafUid = library.DOM.uid("leaf").id;
+      child.data.colora = `${ child.data.color ?? "#FFFFFF" }80`;
 
       if ( child.children != null ) {
         this.tagLeaves( child.children );
@@ -88,38 +90,37 @@ class TreemapEngine {
     this.view = this.data.children;
   }
 
+  setStyleDefaults () {
+    this.context.lineWidth = "2px";
+    this.context.strokeStyle = "#FFFFFF";
+    this.context.font = "24px Roboto";
+    this.context.fontKerning = "normal";
+  }
+
   clearCanvas () {
     this.context.clearRect( 0, 0, this.width, this.height );
   }
 
   drawParent () {
-    const border = "#FFFFFF";
-    const fill = this.parent?.data.color ?? "#FFFFFF";
+    const fill = `${ this.parent?.data.color ?? "#FFFFFF" }80`;
     const label = this.parent?.data.taxonomy_label ?? "All of Reddit";
 
     const x0 = 0;
     const x1 = this.scaleX( 1 );
     const y0 = 0;
     const y1 = this.parentHeight;
-    const tx = 4;   // 2 * 2
-    const ty = 28;  // 14 * 2
+    const tx = 4;   // 2 * this.resolutionScale
+    const ty = 28;  // 14 * this.resolutionScale
 
     this.context.fillStyle = fill;
     this.context.fillRect( x0, y0, x1, y1 );
-
-    this.context.lineWidth = "2px";
-    this.context.strokeStyle = border;
     this.context.strokeRect( x0, y0, x1, y1 );
 
-    this.context.font = "24px Roboto";
-    this.context.fontKerning = "normal";
-    this.context.fillStyle = h.chooseFontColor( fill );
+    this.context.fillStyle = "#000"
     this.context.fillText( label, tx, ty, this.width );
   }
 
   drawLeaf ( leaf ) {
-    let fill = leaf.data.color ?? "#FFFFFF";
-
     const x0 = this.scaleX( leaf.x0 );
     const x1 = this.scaleX( leaf.x1 );
     const y0 = this.scaleY( leaf.y0 );
@@ -130,14 +131,13 @@ class TreemapEngine {
 
     this.context.clearRect( x0, y0, width, height );
     
-    this.context.fillStyle = fill;
+    this.context.fillStyle = leaf.data.colora;
     this.context.fillRect( x0, y0, width, height );
     
     this.context.strokeRect( x0, y0, width, height );
   }
 
   labelLeaf ( leaf ) {
-    let fill = leaf.data.color ?? "#FFFFFF";
     let label = leaf.data.subreddit ?? leaf.data.taxonomy_label;
 
     const x0 = this.scaleX( leaf.x0 );
@@ -145,20 +145,14 @@ class TreemapEngine {
     const y0 = this.scaleY( leaf.y0 );
 
     const width = x1 - x0;
-    const tx = x0 + 4;  // 2 * 2
-    const ty = y0 + 28; // 14 * 2
+    const tx = x0 + 4;  // 2 * this.resolutionScale
+    const ty = y0 + 28; // 14 * this.resolutionScale
 
-    this.context.fillStyle = h.chooseFontColor( fill );
+    this.context.fillStyle = "#000000"
     this.context.fillText( label, tx, ty, width );
   }
 
   drawLeaves () {
-    const border = "#FFFFFF";
-    this.context.lineWidth = "2px";
-    this.context.strokeStyle = border;
-    this.context.font = "24px Roboto";
-    this.context.fontKerning = "normal";
-
     for ( const leaf of this.view ) {
       this.drawLeaf( leaf );
     }
@@ -169,6 +163,7 @@ class TreemapEngine {
   }
 
   render () {
+    this.setStyleDefaults();
     this.clearCanvas();
     this.drawParent();
     this.drawLeaves();
@@ -183,8 +178,8 @@ class TreemapEngine {
       };
     }
 
-    const x = this.scaleX.invert( event.offsetX * 2 );
-    const y = this.scaleY.invert( event.offsetY * 2 );
+    const x = this.scaleX.invert( event.offsetX * this.resolutionScale );
+    const y = this.scaleY.invert( event.offsetY * this.resolutionScale );
 
     const node = this.view.find( function ( node ) {
       return ( node.x0 <= x ) && 
@@ -253,15 +248,15 @@ class TreemapEngine {
         const width = x1 - x0;
         const height = y1 - y0;
 
-        this.context.clearRect( x0, y0, width, height )
-        this.context.lineWidth = "1px";
-        this.context.strokeStyle = "#FFFFFF";
-        this.context.strokeRect( x0, y0, width, height );
-
+        this.clearCanvas();
         this.setScale( node, { x0, x1, y0, y1 } );
+        this.drawLeaves();
+        this.context.clearRect( x0, y0, width, height )
+        this.context.strokeRect( x0, y0, width, height );
 
         for ( const leaf of node.children ) {
           this.drawLeaf( leaf );
+          // this.labelLeaf( leaf );
         }
       },
       onComplete: () => {
@@ -323,15 +318,20 @@ class TreemapEngine {
         const y1 = start.y1 + ( ratio * dy1 );
 
         this.clearCanvas();
-
-        setParentScale();
+        this.setScale( node, { x0, x1, y0, y1 } );
         for ( const leaf of node.parent.children ) {
           this.drawLeaf( leaf );
+          // this.labelLeaf( leaf );
         }
 
-        this.setScale( node, { x0, x1, y0, y1 } );
+        const width = x1 - x0;
+        const height = y1 - y0;
+        this.context.clearRect( x0, y0, width, height )
+        this.context.strokeRect( x0, y0, width, height );
+
         for ( const leaf of node.children ) {
           this.drawLeaf( leaf );
+          // this.labelLeaf( leaf );
         }
       },
       onComplete: () => {

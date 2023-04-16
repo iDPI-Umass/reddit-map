@@ -19,7 +19,6 @@
   // Now we can setup the store stuff with Svelte
   import { beforeUpdate, onDestroy } from "svelte";
   import { browser } from "$app/environment";
-  import { themeStore } from "$lib/stores/theme.js";
   import { resizeStore } from "$lib/stores/resize.js";
 
   if ( browser ) {
@@ -30,20 +29,10 @@
         resizeStore.push();
       });
 
-      unsubscribeTheme = themeStore.subscribe( function ( config ) {
-
-        const html = document.querySelector( "html" );
-        if ( config.dark === true ) {
-          html.classList.add( "gobo-theme-dark", "sl-theme-dark" );
-        } else {
-          html.classList.remove( "gobo-theme-dark", "sl-theme-dark" );
-        }
-      });
-
     });
 
     onDestroy( function () {
-      unsubscribeTheme();
+
     });
 
   }
