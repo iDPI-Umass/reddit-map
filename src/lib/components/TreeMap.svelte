@@ -3,6 +3,7 @@
   import { onDestroy, onMount } from "svelte";
   import { sourceStore } from "$lib/stores/source.js";
   import { resizeStore } from "$lib/stores/resize.js";
+  import { zoomStore } from "$lib/stores/zoom.js";
   import TreemapEngine from "$lib/helpers/treemap/index.js";
 
   let treemap, frame, engine;
@@ -12,7 +13,7 @@
 
   const render = function () {
     if ( source == null ) {
-        return;
+      return;
     }
     engine.size( frame );
     engine.loadData( source );
@@ -21,7 +22,13 @@
   };
   
   onMount(() => {
-    engine = TreemapEngine.create({ canvas: treemap });
+    engine = TreemapEngine.create({ 
+      canvas: treemap,
+      // This gets bound to the engine's context.
+      onViewUpdate: function () {
+        zoomStore.push({ subrootID: this.parent.data.leafUid });
+      }
+    });
 
     unsubscribeSource = sourceStore.subscribe( function ( _source ) {
       source = _source;
@@ -63,12 +70,6 @@
   .spinner-frame {
     width: 100%;
     height: 100%;
-  }
-
-  svg {
-    width: 100%;
-    height: 100%;
-    max-height: 100%;
   }
 
   .hidden {

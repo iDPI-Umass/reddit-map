@@ -5,6 +5,7 @@ import { Library } from "@observablehq/stdlib";
 
 const library = new Library();
 const ease = cubicBezier( 0.42, 0.0, 0.58, 1.0 );
+const twoPiRadians = 2 * Math.PI;
 
 
 class BubblemapEngine {
@@ -20,11 +21,12 @@ class BubblemapEngine {
 
   size ( frame ) {
     this.resolutionScale = 2;
-    this.parentHeight = 30 * this.resolutionScale;
     this.width = frame.clientWidth * this.resolutionScale;
     this.height = frame.clientHeight * this.resolutionScale;
+    this.minBubbleSize = 5 * this.resolutionScale;
+    this.maxBubbleSize = 20 * this.resolutionScale;
+    this.padding = this.maxBubbleSize * 2; // 2 for double radius and either side of width/height
 
-    this.resetScale();
   
     this.d3Canvas
       .attr( "width", this.width )
@@ -41,16 +43,6 @@ class BubblemapEngine {
     }
   }
 
-  resetScale () {
-    this.scaleX = d3.scaleLinear()
-      .domain([ 0, 1 ])  
-      .rangeRound([ 0, this.width ]);
-    
-    this.scaleY = d3.scaleLinear()
-      .domain([ 0, 1 ])
-      .rangeRound([ this.parentHeight, this.height ]);
-  }
-
   setScale ( domain, range ) {
     this.scaleX = d3.scaleLinear()
       .domain([ domain.x0, domain.x1 ])
@@ -59,35 +51,104 @@ class BubblemapEngine {
     this.scaleY = d3.scaleLinear()
       .domain([ domain.y0, domain.y1 ])
       .rangeRound([ range.y0, range.y1 ]);
+
+    this.scaleSize = d3.scaleLinear()
+      .domain([ domain.size0, domain.size1 ])
+      .rangeRound([ range.size0, range.size1 ]);
   }
 
+  getBoundaries () {
+    let minX, maxX, minY, maxY, minSize, maxSize;
 
-  tagLeaves ( children ) {
+    for ( const node of this.view ) {
+      if ( node.data.tsne_x != null ) {
+        minX = node.data.tsne_x;
+        maxX = node.data.tsne_x;
+        minY = node.data.tsne_y;
+        maxY = node.data.tsne_y;
+        break;
+      }
+    }
+
+    for ( const node of this.view ) {
+      if ( node.data.subreddit_count != null ) {
+        minSize = node.data.subreddit_count;
+        maxSize = node.data.subreddit_count;
+        break;
+      }
+    }    
+   
+    for ( const node of this.view ) {
+      const { tsne_x, tsne_y, subreddit_count } = node.data;
+
+      if ( tsne_x != null ) {
+        if ( tsne_x < minX ) {
+          minX = tsne_x;
+        }
+        if ( tsne_x > maxX ) {
+          maxX = tsne_x;
+        }
+        if ( tsne_y < minY ) {
+          minY = tsne_y;
+        }
+        if ( tsne_y > maxY ) {
+          maxY = tsne_y;
+        }
+      }
+    
+      if ( subreddit_count != null ) {
+        if ( subreddit_count < minSize ) {
+          minSize = subreddit_count
+        }
+        if ( subreddit_count > maxSize ) {
+          maxSize = subreddit_count
+        }
+      }
+    }
+
+    return [ minY, maxY, minY, maxY, minSize, maxSize ];
+  }
+
+  scaleToBoundaries () {
+    const [ x0, x1, y0, y1, size0, size1 ] = this.getBoundaries();
+    console.log( "Boundaries", { x0, x1, y0, y1, size0, size1 });
+    
+    this.setScale( { x0, x1, y0, y1, size0, size1 }, { 
+      x0: this.padding,
+      x1: this.width - this.padding,
+      y0: this.padding,
+      y1: this.height - this.padding,
+      size0: this.minBubbleSize,
+      size1: this.maxBubbleSize
+    });
+  }
+
+  indexHierachy ( children ) {
+    if ( children == null ) {
+      this.hierarchyMap = new Map();
+      this.hierarchyMap.set( this.data.data.leafUid, this.data );
+      this.indexHierachy( this.data.children );
+      return;
+    }
+    
     for ( const child of children ) {
-      child.data.leafUid = library.DOM.uid("leaf").id;
-      child.data.colora = `${ child.data.color ?? "#FFFFFF" }80`;
-
+      this.hierarchyMap.set( child.data.leafUid, child );
       if ( child.children != null ) {
-        this.tagLeaves( child.children );
+        this.indexHierachy( child.children );
       }
     }
   }
 
   loadData ( data ) {
-    const tile = h.tile( this.width, this.height );
-    const sortedData = d3.hierarchy( data )
-      .sum( d => Math.sqrt( d.comment_count ))
-      .sort( function ( a, b ) {
-        return Math.sqrt(b.comment_count) - Math.sqrt(a.comment_count);
-      });
+    this.data = data
+    console.log( "bubblemap data", this.data );
+    this.indexHierachy();
+    this.totalView = this.data.descendants();
 
-    this.data = d3.treemap().tile( tile )( sortedData );
-    this.tagLeaves( this.data.children );
-    console.log( "data", this.data );
-    this.data.data.color = "#FFFFFF";
-    this.data.data.taxonomy_label = "All of Reddit";
-    this.parent = this.data;
-    this.view = this.data.children;
+    this.subroot = this.data;
+    this.view = new Set( this.totalView );
+    this.subview = new Set( this.totalView );
+    this.labels = h.pluckLabels( this.subroot.children );
   }
 
   setStyleDefaults () {
@@ -120,226 +181,70 @@ class BubblemapEngine {
     this.context.fillText( label, tx, ty, this.width );
   }
 
-  drawLeaf ( leaf ) {
-    const x0 = this.scaleX( leaf.x0 );
-    const x1 = this.scaleX( leaf.x1 );
-    const y0 = this.scaleY( leaf.y0 );
-    const y1 = this.scaleY( leaf.y1 );
-
-    const width = x1 - x0;
-    const height = y1 - y0;
-
-    this.context.clearRect( x0, y0, width, height );
+  drawInertNode ( node ) {
+    const x = this.scaleX( node.data.tsne_x );
+    const y = this.scaleY( node.data.tsne_y );
+    const r = this.scaleSize( node.data.subreddit_count );
     
-    this.context.fillStyle = leaf.data.colora;
-    this.context.fillRect( x0, y0, width, height );
-    
-    this.context.strokeRect( x0, y0, width, height );
+    this.context.beginPath();
+    this.context.arc( x, y, r, 0, twoPiRadians );
+    this.context.fill();    
   }
 
-  labelLeaf ( leaf ) {
-    let label = leaf.data.subreddit ?? leaf.data.taxonomy_label;
+  drawView () {
+    this.context.fillStyle = "#80808040";
+    for ( const node of this.view ) {
+      if ( !this.subview.has( node ) ) {
+        this.drawInertNode( node );
+      }
+    }
+  }
 
-    const x0 = this.scaleX( leaf.x0 );
-    const x1 = this.scaleX( leaf.x1 );
-    const y0 = this.scaleY( leaf.y0 );
+  drawNode ( node ) {
+    const x = this.scaleX( node.data.tsne_x );
+    const y = this.scaleY( node.data.tsne_y );
+    const r = this.scaleSize( node.data.subreddit_count );
+    
+    this.context.beginPath();
+    this.context.arc( x, y, r, 0, twoPiRadians );
+    this.context.fillStyle = node.data.colorBubble;
+    this.context.fill();    
+  }
 
-    const width = x1 - x0;
-    const tx = x0 + 4;  // 2 * this.resolutionScale
-    const ty = y0 + 28; // 14 * this.resolutionScale
+  drawSubview () {
+    for ( const node of this.subview ) {
+      this.drawNode( node );
+    }
+  }
+
+  drawLabel ( label ) {
+    const x = this.scaleX( label.x );
+    const y = this.scaleY( label.y );
 
     this.context.fillStyle = "#000000"
-    this.context.fillText( label, tx, ty, width );
+    this.context.fillText( label.text, x, y );
   }
 
-  drawLeaves () {
-    for ( const leaf of this.view ) {
-      this.drawLeaf( leaf );
-    }
-
-    for ( const leaf of this.view ) {
-      this.labelLeaf( leaf );
+  drawLabels () {
+    for ( const label of this.labels ) {
+      this.drawLabel( label );
     }
   }
 
   render () {
     this.setStyleDefaults();
     this.clearCanvas();
-    this.drawParent();
-    this.drawLeaves();
+    this.scaleToBoundaries();
+    this.drawView();
+    this.drawSubview();
+    this.drawLabels();
   }
 
-  
-  findNode ( event ) {
-    if ( event.offsetY <= (this.parentHeight / 2) ) {
-      return { 
-        isParent: true,
-        node: this.parent
-      };
-    }
-
-    const x = this.scaleX.invert( event.offsetX * this.resolutionScale );
-    const y = this.scaleY.invert( event.offsetY * this.resolutionScale );
-
-    const node = this.view.find( function ( node ) {
-      return ( node.x0 <= x ) && 
-        ( node.x1 >= x ) &&
-        ( node.y0 <= y ) &&
-        ( node.y1 >= y );
-    });
-
-    return {
-      isParent: false,
-      node
-    };
-  }
-
-  zoom ( event ) {
-    const match = this.findNode( event );
-    
-    if ( match.isParent ) {
-      return this.zoomOut( event, match.node );
-    }
-
-    if ( match.node != null ) {
-      return this.zoomIn( event, match.node );
-    }
-  }
-
-
-  zoomIn ( event, node ) {
-    console.log( "Zoom In", node );
-    if ( node.children == null ) {
-      console.log( "no children" );
-      return;
-    }
-    
-    const start = {
-      x0: this.scaleX( node.x0 ),
-      x1: this.scaleX( node.x1 ),
-      y0: this.scaleY( node.y0 ),
-      y1: this.scaleY( node.y1 )
-    };
-
-    const end = {
-      x0: 0,
-      x1: this.width,
-      y0: this.parentHeight,
-      y1: this.height
-    };
-
-    // d as in delta
-    const dx0 = end.x0 - start.x0;
-    const dx1 = end.x1 - start.x1;
-    const dy0 = end.y0 - start.y0;
-    const dy1 = end.y1 - start.y1;
-
-    animate({
-      from: 0,
-      to: 1,
-      duration: 650,
-      ease: ease,
-      onUpdate: ratio => {
-        const x0 = start.x0 + ( ratio * dx0 );
-        const x1 = start.x1 + ( ratio * dx1 );
-        const y0 = start.y0 + ( ratio * dy0 );
-        const y1 = start.y1 + ( ratio * dy1 );
-
-        const width = x1 - x0;
-        const height = y1 - y0;
-
-        this.clearCanvas();
-        this.setScale( node, { x0, x1, y0, y1 } );
-        this.drawLeaves();
-        this.context.clearRect( x0, y0, width, height )
-        this.context.strokeRect( x0, y0, width, height );
-
-        for ( const leaf of node.children ) {
-          this.drawLeaf( leaf );
-          // this.labelLeaf( leaf );
-        }
-      },
-      onComplete: () => {
-        this.parent = node;
-        this.view = node.children;
-        this.render();
-      }
-    });
-
-  }
-
-  zoomOut ( event, node ) {
-    console.log( "Zoom Out", node );
-    if ( node.parent == null ) {
-      console.log( "no parent (top level)" );
-      return;
-    }
-
-    const setParentScale = () => {
-      this.setScale( node.parent, {
-        x0: 0, 
-        x1: this.width, 
-        y0: this.parentHeight,
-        y1: this.height
-      });
-    };
-
-
-
-    const start = {
-      x0: 0,
-      x1: this.width,
-      y0: this.parentHeight,
-      y1: this.height
-    };
-
-    setParentScale();
-    const end = {
-      x0: this.scaleX( node.x0 ),
-      x1: this.scaleX( node.x1 ),
-      y0: this.scaleY( node.y0 ),
-      y1: this.scaleY( node.y1 )
-    };
-
-    const dx0 = end.x0 - start.x0;
-    const dx1 = end.x1 - start.x1;
-    const dy0 = end.y0 - start.y0;
-    const dy1 = end.y1 - start.y1;
-
-    animate({
-      from: 0,
-      to: 1,
-      duration: 650,
-      ease: ease,
-      onUpdate: ratio => {
-        const x0 = start.x0 + ( ratio * dx0 );
-        const x1 = start.x1 + ( ratio * dx1 );
-        const y0 = start.y0 + ( ratio * dy0 );
-        const y1 = start.y1 + ( ratio * dy1 );
-
-        this.clearCanvas();
-        this.setScale( node, { x0, x1, y0, y1 } );
-        for ( const leaf of node.parent.children ) {
-          this.drawLeaf( leaf );
-          // this.labelLeaf( leaf );
-        }
-
-        const width = x1 - x0;
-        const height = y1 - y0;
-        this.context.clearRect( x0, y0, width, height )
-        this.context.strokeRect( x0, y0, width, height );
-
-        for ( const leaf of node.children ) {
-          this.drawLeaf( leaf );
-          // this.labelLeaf( leaf );
-        }
-      },
-      onComplete: () => {
-        this.parent = node.parent;
-        this.view = node.parent.children;
-        this.render();
-      }
-    });
+  updateView ({ subrootID }) {
+    this.subroot = this.hierarchyMap.get( subrootID );
+    this.subview = new Set( this.subroot.descendants() );
+    this.labels = h.pluckLabels( this.subroot.children );
+    this.render();
   }
 }
 

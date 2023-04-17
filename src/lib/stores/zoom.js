@@ -10,7 +10,7 @@ const createStore = function () {
     subscribe,
     push: function ( zoom ) {
       update( function () {
-        return zoon;
+        return zoom;
       });
     }
   };

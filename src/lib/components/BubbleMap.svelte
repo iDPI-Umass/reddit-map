@@ -3,23 +3,27 @@
   import { onDestroy, onMount } from "svelte";
   import { sourceStore } from "$lib/stores/source.js";
   import { resizeStore } from "$lib/stores/resize.js";
-  import * as Bubblemap from "$lib/helpers/bubblemap/index.js";
+  import { zoomStore } from "$lib/stores/zoom";
+  import BubblemapEngine from "$lib/helpers/bubblemap/index.js";
 
-  let bubblemap, frame;
+  let bubblemap, frame, engine;
   let source, unsubscribeSource;
-  let unsubscribeResize;
+  let unsubscribeResize, unsubscribeZoom;
   let hidden = true;
 
   const render = function () {
     if ( source == null ) {
         return;
     }
-    Bubblemap.prepare( bubblemap, frame );
-    Bubblemap.render( source );
+    engine.size( frame );
+    engine.loadData( source );
+    engine.render();
     hidden = false;
   };
   
   onMount(() => {
+    engine = BubblemapEngine.create({ canvas: bubblemap });
+
     unsubscribeSource = sourceStore.subscribe( function ( _source ) {
       source = _source;
       render();
@@ -27,6 +31,12 @@
 
     unsubscribeResize = resizeStore.subscribe( function () {
       render();
+    });
+
+    unsubscribeZoom = zoomStore.subscribe( function ( view ) {
+      if ( view != null ) {
+        engine.updateView( view );
+      }
     });
   });
 
@@ -47,10 +57,10 @@
     <Spinner></Spinner>
   {/if}
 
-  <svg 
+  <canvas 
     bind:this={bubblemap}
     class:hidden="{hidden === true}">
-  </svg>
+  </canvas>
 </div>
 
 
@@ -59,14 +69,7 @@
 <style>
   .spinner-frame {
     width: 100%;
-    height: 90%;
-    max-height: 100%;
-  }
-
-  svg {
-    width: 100%;
     height: 100%;
-    max-height: 100%;
   }
 
   .hidden {

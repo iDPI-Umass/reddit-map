@@ -10,11 +10,12 @@ const ease = cubicBezier( 0.42, 0.0, 0.58, 1.0 );
 class TreemapEngine {
   constructor () {}
 
-  static create ({ canvas }) {
+  static create ({ canvas, onViewUpdate }) {
     return Object.assign( new TreemapEngine(), {
       element: canvas,
       context: canvas.getContext( "2d" ),
-      d3Canvas: d3.select( canvas )
+      d3Canvas: d3.select( canvas ),
+      onViewUpdate: onViewUpdate
     });
   }
 
@@ -61,29 +62,16 @@ class TreemapEngine {
       .rangeRound([ range.y0, range.y1 ]);
   }
 
-
-  tagLeaves ( children ) {
-    for ( const child of children ) {
-      child.data.leafUid = library.DOM.uid("leaf").id;
-      child.data.colora = `${ child.data.color ?? "#FFFFFF" }80`;
-
-      if ( child.children != null ) {
-        this.tagLeaves( child.children );
-      }
-    }
-  }
-
   loadData ( data ) {
     const tile = h.tile( this.width, this.height );
-    const sortedData = d3.hierarchy( data )
+    const sortedData = data
       .sum( d => Math.sqrt( d.comment_count ))
       .sort( function ( a, b ) {
         return Math.sqrt(b.comment_count) - Math.sqrt(a.comment_count);
       });
 
     this.data = d3.treemap().tile( tile )( sortedData );
-    this.tagLeaves( this.data.children );
-    console.log( "data", this.data );
+    console.log( "treempa data", this.data );
     this.data.data.color = "#FFFFFF";
     this.data.data.taxonomy_label = "All of Reddit";
     this.parent = this.data;
@@ -131,15 +119,13 @@ class TreemapEngine {
 
     this.context.clearRect( x0, y0, width, height );
     
-    this.context.fillStyle = leaf.data.colora;
+    this.context.fillStyle = leaf.data.colorLeaf;
     this.context.fillRect( x0, y0, width, height );
     
     this.context.strokeRect( x0, y0, width, height );
   }
 
   labelLeaf ( leaf ) {
-    let label = leaf.data.subreddit ?? leaf.data.taxonomy_label;
-
     const x0 = this.scaleX( leaf.x0 );
     const x1 = this.scaleX( leaf.x1 );
     const y0 = this.scaleY( leaf.y0 );
@@ -149,7 +135,7 @@ class TreemapEngine {
     const ty = y0 + 28; // 14 * this.resolutionScale
 
     this.context.fillStyle = "#000000"
-    this.context.fillText( label, tx, ty, width );
+    this.context.fillText( leaf.data.displayLabel, tx, ty, width );
   }
 
   drawLeaves () {
@@ -171,7 +157,7 @@ class TreemapEngine {
 
   
   findNode ( event ) {
-    if ( event.offsetY <= (this.parentHeight / 2) ) {
+    if ( event.offsetY <= (this.parentHeight / this.resolutionScale) ) {
       return { 
         isParent: true,
         node: this.parent
@@ -263,6 +249,7 @@ class TreemapEngine {
         this.parent = node;
         this.view = node.children;
         this.render();
+        this.onViewUpdate.bind(this)();
       }
     });
 
@@ -338,6 +325,7 @@ class TreemapEngine {
         this.parent = node.parent;
         this.view = node.parent.children;
         this.render();
+        this.onViewUpdate.bind(this)();
       }
     });
   }
