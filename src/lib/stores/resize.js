@@ -6,7 +6,7 @@ const getSize = function () {
 };
 
 const createStore = function () {
-  let resize = getSize();
+  let resize = null;
   let timer;
 
   const { subscribe, update } = writable( resize );
@@ -15,7 +15,7 @@ const createStore = function () {
 
   const debouncedUpdate = function () {
     clearTimeout( timer );
-    timer = setTimeout( triggerResize, 500 );
+    timer = setTimeout( triggerResize, 250 );
   };
 
   return {

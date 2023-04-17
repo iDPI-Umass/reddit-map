@@ -12,7 +12,6 @@
   let hidden = true;
 
   const render = function () {
-    console.log("rendering bubblemap");
     if ( source == null ) {
         return;
     }
@@ -26,18 +25,21 @@
     engine = BubblemapEngine.create({ canvas: bubblemap });
 
     unsubscribeSource = sourceStore.subscribe( function ( _source ) {
-      source = _source;
+      if ( _source != null ) {
+        source = _source.data;
       
-      if ( engine.data == null ) {
-        render(); 
-      } else {
-        engine.updateData( source );
+        if ( engine.data == null ) {
+          render(); 
+        } else {
+          engine.updateData( source );
+        }
       }
     });
 
-    unsubscribeResize = resizeStore.subscribe( function () {
-      console.log("resize event");
-      render();
+    unsubscribeResize = resizeStore.subscribe( function ( resize ) {
+      if ( resize != null ) {
+        render();
+      }
     });
 
     unsubscribeZoom = zoomStore.subscribe( function ( view ) {

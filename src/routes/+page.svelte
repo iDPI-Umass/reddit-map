@@ -1,14 +1,10 @@
 <script>
   import Treemap from "$lib/components/Treemap.svelte";
   import Bubblemap from "$lib/components/Bubblemap.svelte";
-  import "@shoelace-style/shoelace/dist/components/button/button.js";
+  import Slider from "$lib/components/Slider.svelte";
   import { sourceStore } from "../lib/stores/source";
 
   sourceStore.push( "2021-04" );
-
-  const handleClick = function () {
-    sourceStore.push( "2021-05" );
-  };
 
 </script>
 
@@ -22,13 +18,12 @@
   </section>
 
   <section class="right">
-    <Bubblemap></Bubblemap>
-    <section>
-      <sl-button
-        on:click={handleClick}
-        on:keydown={handleClick}>
-      May
-      </sl-button>
+    <div class="bubble">
+      <Bubblemap></Bubblemap>
+    </div>
+    
+    <section class="control">
+      <Slider></Slider>
     </section>
   </section>
   
@@ -64,5 +59,19 @@
     justify-content: stretch;
     align-items: stretch;
     max-height: 100%;
+  }
+
+  main .right .bubble {
+    height: 90%;
+  }
+
+  main .right .control {
+    height: 10%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    padding-left: 10%;
+    padding-right: 10%;
   }
 </style>

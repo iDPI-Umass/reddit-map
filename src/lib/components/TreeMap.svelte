@@ -31,12 +31,16 @@
     });
 
     unsubscribeSource = sourceStore.subscribe( function ( _source ) {
-      source = _source;
-      render();
+      if ( _source != null ) {
+        source = _source.data;
+        render();
+      }
     });
 
-    unsubscribeResize = resizeStore.subscribe( function () {
-      render();
+    unsubscribeResize = resizeStore.subscribe( function ( resize ) {
+      if ( resize != null ) {
+        render();
+      }
     });
   });
 
