@@ -1,9 +1,7 @@
 import * as d3 from "d3";
 import * as h from "./helpers";
 import { animate, cubicBezier } from "popmotion";
-import { Library } from "@observablehq/stdlib";
 
-const library = new Library();
 const ease = cubicBezier( 0.42, 0.0, 0.58, 1.0 );
 
 

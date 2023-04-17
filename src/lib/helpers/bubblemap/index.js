@@ -1,9 +1,8 @@
 import * as d3 from "d3";
 import * as h from "./helpers";
 import { animate, cubicBezier } from "popmotion";
-import { Library } from "@observablehq/stdlib";
 
-const library = new Library();
+
 const ease = cubicBezier( 0.42, 0.0, 0.58, 1.0 );
 const twoPiRadians = 2 * Math.PI;
 
@@ -126,13 +125,13 @@ class BubblemapEngine {
   indexHierachy ( children ) {
     if ( children == null ) {
       this.hierarchyMap = new Map();
-      this.hierarchyMap.set( this.data.data.leafUid, this.data );
+      this.hierarchyMap.set( this.data.data.displayLabel, this.data );
       this.indexHierachy( this.data.children );
       return;
     }
     
     for ( const child of children ) {
-      this.hierarchyMap.set( child.data.leafUid, child );
+      this.hierarchyMap.set( child.data.displayLabel, child );
       if ( child.children != null ) {
         this.indexHierachy( child.children );
       }
@@ -240,11 +239,60 @@ class BubblemapEngine {
     this.drawLabels();
   }
 
-  updateView ({ subrootID }) {
-    this.subroot = this.hierarchyMap.get( subrootID );
+  // Updates when we drill down into a treemap category.
+  updateView ({ subrootLabel }) {
+    this.subroot = this.hierarchyMap.get( subrootLabel );
     this.subview = new Set( this.subroot.descendants() );
     this.labels = h.pluckLabels( this.subroot.children );
     this.render();
+  }
+
+  // Updates when we look at another month of data.
+  updateData ( data ) {
+    console.log( "New month, update animation" );
+    
+    // Reset to top-level view of current data to start animation to another month.
+    this.updateView({ subrootLabel: this.data.data.displayLabel });
+
+
+    const diffMap = new Map();
+    for ( const newNode of data.descendants() ) {
+      const name = newNode.data.displayLabel;
+      const oldNode = this.hierarchyMap.get( name );
+      if ( oldNode != null ) {
+        const dx = newNode.data.tsne_x - oldNode.data.tsne_x;
+        const dy = newNode.data.tsne_y - oldNode.data.tsne_y;
+        const dsize = newNode.data.subreddit_count - oldNode.data.subreddit_count;
+        diffMap.set( name, { oldNode, newNode, dx, dy, dsize });
+      }
+    }
+
+    animate({
+      from: 0,
+      to: 1,
+      duration: 650,
+      ease: ease,
+      onUpdate: ratio => {
+        this.clearCanvas();
+
+        // Animate this frame, but avoid mutating old or new data structures.
+        for ( const [ name, { oldNode, dx, dy, dsize } ] of diffMap.entries() ) {
+          this.drawNode({
+            data: {
+              tsne_x: oldNode.data.tsne_x + ( ratio * dx ),
+              tsne_y: oldNode.data.tsne_y + ( ratio * dy ),
+              subreddit_count: oldNode.data.subreddit_count + ( ratio * dsize ),
+              colorBubble: oldNode.data.colorBubble
+            }
+          });
+        }
+
+      },
+      onComplete: () => {
+        this.loadData( data );
+        this.render();
+      }
+    });
   }
 }
 

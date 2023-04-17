@@ -12,6 +12,7 @@
   let hidden = true;
 
   const render = function () {
+    console.log("rendering bubblemap");
     if ( source == null ) {
         return;
     }
@@ -26,10 +27,16 @@
 
     unsubscribeSource = sourceStore.subscribe( function ( _source ) {
       source = _source;
-      render();
+      
+      if ( engine.data == null ) {
+        render(); 
+      } else {
+        engine.updateData( source );
+      }
     });
 
     unsubscribeResize = resizeStore.subscribe( function () {
+      console.log("resize event");
       render();
     });
 

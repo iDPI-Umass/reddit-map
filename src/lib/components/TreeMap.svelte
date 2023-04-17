@@ -26,7 +26,7 @@
       canvas: treemap,
       // This gets bound to the engine's context.
       onViewUpdate: function () {
-        zoomStore.push({ subrootID: this.parent.data.leafUid });
+        zoomStore.push({ subrootLabel: this.parent.data.displayLabel });
       }
     });
 

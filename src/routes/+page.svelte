@@ -1,9 +1,14 @@
 <script>
   import Treemap from "$lib/components/Treemap.svelte";
   import Bubblemap from "$lib/components/Bubblemap.svelte";
+  import "@shoelace-style/shoelace/dist/components/button/button.js";
   import { sourceStore } from "../lib/stores/source";
 
   sourceStore.push( "2021-04" );
+
+  const handleClick = function () {
+    sourceStore.push( "2021-05" );
+  };
 
 </script>
 
@@ -18,6 +23,13 @@
 
   <section class="right">
     <Bubblemap></Bubblemap>
+    <section>
+      <sl-button
+        on:click={handleClick}
+        on:keydown={handleClick}>
+      May
+      </sl-button>
+    </section>
   </section>
   
 </main>

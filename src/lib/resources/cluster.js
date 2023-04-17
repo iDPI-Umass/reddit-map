@@ -35,7 +35,6 @@ const getJSON = async function ( name ) {
 // to go through children, so we need to also place the root into one temporarily.
 const decorate = function ( children ) {
   for ( const child of children ) {
-    child.data.leafUid = library.DOM.uid("leaf").id;
     child.data.displayLabel = child.data.subreddit ?? child.data.taxonomy_label;
 
     const color = child.data.color ?? "#FFFFFF";
