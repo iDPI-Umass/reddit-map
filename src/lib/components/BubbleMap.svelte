@@ -1,4 +1,5 @@
 <script>
+  import "@shoelace-style/shoelace/dist/components/button/button.js";
   import Spinner from "$lib/components/primitives/Spinner.svelte";
   import { onDestroy, onMount } from "svelte";
   import { sourceStore } from "$lib/stores/source.js";

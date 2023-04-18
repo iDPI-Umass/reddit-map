@@ -56,10 +56,10 @@ class BubblemapEngine {
       .rangeRound([ range.size0, range.size1 ]);
   }
 
-  getBoundaries () {
+  getBoundaries ( view ) {
     let minX, maxX, minY, maxY, minSize, maxSize;
 
-    for ( const node of this.view ) {
+    for ( const node of view ) {
       if ( node.data.tsne_x != null ) {
         minX = node.data.tsne_x;
         maxX = node.data.tsne_x;
@@ -69,7 +69,7 @@ class BubblemapEngine {
       }
     }
 
-    for ( const node of this.view ) {
+    for ( const node of view ) {
       if ( node.data.subreddit_count != null ) {
         minSize = node.data.subreddit_count;
         maxSize = node.data.subreddit_count;
@@ -77,7 +77,7 @@ class BubblemapEngine {
       }
     }    
    
-    for ( const node of this.view ) {
+    for ( const node of view ) {
       const { tsne_x, tsne_y, subreddit_count } = node.data;
 
       if ( tsne_x != null ) {
@@ -109,8 +109,8 @@ class BubblemapEngine {
   }
 
   scaleToBoundaries () {
-    const [ x0, x1, y0, y1, size0, size1 ] = this.getBoundaries();
-    console.log( "Boundaries", { x0, x1, y0, y1, size0, size1 });
+    this.boundaries = this.getBoundaries( this.view );
+    const [ x0, x1, y0, y1, size0, size1 ] = this.boundaries;
     
     this.setScale( { x0, x1, y0, y1, size0, size1 }, { 
       x0: this.padding,
@@ -142,11 +142,10 @@ class BubblemapEngine {
     this.data = data
     console.log( "bubblemap data", this.data );
     this.indexHierachy();
-    this.totalView = this.data.descendants();
 
     this.subroot = this.data;
-    this.view = new Set( this.totalView );
-    this.subview = new Set( this.totalView );
+    this.view = new Set( this.data.descendants() );
+    this.subview = this.view;
     this.labels = h.pluckLabels( this.subroot.children );
   }
 
@@ -249,21 +248,27 @@ class BubblemapEngine {
 
   // Updates when we look at another month of data.
   updateData ( data ) {
-    console.log( "New month, update animation" );
-    
+    console.log( "New Month" );
+
     // Reset to top-level view of current data to start animation to another month.
     this.updateView({ subrootLabel: this.data.data.displayLabel });
 
-
+    const newView = new Set ( data.descendants() );
+    const newBoundaries = this.getBoundaries( newView );
+    const dBoundaries = [];
+    for ( let i = 0; i < this.boundaries.length; i++ ) {
+      dBoundaries.push( newBoundaries[i] - this.boundaries[i] );
+    }
+    
     const diffMap = new Map();
-    for ( const newNode of data.descendants() ) {
+    for ( const newNode of newView ) {
       const name = newNode.data.displayLabel;
       const oldNode = this.hierarchyMap.get( name );
       if ( oldNode != null ) {
         const dx = newNode.data.tsne_x - oldNode.data.tsne_x;
         const dy = newNode.data.tsne_y - oldNode.data.tsne_y;
-        const dsize = newNode.data.subreddit_count - oldNode.data.subreddit_count;
-        diffMap.set( name, { oldNode, newNode, dx, dy, dsize });
+        const dSize = newNode.data.subreddit_count - oldNode.data.subreddit_count;
+        diffMap.set( name, { oldNode, newNode, dx, dy, dSize });
       }
     }
 
@@ -275,13 +280,31 @@ class BubblemapEngine {
       onUpdate: ratio => {
         this.clearCanvas();
 
+        // Increment scale toward new boundaries.
+        this.setScale({ 
+          x0: this.boundaries[0] + ( ratio * dBoundaries[0] ),
+          x1: this.boundaries[1] + ( ratio * dBoundaries[1] ),
+          y0: this.boundaries[2] + ( ratio * dBoundaries[2] ),
+          y1: this.boundaries[3] + ( ratio * dBoundaries[3] ),
+          size0: this.boundaries[4] + ( ratio * dBoundaries[4] ),
+          size1: this.boundaries[5] + ( ratio * dBoundaries[5] ),
+        },{ 
+          x0: this.padding,
+          x1: this.width - this.padding,
+          y0: this.padding,
+          y1: this.height - this.padding,
+          size0: this.minBubbleSize,
+          size1: this.maxBubbleSize
+        });
+        
+
         // Animate this frame, but avoid mutating old or new data structures.
-        for ( const [ name, { oldNode, dx, dy, dsize } ] of diffMap.entries() ) {
+        for ( const [ name, { oldNode, newNode, dx, dy, dSize } ] of diffMap.entries() ) {
           this.drawNode({
             data: {
               tsne_x: oldNode.data.tsne_x + ( ratio * dx ),
               tsne_y: oldNode.data.tsne_y + ( ratio * dy ),
-              subreddit_count: oldNode.data.subreddit_count + ( ratio * dsize ),
+              subreddit_count: oldNode.data.subreddit_count + ( ratio * dSize ),
               colorBubble: oldNode.data.colorBubble
             }
           });

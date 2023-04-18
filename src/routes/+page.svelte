@@ -1,18 +1,40 @@
 <script>
+  import "@shoelace-style/shoelace/dist/components/alert/alert.js";
+  import "@shoelace-style/shoelace/dist/components/icon/icon.js";
   import Treemap from "$lib/components/Treemap.svelte";
   import Bubblemap from "$lib/components/Bubblemap.svelte";
   import Slider from "$lib/components/Slider.svelte";
   import { sourceStore } from "../lib/stores/source";
+  import { onMount } from "svelte";
 
   sourceStore.push( "2021-04" );
 
+  let alert
+
+  onMount( function () {
+    if ( window.innerWidth < 750 ) {
+      alert.toast();
+    }
+  })
+
 </script>
+
+<sl-alert
+  bind:this={alert}
+  variant="primary"
+  duration="10000"
+  closable>
+  <sl-icon slot="icon" src="/icons/info-circle.svg"></sl-icon>
+  For the best experience, we recommend viewing RedditMap on a large screen.
+</sl-alert>
 
 <header>
   <h1>RedditMap</h1>
 </header>
 
 <main>
+
+
   <section class="left">
     <Treemap></Treemap>
   </section>
@@ -52,26 +74,42 @@
     max-height: calc( 100vh - 4rem );
   }
 
-  main .left, main .right {
+  main .left {
     flex: 1 1 50%;
     display: flex;
     flex-direction: column;
     justify-content: stretch;
     align-items: stretch;
     max-height: 100%;
+  }  
+
+  main .right {
+    display: none;
   }
 
-  main .right .bubble {
-    height: 90%;
-  }
+  @media( min-width: 750px ) {
+    main .right {
+      flex: 1 1 50%;
+      display: flex;
+      flex-direction: column;
+      justify-content: stretch;
+      align-items: stretch;
+      max-height: 100%;
+    }
 
-  main .right .control {
-    height: 10%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: stretch;
-    padding-left: 10%;
-    padding-right: 10%;
+    main .right .bubble {
+      height: 90%;
+    }
+
+    main .right .control {
+      height: 10%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: stretch;
+      padding-left: 10%;
+      padding-right: 10%;
+    }
   }
+ 
 </style>

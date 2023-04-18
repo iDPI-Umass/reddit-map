@@ -136,13 +136,15 @@ class TreemapEngine {
     this.context.fillText( leaf.data.displayLabel, tx, ty, width );
   }
 
-  drawLeaves () {
+  drawLeaves ( options = {} ) {
     for ( const leaf of this.view ) {
       this.drawLeaf( leaf );
     }
 
-    for ( const leaf of this.view ) {
-      this.labelLeaf( leaf );
+    if ( options.witholdLabels !== true ) {
+      for ( const leaf of this.view ) {
+        this.labelLeaf( leaf );
+      }
     }
   }
 
@@ -234,13 +236,15 @@ class TreemapEngine {
 
         this.clearCanvas();
         this.setScale( node, { x0, x1, y0, y1 } );
-        this.drawLeaves();
+        this.drawLeaves({ witholdLabels: this.view.length > 100 });
         this.context.clearRect( x0, y0, width, height )
         this.context.strokeRect( x0, y0, width, height );
 
         for ( const leaf of node.children ) {
           this.drawLeaf( leaf );
-          // this.labelLeaf( leaf );
+          if ( node.children.length < 100 ) {
+            this.labelLeaf( leaf );
+          }
         }
       },
       onComplete: () => {
@@ -306,7 +310,9 @@ class TreemapEngine {
         this.setScale( node, { x0, x1, y0, y1 } );
         for ( const leaf of node.parent.children ) {
           this.drawLeaf( leaf );
-          // this.labelLeaf( leaf );
+          if ( node.parent.children.length < 100 ) {
+            this.labelLeaf( leaf );
+          }
         }
 
         const width = x1 - x0;
@@ -316,7 +322,9 @@ class TreemapEngine {
 
         for ( const leaf of node.children ) {
           this.drawLeaf( leaf );
-          // this.labelLeaf( leaf );
+          if ( node.children.length < 100 ) {
+            this.labelLeaf( leaf );
+          }
         }
       },
       onComplete: () => {

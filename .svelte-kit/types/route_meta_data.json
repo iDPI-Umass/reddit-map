@@ -2,8 +2,5 @@
 	"/": [
 		"src/routes/+layout.js",
 		"src/routes/+layout.js"
-	],
-	"/treemap": [
-		"src/routes/+layout.js"
 	]
 }
