@@ -77,11 +77,12 @@ class TreemapEngine {
   }
 
   setStyleDefaults () {
+    this.fontSize = Math.round( 12 * this.resolutionScale );
+    this.lineHeight = Math.round( this.fontSize * 1.33 );
     this.context.lineWidth = "2px";
     this.context.strokeStyle = "#FFFFFF";
-    this.context.font = "24px Roboto";
+    this.context.font = `${ this.fontSize }px Roboto`;
     this.context.fontKerning = "normal";
-    this.lineHeight = 36;
   }
 
   clearCanvas () {
