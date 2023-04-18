@@ -81,6 +81,7 @@ class TreemapEngine {
     this.context.strokeStyle = "#FFFFFF";
     this.context.font = "24px Roboto";
     this.context.fontKerning = "normal";
+    this.lineHeight = 36;
   }
 
   clearCanvas () {
@@ -133,16 +134,17 @@ class TreemapEngine {
     const ty = y0 + 28; // 14 * this.resolutionScale
 
     this.context.fillStyle = "#000000"
-    this.context.fillText( leaf.data.displayLabel, tx, ty, width );
+    h.drawWrappedText.call( this, leaf.data.displayLabel, tx, ty, width );
   }
 
   drawLeaves ( options = {} ) {
-    for ( const leaf of this.view ) {
-      this.drawLeaf( leaf );
-    }
-
-    if ( options.witholdLabels !== true ) {
+    if ( options.witholdLabels === true ) {
       for ( const leaf of this.view ) {
+        this.drawLeaf( leaf );
+      }
+    } else {
+      for ( const leaf of this.view ) {
+        this.drawLeaf( leaf );
         this.labelLeaf( leaf );
       }
     }

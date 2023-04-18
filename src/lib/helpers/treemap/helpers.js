@@ -12,6 +12,31 @@ const tile = function ( width, height ) {
   };
 };
 
+const drawWrappedText = function ( text, x, y, width ) {
+  const words = text.split(" ");
+  let line = "";
+
+  for ( let i = 0; i < words.length; i++ ) {
+    const word = words[i];
+    const draftLine = line  + word + " ";
+    const metrics = this.context.measureText( draftLine );
+    
+    // Draw the line if we're out of width, otherwise keep tallying.
+    if (( i > 0 ) && ( metrics.width > width )) {
+      this.context.fillText( line, x, y );
+      line = word + " ";
+      y += this.lineHeight;
+    } else {
+      line = draftLine;
+    }
+  }
+
+  // Followup with outstanding text.
+  this.context.fillText( line, x, y );
+}
+
+
 export {
-  tile
+  tile,
+  drawWrappedText
 }
