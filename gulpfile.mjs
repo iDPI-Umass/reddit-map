@@ -3,7 +3,7 @@ import * as Task from "./tasks/index.mjs";
 
 
 const build = async function () {
-  await Task.Shell.run( "react-scripts build" );
+  await Task.Shell.run( "vite build" );
 };
 
 const deploy = async function () {

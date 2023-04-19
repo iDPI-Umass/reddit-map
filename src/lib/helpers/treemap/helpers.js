@@ -12,7 +12,7 @@ const tile = function ( width, height ) {
   };
 };
 
-const drawWrappedText = function ( text, x, y, width ) {
+const drawWrappedText = function ( text, x, y, width ) {  
   const words = text.split(" ");
   let line = "";
 
@@ -36,7 +36,24 @@ const drawWrappedText = function ( text, x, y, width ) {
 }
 
 
+const setupClip = function ( x0, x1, y0, y1 ) {
+  const width = x1 - x0;
+  const height = y1 - y0;
+
+  this.context.save();
+  this.context.beginPath();
+  this.context.rect( x0, y0, width, height );
+  this.context.clip();
+};
+
+const teardownClip = function () {
+  this.context.restore();
+}
+
+
 export {
   tile,
-  drawWrappedText
+  drawWrappedText,
+  setupClip,
+  teardownClip
 }

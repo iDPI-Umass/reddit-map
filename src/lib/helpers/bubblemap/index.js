@@ -125,13 +125,13 @@ class BubblemapEngine {
   indexHierachy ( children ) {
     if ( children == null ) {
       this.hierarchyMap = new Map();
-      this.hierarchyMap.set( this.data.data.displayLabel, this.data );
+      this.hierarchyMap.set( this.data.data.node_id, this.data );
       this.indexHierachy( this.data.children );
       return;
     }
     
     for ( const child of children ) {
-      this.hierarchyMap.set( child.data.displayLabel, child );
+      this.hierarchyMap.set( child.data.node_id, child );
       if ( child.children != null ) {
         this.indexHierachy( child.children );
       }
@@ -146,7 +146,7 @@ class BubblemapEngine {
     this.subroot = this.data;
     this.view = new Set( this.data.descendants() );
     this.subview = this.view;
-    this.labels = h.pluckLabels( this.subroot.children );
+    this.labels = h.pluckLabels( this.subroot );
   }
 
   setStyleDefaults () {
@@ -239,10 +239,10 @@ class BubblemapEngine {
   }
 
   // Updates when we drill down into a treemap category.
-  updateView ({ subrootLabel }) {
-    this.subroot = this.hierarchyMap.get( subrootLabel );
+  updateView ({ subrootID }) {
+    this.subroot = this.hierarchyMap.get( subrootID );
     this.subview = new Set( this.subroot.descendants() );
-    this.labels = h.pluckLabels( this.subroot.children );
+    this.labels = h.pluckLabels( this.subroot );
     this.render();
   }
 
@@ -251,7 +251,7 @@ class BubblemapEngine {
     console.log( "New Month" );
 
     // Reset to top-level view of current data to start animation to another month.
-    this.updateView({ subrootLabel: this.data.data.displayLabel });
+    this.updateView({ subrootID: this.data.data.node_id });
 
     const newView = new Set ( data.descendants() );
     const newBoundaries = this.getBoundaries( newView );
@@ -262,13 +262,13 @@ class BubblemapEngine {
     
     const diffMap = new Map();
     for ( const newNode of newView ) {
-      const name = newNode.data.displayLabel;
-      const oldNode = this.hierarchyMap.get( name );
+      const id = newNode.data.node_id;
+      const oldNode = this.hierarchyMap.get( id );
       if ( oldNode != null ) {
         const dx = newNode.data.tsne_x - oldNode.data.tsne_x;
         const dy = newNode.data.tsne_y - oldNode.data.tsne_y;
         const dSize = newNode.data.subreddit_count - oldNode.data.subreddit_count;
-        diffMap.set( name, { oldNode, newNode, dx, dy, dSize });
+        diffMap.set( id, { oldNode, newNode, dx, dy, dSize });
       }
     }
 
@@ -299,7 +299,7 @@ class BubblemapEngine {
         
 
         // Animate this frame, but avoid mutating old or new data structures.
-        for ( const [ name, { oldNode, newNode, dx, dy, dSize } ] of diffMap.entries() ) {
+        for ( const [ id, { oldNode, newNode, dx, dy, dSize } ] of diffMap.entries() ) {
           this.drawNode({
             data: {
               tsne_x: oldNode.data.tsne_x + ( ratio * dx ),

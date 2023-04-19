@@ -138,16 +138,10 @@ class TreemapEngine {
     h.drawWrappedText.call( this, leaf.data.displayLabel, tx, ty, width );
   }
 
-  drawLeaves ( options = {} ) {
-    if ( options.witholdLabels === true ) {
-      for ( const leaf of this.view ) {
-        this.drawLeaf( leaf );
-      }
-    } else {
-      for ( const leaf of this.view ) {
-        this.drawLeaf( leaf );
-        this.labelLeaf( leaf );
-      }
+  drawLeaves () {
+    for ( const leaf of this.view ) {
+      this.drawLeaf( leaf );
+      this.labelLeaf( leaf );
     }
   }
 
@@ -239,16 +233,35 @@ class TreemapEngine {
 
         this.clearCanvas();
         this.setScale( node, { x0, x1, y0, y1 } );
-        this.drawLeaves({ witholdLabels: this.view.length > 100 });
+
+        if ( this.view.length < 100 ) {
+          for ( const leaf of this.view ) {
+            this.drawLeaf( leaf );
+            this.labelLeaf( leaf );
+          }
+        } else {
+          for ( const leaf of this.view ) {
+            this.drawLeaf( leaf );
+          }
+        }
+
         this.context.clearRect( x0, y0, width, height )
         this.context.strokeRect( x0, y0, width, height );
 
-        for ( const leaf of node.children ) {
-          this.drawLeaf( leaf );
-          if ( node.children.length < 100 ) {
+        if ( node.children.length < 100 ) {
+          // Clip the growing child so internal labels don't overflow and look sloppy.
+          h.setupClip.call( this, x0, x1, y0, y1 );
+          for ( const leaf of node.children ) {
+            this.drawLeaf( leaf );
             this.labelLeaf( leaf );
           }
+          h.teardownClip.call( this );
+        } else {
+          for ( const leaf of node.children ) {
+            this.drawLeaf( leaf );
+          }
         }
+        
       },
       onComplete: () => {
         this.parent = node;
@@ -311,24 +324,38 @@ class TreemapEngine {
 
         this.clearCanvas();
         this.setScale( node, { x0, x1, y0, y1 } );
-        for ( const leaf of node.parent.children ) {
-          this.drawLeaf( leaf );
-          if ( node.parent.children.length < 100 ) {
+
+        if ( node.parent.children.length < 100 ) { 
+          for ( const leaf of node.parent.children ) {
+            this.drawLeaf( leaf );
             this.labelLeaf( leaf );
           }
+        } else {
+          for ( const leaf of node.parent.children ) {
+            this.drawLeaf( leaf );
+          }
         }
+        
 
         const width = x1 - x0;
         const height = y1 - y0;
         this.context.clearRect( x0, y0, width, height )
         this.context.strokeRect( x0, y0, width, height );
 
-        for ( const leaf of node.children ) {
-          this.drawLeaf( leaf );
-          if ( node.children.length < 100 ) {
-            this.labelLeaf( leaf );
+        if ( node.children.length < 100 ) {
+          // Clip the shrinking child so internal labels don't overflow and look sloppy.
+          h.setupClip.call( this, x0, x1, y0, y1 );
+          for ( const leaf of node.children ) {
+            this.drawLeaf( leaf );
+            this.labelLeaf( leaf, { squish: true } );
+          }
+          h.teardownClip.call( this );
+        } else {
+          for ( const leaf of node.children ) {
+            this.drawLeaf( leaf );
           }
         }
+
       },
       onComplete: () => {
         this.parent = node.parent;

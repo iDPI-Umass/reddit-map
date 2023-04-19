@@ -26,7 +26,7 @@
       canvas: treemap,
       // This gets bound to the engine's context.
       onViewUpdate: function () {
-        zoomStore.push({ subrootLabel: this.parent.data.displayLabel });
+        zoomStore.push({ subrootID: this.parent.data.node_id });
       }
     });
 
@@ -74,6 +74,10 @@
   .spinner-frame {
     width: 100%;
     height: 100%;
+  }
+
+  canvas{
+    border: 1px solid black;
   }
 
   .hidden {
