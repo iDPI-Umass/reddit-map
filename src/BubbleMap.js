@@ -37,18 +37,11 @@ function BubbleMap(props) {
     
     // note: might need to make changes later to add more groupings to add interactions with other clusters
     React.useEffect(() => { 
-        function updateChartBrush(e, min_x, min_y, max_x, max_y) {
-            let remapped_x = d3.scaleLinear()
-                .domain([min_x, max_x])
-                .range([ 0, width - margin ])
-            let remapped_y = d3.scaleLinear()
-                .domain([min_y, max_y])
-                .range([ 0, height - margin - 100])
+        function updateChartBrush(e) {
             // If no selection, back to initial coordinate. Otherwise, update X axis domain
             if (e == null) {
                 var prev_brush = stack_of_brushes.pop()
                 stack_of_brushes.push(prev_brush)
-                console.log("props remapped x: ", min_x, min_y, max_x, max_y)
                 remapped_x.domain([ prev_brush["min_x"], prev_brush["max_x"] ])
                 remapped_y.domain([ prev_brush["min_y"], prev_brush["max_y"] ])
                 if (stack_of_brushes.length == 0) {
@@ -264,20 +257,6 @@ function BubbleMap(props) {
             remapped_y = d3.scaleLinear()
                 .domain([min_y, max_y])
                 .range([ 0, height - margin - 100])
-            props.setMinX(min_x)
-            props.setMinY(min_y)
-            props.setMaxX(max_x)
-            props.setMaxY(max_y)
-            console.log("set: ", props.min_x)
-            var brush = d3.brush()                 // Add the brush feature using the d3.brush function
-            .extent( [ [0,0], [width,height] ] ) // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
-            .on("end", function (e) {
-                console.log("calling function: ", props.min_x, props)
-                updateChartBrush(e, min_x, min_y, max_x, max_y)
-
-            })
-            svg.select(".brush").call(brush)
-            
             initial_brush = {"min_x": min_x, "max_x": max_x, "min_y": min_y, "max_y": max_y}
  
             if (props.zoom_info == null) {
@@ -288,7 +267,21 @@ function BubbleMap(props) {
                 stack_of_brushes = props.zoom_info
             }
                 
-          
+            function updateChart(e) {
+                // recover the new scale
+                var newX = e.transform.rescaleX(remapped_x);
+                var newY = e.transform.rescaleY(remapped_y);
+                svg.selectAll("circle")
+                    .attr('cx', function(d) {
+                        return newX(d.x)})
+                    .attr('cy', function(d) {return newY(d.y)});
+
+                svg.selectAll("text")
+                    .attr("dx", function (d) {
+                        return newX(d.x); } )
+                    .attr("dy", function (d) { 
+                        return newY(d.y); } )
+            }
 
             props.setNodeRender(true)
 
@@ -423,7 +416,14 @@ function BubbleMap(props) {
             }
         })
 
-
+        // needs to be converted into a function
+        /* svg.call(d3.zoom()
+            .scaleExtent([1, 5])
+            .translateExtent([[0, 0], [width, height]])
+            .on("zoom", function (e) {
+                updateChart(e)
+                })) */
+       
 
         
 
