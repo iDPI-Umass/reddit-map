@@ -157,7 +157,6 @@ class BubblemapEngine {
   }
 
   setStyleDefaults () {
-    this.context.lineWidth = this.bubbleBorder;
     this.context.strokeStyle = "#000";
     this.context.font = "24px Roboto";
     this.context.fontKerning = "normal";
@@ -174,6 +173,7 @@ class BubblemapEngine {
     
     this.context.beginPath();
     this.context.arc( x, y, r, 0, twoPiRadians );
+    this.context.closePath();
     this.context.fill();    
   }
 
@@ -186,6 +186,32 @@ class BubblemapEngine {
     }
   }
 
+  drawBranch ( node ) {
+    const x = this.scaleX( node.data.tsne_x );
+    const y = this.scaleY( node.data.tsne_y );
+    
+    this.context.beginPath();
+    this.context.moveTo( x, y );
+    
+    const parent = this.hierarchyMap.get( node.parent.data.node_id );
+    const px = this.scaleX( parent.data.tsne_x );
+    const py = this.scaleY( parent.data.tsne_y );
+    
+    this.context.lineTo( px, py );
+    this.context.lineWidth = 1;
+    this.context.stroke();
+  }
+
+  drawBranches () {
+    if ( this.subroot !== this.data ) {
+      for ( const node of this.subview ) {
+        if ( node.data.subreddit != null ) {
+          this.drawBranch( node );
+        }
+      }
+    }
+  }
+
   drawQuarterNode ( node ) {
     const x = this.scaleX( node.data.tsne_x );
     const y = this.scaleY( node.data.tsne_y );
@@ -193,6 +219,7 @@ class BubblemapEngine {
     
     this.context.beginPath();
     this.context.arc( x, y, r, 0, twoPiRadians );
+    this.context.closePath();
     this.context.fillStyle = node.data.colorQuarter;
     this.context.fill();
   }
@@ -204,8 +231,10 @@ class BubblemapEngine {
     
     this.context.beginPath();
     this.context.arc( x, y, r, 0, twoPiRadians );
+    this.context.closePath();
     this.context.fillStyle = node.data.color;
     this.context.fill();
+    this.context.lineWidth = this.bubbleBorder;
     this.context.stroke();
   }
 
@@ -248,6 +277,7 @@ class BubblemapEngine {
     this.clearCanvas();
     this.scaleToBoundaries();
     this.drawInertView();
+    this.drawBranches();
     this.drawSubview();
     this.drawLabels();
   }
