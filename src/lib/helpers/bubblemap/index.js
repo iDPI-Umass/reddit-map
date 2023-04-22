@@ -25,7 +25,8 @@ class BubblemapEngine {
     this.minBubbleSize = 5 * this.resolutionScale;
     this.maxBubbleSize = 20 * this.resolutionScale;
     this.padding = this.maxBubbleSize * 2; // 2 for double radius and either side of width/height
-
+    this.lineHeight = 12 * this.resolutionScale;
+    this.bubbleBorder = Math.round( 2 * this.resolutionScale);
   
     this.d3Canvas
       .attr( "width", this.width )
@@ -51,7 +52,7 @@ class BubblemapEngine {
       .domain([ domain.y0, domain.y1 ])
       .rangeRound([ range.y0, range.y1 ]);
 
-    this.scaleSize = d3.scaleLinear()
+    this.scaleSize = d3.scaleLog()
       .domain([ domain.size0, domain.size1 ])
       .rangeRound([ range.size0, range.size1 ]);
   }
@@ -70,15 +71,15 @@ class BubblemapEngine {
     }
 
     for ( const node of view ) {
-      if ( node.data.subreddit_count != null ) {
-        minSize = node.data.subreddit_count;
-        maxSize = node.data.subreddit_count;
+      if ( node.data.comment_count != null ) {
+        minSize = node.data.comment_count;
+        maxSize = node.data.comment_count;
         break;
       }
     }    
    
     for ( const node of view ) {
-      const { tsne_x, tsne_y, subreddit_count } = node.data;
+      const { tsne_x, tsne_y, comment_count } = node.data;
 
       if ( tsne_x != null ) {
         if ( tsne_x < minX ) {
@@ -95,12 +96,12 @@ class BubblemapEngine {
         }
       }
     
-      if ( subreddit_count != null ) {
-        if ( subreddit_count < minSize ) {
-          minSize = subreddit_count
+      if ( comment_count != null ) {
+        if ( comment_count < minSize ) {
+          minSize = comment_count
         }
-        if ( subreddit_count > maxSize ) {
-          maxSize = subreddit_count
+        if ( comment_count > maxSize ) {
+          maxSize = comment_count
         }
       }
     }
@@ -109,7 +110,6 @@ class BubblemapEngine {
   }
 
   scaleToBoundaries () {
-    this.boundaries = this.getBoundaries( this.view );
     const [ x0, x1, y0, y1, size0, size1 ] = this.boundaries;
     
     this.setScale( { x0, x1, y0, y1, size0, size1 }, { 
@@ -130,10 +130,16 @@ class BubblemapEngine {
       return;
     }
     
-    for ( const child of children ) {
-      this.hierarchyMap.set( child.data.node_id, child );
-      if ( child.children != null ) {
-        this.indexHierachy( child.children );
+    if ( children[0]?.data?.subreddit != null ) {
+      for ( const child of children ) {
+        this.hierarchyMap.set( child.data.subreddit, child );
+      }
+    } else {
+      for ( const child of children ) {
+        this.hierarchyMap.set( child.data.node_id, child );
+        if ( child.children != null ) {
+          this.indexHierachy( child.children );
+        }
       }
     }
   }
@@ -143,6 +149,7 @@ class BubblemapEngine {
     console.log( "bubblemap data", this.data );
     this.indexHierachy();
 
+    this.boundaries = this.data.boundaries;
     this.subroot = this.data;
     this.view = new Set( this.data.descendants() );
     this.subview = this.view;
@@ -150,8 +157,8 @@ class BubblemapEngine {
   }
 
   setStyleDefaults () {
-    this.context.lineWidth = "2px";
-    this.context.strokeStyle = "#FFFFFF";
+    this.context.lineWidth = this.bubbleBorder;
+    this.context.strokeStyle = "#000";
     this.context.font = "24px Roboto";
     this.context.fontKerning = "normal";
   }
@@ -160,64 +167,71 @@ class BubblemapEngine {
     this.context.clearRect( 0, 0, this.width, this.height );
   }
 
-  drawParent () {
-    const fill = `${ this.parent?.data.color ?? "#FFFFFF" }80`;
-    const label = this.parent?.data.taxonomy_label ?? "All of Reddit";
-
-    const x0 = 0;
-    const x1 = this.scaleX( 1 );
-    const y0 = 0;
-    const y1 = this.parentHeight;
-    const tx = 4;   // 2 * this.resolutionScale
-    const ty = 28;  // 14 * this.resolutionScale
-
-    this.context.fillStyle = fill;
-    this.context.fillRect( x0, y0, x1, y1 );
-    this.context.strokeRect( x0, y0, x1, y1 );
-
-    this.context.fillStyle = "#000"
-    this.context.fillText( label, tx, ty, this.width );
-  }
-
   drawInertNode ( node ) {
     const x = this.scaleX( node.data.tsne_x );
     const y = this.scaleY( node.data.tsne_y );
-    const r = this.scaleSize( node.data.subreddit_count );
+    const r = this.scaleSize( node.data.comment_count );
     
     this.context.beginPath();
     this.context.arc( x, y, r, 0, twoPiRadians );
     this.context.fill();    
   }
 
-  drawView () {
+  drawInertView () {
     this.context.fillStyle = "#80808040";
     for ( const node of this.view ) {
-      if ( !this.subview.has( node ) ) {
+      if ( !this.subview.has( node ) && (node.data.subreddit != null) ) {
         this.drawInertNode( node );
       }
     }
   }
 
-  drawNode ( node ) {
+  drawQuarterNode ( node ) {
     const x = this.scaleX( node.data.tsne_x );
     const y = this.scaleY( node.data.tsne_y );
-    const r = this.scaleSize( node.data.subreddit_count );
+    const r = this.scaleSize( node.data.comment_count );
     
     this.context.beginPath();
     this.context.arc( x, y, r, 0, twoPiRadians );
-    this.context.fillStyle = node.data.colorBubble;
-    this.context.fill();    
+    this.context.fillStyle = node.data.colorQuarter;
+    this.context.fill();
+  }
+
+  drawFullNode ( node ) {
+    const x = this.scaleX( node.data.tsne_x );
+    const y = this.scaleY( node.data.tsne_y );
+    const r = this.scaleSize( node.data.comment_count );
+    
+    this.context.beginPath();
+    this.context.arc( x, y, r, 0, twoPiRadians );
+    this.context.fillStyle = node.data.color;
+    this.context.fill();
+    this.context.stroke();
   }
 
   drawSubview () {
-    for ( const node of this.subview ) {
-      this.drawNode( node );
+    if ( this.subroot === this.data ) {
+      for ( const node of this.subview ) {
+        if ( node.data.subreddit != null ) {
+          this.drawQuarterNode( node );
+        }
+      }
+    } else {
+      for ( const node of this.subview ) {
+        if ( node.data.subreddit != null ) {
+          this.drawFullNode( node );
+        }
+      }
     }
   }
 
   drawLabel ( label ) {
-    const x = this.scaleX( label.x );
-    const y = this.scaleY( label.y );
+    let x = this.scaleX( label.x );
+    let y = this.scaleY( label.y );
+
+    const metrics = this.context.measureText( label.text );
+    x -= metrics.width / 2;
+    y += this.lineHeight / 2;
 
     this.context.fillStyle = "#000000"
     this.context.fillText( label.text, x, y );
@@ -233,7 +247,7 @@ class BubblemapEngine {
     this.setStyleDefaults();
     this.clearCanvas();
     this.scaleToBoundaries();
-    this.drawView();
+    this.drawInertView();
     this.drawSubview();
     this.drawLabels();
   }
@@ -254,7 +268,7 @@ class BubblemapEngine {
     this.updateView({ subrootID: this.data.data.node_id });
 
     const newView = new Set ( data.descendants() );
-    const newBoundaries = this.getBoundaries( newView );
+    const newBoundaries = data.boundaries;
     const dBoundaries = [];
     for ( let i = 0; i < this.boundaries.length; i++ ) {
       dBoundaries.push( newBoundaries[i] - this.boundaries[i] );
@@ -262,13 +276,13 @@ class BubblemapEngine {
     
     const diffMap = new Map();
     for ( const newNode of newView ) {
-      const id = newNode.data.node_id;
-      const oldNode = this.hierarchyMap.get( id );
+      const subreddit = newNode.data.subreddit;
+      const oldNode = this.hierarchyMap.get( subreddit );
       if ( oldNode != null ) {
         const dx = newNode.data.tsne_x - oldNode.data.tsne_x;
         const dy = newNode.data.tsne_y - oldNode.data.tsne_y;
-        const dSize = newNode.data.subreddit_count - oldNode.data.subreddit_count;
-        diffMap.set( id, { oldNode, newNode, dx, dy, dSize });
+        const dSize = newNode.data.comment_count - oldNode.data.comment_count;
+        diffMap.set( subreddit, { oldNode, newNode, dx, dy, dSize });
       }
     }
 
@@ -299,13 +313,13 @@ class BubblemapEngine {
         
 
         // Animate this frame, but avoid mutating old or new data structures.
-        for ( const [ id, { oldNode, newNode, dx, dy, dSize } ] of diffMap.entries() ) {
-          this.drawNode({
+        for ( const [ subreddit, { oldNode, newNode, dx, dy, dSize } ] of diffMap.entries() ) {
+          this.drawQuarterNode({
             data: {
               tsne_x: oldNode.data.tsne_x + ( ratio * dx ),
               tsne_y: oldNode.data.tsne_y + ( ratio * dy ),
-              subreddit_count: oldNode.data.subreddit_count + ( ratio * dSize ),
-              colorBubble: oldNode.data.colorBubble
+              comment_count: oldNode.data.comment_count + ( ratio * dSize ),
+              colorQuarter: oldNode.data.colorQuarter
             }
           });
         }

@@ -22,6 +22,7 @@ class TreemapEngine {
     this.parentHeight = 30 * this.resolutionScale;
     this.width = frame.clientWidth * this.resolutionScale;
     this.height = frame.clientHeight * this.resolutionScale;
+    this.lineWidth = 2 * this.resolutionScale;
 
     this.resetScale();
   
@@ -79,7 +80,7 @@ class TreemapEngine {
   setStyleDefaults () {
     this.fontSize = Math.round( 12 * this.resolutionScale );
     this.lineHeight = Math.round( this.fontSize * 1.33 );
-    this.context.lineWidth = "2px";
+    this.context.lineWidth = this.lineWidth;
     this.context.strokeStyle = "#FFFFFF";
     this.context.font = `${ this.fontSize }px Roboto`;
     this.context.fontKerning = "normal";
@@ -119,7 +120,7 @@ class TreemapEngine {
 
     this.context.clearRect( x0, y0, width, height );
     
-    this.context.fillStyle = leaf.data.colorLeaf;
+    this.context.fillStyle = leaf.data.colorHalf;
     this.context.fillRect( x0, y0, width, height );
     
     this.context.strokeRect( x0, y0, width, height );
