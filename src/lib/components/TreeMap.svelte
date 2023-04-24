@@ -4,11 +4,12 @@
   import { sourceStore } from "$lib/stores/source.js";
   import { resizeStore } from "$lib/stores/resize.js";
   import { zoomStore } from "$lib/stores/zoom.js";
+  import { resetStore } from "$lib/stores/reset";
   import TreemapEngine from "$lib/helpers/treemap/index.js";
 
   let treemap, frame, engine;
   let source, unsubscribeSource;
-  let unsubscribeResize;
+  let unsubscribeResize, unsubscribeReset;
   let hidden = true;
 
   const render = function () {
@@ -42,11 +43,18 @@
         render();
       }
     });
+
+    unsubscribeReset = resetStore.subscribe( function ( reset ) {
+      if ( reset != null ) {
+        engine.resetView();
+      }
+    });
   });
 
   onDestroy(() => {
     unsubscribeSource();
     unsubscribeResize();
+    unsubscribeReset();
   });
 </script>
 

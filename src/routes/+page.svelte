@@ -4,12 +4,24 @@
   import Treemap from "$lib/components/Treemap.svelte";
   import Bubblemap from "$lib/components/Bubblemap.svelte";
   import Slider from "$lib/components/Slider.svelte";
-  import { sourceStore } from "../lib/stores/source";
+  import { sourceStore } from "$lib/stores/source";
+  import { resetStore } from "$lib/stores/reset";
   import { onMount } from "svelte";
 
   sourceStore.push( "2021-04" );
 
-  let alert
+  let alert;
+
+  const handleReset = function ( event ) {
+    event.preventDefault();
+    resetStore.push( new Date().toISOString() );
+  };
+
+  const handleKeypress = function ( event ) {
+    if ( event.key === "Enter" ) {
+      handleReset( event );
+    }
+  };
 
   onMount( function () {
     if ( window.innerWidth < 750 ) {
@@ -29,7 +41,14 @@
 </sl-alert>
 
 <header>
-  <h1>RedditMap</h1>
+  <a
+    href="/"
+    aria-label="reset view"
+    on:click={handleReset}
+    on:keypress={handleKeypress}
+    >
+    <h1>RedditMap</h1>
+    </a>
 </header>
 
 <main>
@@ -62,6 +81,11 @@
     background: var(--gobo-color-panel);
     border-bottom: var(--gobo-border-panel);
     height: 4rem;
+  }
+
+  header a {
+    color: inherit;
+    text-decoration: none;
   }
 
   main {

@@ -1,7 +1,7 @@
 import { writable } from "svelte/store";
 
 const createStore = function () {
-  let event = {};
+  let event = null;
 
   const { subscribe, update } = writable( event );
 
@@ -16,4 +16,4 @@ const createStore = function () {
 };
 
 
-export const scrollStore = createStore();
+export const resetStore = createStore();

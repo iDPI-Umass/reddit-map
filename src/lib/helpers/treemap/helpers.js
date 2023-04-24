@@ -1,4 +1,7 @@
 import * as d3 from "d3";
+import { animate, cubicBezier } from "popmotion";
+
+const ease = cubicBezier( 0.42, 0.0, 0.58, 1.0 );
 
 const tile = function ( width, height ) {
   return function ( node, x0, y0, x1, y1 ) {
@@ -51,7 +54,11 @@ const teardownClip = function () {
 }
 
 
+
+
 export {
+  animate,
+  ease,
   tile,
   drawWrappedText,
   setupClip,

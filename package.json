@@ -5,7 +5,6 @@
   "type": "module",
   "devDependencies": {
     "@dashkite/dolores": "github:dashkite/dolores#gobo",
-    "@dashkite/joy": "^0.3.16",
     "@dashkite/template": "^0.0.1",
     "@sveltejs/adapter-auto": "^1.0.0",
     "@sveltejs/adapter-static": "^2.0.1",
@@ -23,6 +22,7 @@
     "yargs": "^17.7.1"
   },
   "dependencies": {
+    "@dashkite/joy": "^0.3.16",
     "@observablehq/stdlib": "^5.3.2",
     "@shoelace-style/shoelace": "2.3.0",
     "@testing-library/jest-dom": "^5.16.5",

@@ -5,11 +5,12 @@
   import { sourceStore } from "$lib/stores/source.js";
   import { resizeStore } from "$lib/stores/resize.js";
   import { zoomStore } from "$lib/stores/zoom";
+  import { resetStore } from "$lib/stores/reset";
   import BubblemapEngine from "$lib/helpers/bubblemap/index.js";
 
   let bubblemap, frame, engine;
   let source, unsubscribeSource;
-  let unsubscribeResize, unsubscribeZoom;
+  let unsubscribeResize, unsubscribeZoom, unsubscribeReset;
   let hidden = true;
 
   const render = function () {
@@ -48,11 +49,18 @@
         engine.updateView( view );
       }
     });
+
+    unsubscribeReset = resetStore.subscribe( function ( reset ) {
+      if ( reset != null ) {
+        // engine.resetView();
+      }
+    });
   });
 
   onDestroy(() => {
     unsubscribeSource();
     unsubscribeResize();
+    unsubscribeReset();
   });
 </script>
 
