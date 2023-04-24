@@ -26,7 +26,12 @@ class BubblemapEngine {
     this.maxBubbleSize = 20 * this.resolutionScale;
     this.padding = this.maxBubbleSize * 2; // 2 for double radius and either side of width/height
     this.lineHeight = 12 * this.resolutionScale;
-    this.bubbleBorder = Math.round( 2 * this.resolutionScale);
+    this.lineHeightHalf = this.lineHeight / 2;
+    this.labelBoxPadding = 4 * this.resolutionScale;
+    this.labelBoxPaddingDouble = 2 * this.labelBoxPadding;
+    this.labelBoxHeight = this.lineHeight + ( 2 * this.labelBoxPadding );
+    this.labelBoxHeightHalf = this.labelBoxHeight / 2;
+    this.bubbleBorder = Math.round( 0.5 * this.resolutionScale);
   
     this.d3Canvas
       .attr( "width", this.width )
@@ -186,6 +191,16 @@ class BubblemapEngine {
     }
   }
 
+  getNearestLabel ( node ) {
+    let parent = this.hierarchyMap.get( node.parent.data.node_id );
+    for ( const label of this.labels ) {
+      if ( parent === label ) {
+        return parent;
+      }
+    }
+    return this.getNearestLabel( parent );
+  }
+
   drawBranch ( node ) {
     const x = this.scaleX( node.data.tsne_x );
     const y = this.scaleY( node.data.tsne_y );
@@ -193,7 +208,7 @@ class BubblemapEngine {
     this.context.beginPath();
     this.context.moveTo( x, y );
     
-    const parent = this.hierarchyMap.get( node.parent.data.node_id );
+    const parent = this.getNearestLabel( node );
     const px = this.scaleX( parent.data.tsne_x );
     const py = this.scaleY( parent.data.tsne_y );
     
@@ -255,15 +270,22 @@ class BubblemapEngine {
   }
 
   drawLabel ( label ) {
-    let x = this.scaleX( label.x );
-    let y = this.scaleY( label.y );
+    const x = this.scaleX( label.data.tsne_x );
+    const y = this.scaleY( label.data.tsne_y );
+    const text = label.data.displayLabel;
 
-    const metrics = this.context.measureText( label.text );
-    x -= metrics.width / 2;
-    y += this.lineHeight / 2;
+    const metrics = this.context.measureText( text );
+    const textX = x - metrics.width / 2;
+    const textY = y + this.labelBoxPadding;
+    const boxX = textX - this.labelBoxPadding;
+    const boxY = y - this.labelBoxHeightHalf;
+    const boxWidth = metrics.width + this.labelBoxPaddingDouble;
 
-    this.context.fillStyle = "#000000"
-    this.context.fillText( label.text, x, y );
+    this.context.fillStyle = "#FFFFFFC0";
+    this.context.fillRect( boxX, boxY, boxWidth, this.labelBoxHeight );
+    this.context.strokeRect( boxX, boxY, boxWidth, this.labelBoxHeight );
+    this.context.fillStyle = "#000000";
+    this.context.fillText( text, textX, textY );
   }
 
   drawLabels () {
