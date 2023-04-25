@@ -7,7 +7,7 @@ import Treemap from './Treemap';
 import BubbleMap from "./BubbleMap";
 import VisPickerUI from './VisPickerUI';
 import Slider from './Slider';
-import data_4 from "./data/RC_2021-04_KMeans_Agglom_100_Clusters_Updated_Mapping.json"
+import data_4 from "./data/RC_2022-02_KMeans_Agglom_100_Clusters_Rules_Mapping.json"
 import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Updated_Mapping.json"
 import Thumbnail from "react-webpage-thumbnail";
 
