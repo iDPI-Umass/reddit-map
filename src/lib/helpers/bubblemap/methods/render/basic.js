@@ -11,7 +11,6 @@ const clearCanvas = function () {
 const render = function () {
   this.setStyleDefaults();
   this.clearCanvas();
-  this.scaleToBoundaries();
   this.drawInertView();
   this.drawBranches();
   this.drawSubview();

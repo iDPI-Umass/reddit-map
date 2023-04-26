@@ -17,8 +17,8 @@
     if ( source == null ) {
         return;
     }
-    engine.size( frame );
     engine.loadData( source );
+    engine.size( frame );
     engine.render();
     hidden = false;
   };
@@ -52,7 +52,7 @@
 
     unsubscribeReset = resetStore.subscribe( function ( reset ) {
       if ( reset != null ) {
-        // engine.resetView();
+        engine.resetView();
       }
     });
   });

@@ -5,7 +5,6 @@ const loadData = function ( data ) {
   console.log( "bubblemap data", this.data );
   this.indexHierachy();
 
-  this.boundaries = this.data.boundaries;
   this.subroot = this.data;
   this.view = new Set( this.data.descendants() );
   this.subview = this.view;

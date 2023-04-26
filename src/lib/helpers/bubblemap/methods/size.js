@@ -2,17 +2,29 @@ import * as d3 from "d3";
 
 const size = function ( frame ) {
   this.resolutionScale = 2;
+  
   this.width = frame.clientWidth * this.resolutionScale;
   this.height = frame.clientHeight * this.resolutionScale;
+  
   this.bubbleSize = 5 * this.resolutionScale;
+  this.bubbleBorder = Math.round( 0.5 * this.resolutionScale);
   this.padding = this.bubbleSize * 2; // 2 for double radius and either side of width/height
+  
   this.lineHeight = 12 * this.resolutionScale;
   this.lineHeightHalf = this.lineHeight / 2;
   this.labelBoxPadding = 4 * this.resolutionScale;
   this.labelBoxPaddingDouble = 2 * this.labelBoxPadding;
   this.labelBoxHeight = this.lineHeight + ( 2 * this.labelBoxPadding );
   this.labelBoxHeightHalf = this.labelBoxHeight / 2;
-  this.bubbleBorder = Math.round( 0.5 * this.resolutionScale);
+
+  this.boundaries = this.data.boundaries;
+  const [ x0, x1, y0, y1 ] = this.boundaries
+  this.zoomWidth = x1 - x0;
+  this.zoomHeight = y1 - y0;
+  this.zoomRatioX = 0.5;
+  this.zoomRatioY = 0.5;
+
+  this.scaleToBoundaries();
 
   this.d3Canvas
     .attr( "width", this.width )

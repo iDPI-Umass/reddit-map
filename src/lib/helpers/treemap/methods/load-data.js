@@ -13,8 +13,7 @@ const loadData = function ( data ) {
   console.log( "treempa data", this.data );
   this.data.data.color = "#FFFFFF";
   this.data.data.taxonomy_label = "All of Reddit";
-  this.parent = this.data;
-  this.view = this.data.children;
+  this.resetView();
 };
 
 export {

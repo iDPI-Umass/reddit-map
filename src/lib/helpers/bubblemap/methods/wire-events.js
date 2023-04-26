@@ -1,8 +1,13 @@
 const wireEvents = function () {
-  if ( this.isWired !== true ) {
-    // this.element.addEventListener( "click", this.zoom.bind(this) );
-    this.isWired = true;
-  }
+  this.zoomScale = 1;
+  this.dragCenterX = 0;
+  this.dragCenterY = 0;
+  
+  this.startZoomLoop();
+  
+  this.element.addEventListener( "wheel", this.scrollZoom.bind(this) );
+  this.element.addEventListener( "pointerdown", this.handlePointerDown.bind(this) );
+  this.element.addEventListener( "pointerup", this.handlePointerUp.bind(this) );
 };
 
 export { wireEvents }

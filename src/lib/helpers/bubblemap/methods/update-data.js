@@ -5,7 +5,7 @@ const updateData = function ( data ) {
   console.log( "New Month" );
 
   // Reset to top-level view of current data to start animation to another month.
-  this.updateView({ subrootID: this.data.data.node_id });
+  this.resetView();
 
   const newView = new Set ( data.descendants() );
   const newBoundaries = data.boundaries;
@@ -25,6 +25,8 @@ const updateData = function ( data ) {
       diffMap.set( subreddit, { oldNode, newNode, dx, dy, dSize });
     }
   }
+
+  this.stopZoomLoop();
 
   h.animate({
     from: 0,
@@ -64,6 +66,7 @@ const updateData = function ( data ) {
     onComplete: () => {
       this.loadData( data );
       this.render();
+      this.startZoomLoop();
     }
   });
 };

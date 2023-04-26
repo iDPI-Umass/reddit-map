@@ -7,8 +7,6 @@ const size = function ( frame ) {
   this.height = frame.clientHeight * this.resolutionScale;
   this.lineWidth = 2 * this.resolutionScale;
 
-  this.resetScale();
-
   this.d3Canvas
     .attr( "width", this.width )
     .attr( "height", this.height );
