@@ -1,6 +1,5 @@
 import * as d3 from "d3";
 import * as Meta from "@dashkite/joy/metaclass";
-import * as h from "./helpers.js";
 import * as methods from "./methods";
 
 

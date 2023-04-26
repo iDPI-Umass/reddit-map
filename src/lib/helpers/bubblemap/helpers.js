@@ -1,4 +1,8 @@
 import * as d3 from "d3";
+import { animate, cubicBezier } from "popmotion";
+
+const twoPiRadians = 2 * Math.PI;
+const ease = cubicBezier( 0.42, 0.0, 0.58, 1.0 );
 
 const hasLeaves = function ( subroot ) {
   return subroot.children?.[0].children == null;
@@ -23,5 +27,8 @@ const pluckLabels = function ( subroot ) {
 };
 
 export {
+  twoPiRadians,
+  animate,
+  ease,
   pluckLabels
 }
