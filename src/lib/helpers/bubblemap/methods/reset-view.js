@@ -8,6 +8,14 @@ const resetView = function () {
   this.subview = this.view;
   this.labels = h.pluckLabels( this.subroot );
 
+  this.neighbors = [];
+  if ( this.labels.length === 1 ) {
+    for ( const id of this.labels[0].data.nearest_neighbors ) {
+      const node = this.hierarchyMap.get( id );
+      this.neighbors.push( node );
+    }
+  }
+
   this.zoomScale = 1;
   this.dragCenterX = 0;
   this.dragCenterY = 0;

@@ -13,8 +13,10 @@ const render = function () {
   this.clearCanvas();
   this.drawInertView();
   this.drawBranches();
+  this.drawNeighborBranches();
   this.drawSubview();
   this.drawLabels();
+  this.drawNeighborLabels();
 }
 
 export {

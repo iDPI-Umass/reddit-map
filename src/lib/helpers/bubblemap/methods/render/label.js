@@ -23,7 +23,34 @@ const drawLabels = function () {
   }
 };
 
+const drawNeighborLabel = function ( end ) {
+  const x1 = this.scaleX( end.data.tsne_x );
+  const y1 = this.scaleY( end.data.tsne_y );
+  const text = end.data.displayLabel;
+
+  const metrics = this.context.measureText( text );
+  const textX = x1 - metrics.width / 2;
+  const textY = y1 + this.labelBoxPadding;
+  const boxX = textX - this.labelBoxPadding;
+  const boxY = y1 - this.labelBoxHeightHalf;
+  const boxWidth = metrics.width + this.labelBoxPaddingDouble;
+
+  this.context.fillStyle = "#000000C0";
+  this.context.fillRect( boxX, boxY, boxWidth, this.labelBoxHeight );
+  this.context.strokeRect( boxX, boxY, boxWidth, this.labelBoxHeight );
+  this.context.fillStyle = "#FFFFFF";
+  this.context.fillText( text, textX, textY );
+};
+
+const drawNeighborLabels = function () {
+  for ( const node of this.neighbors ) {
+    this.drawNeighborLabel( node );
+  }
+};
+
 export {
   drawLabel,
-  drawLabels
+  drawLabels,
+  drawNeighborLabel,
+  drawNeighborLabels
 }
