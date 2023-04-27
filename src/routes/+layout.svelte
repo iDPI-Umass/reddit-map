@@ -15,6 +15,7 @@
   import "$lib/styles/brand.css";
   import "$lib/styles/keyword-table.css";
   import "$lib/styles/switches.css";
+  import "$lib/styles/buttons.css";
 
   // Now we can setup the store stuff with Svelte
   import { beforeUpdate, onDestroy } from "svelte";
@@ -26,9 +27,8 @@
     
     beforeUpdate( function() {
       window.addEventListener( "resize", function () {
-        resizeStore.push();
+        resizeStore.push({ id: ( new Date ).toISOString() });
       });
-
     });
 
     onDestroy( function () {

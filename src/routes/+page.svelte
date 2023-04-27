@@ -4,14 +4,16 @@
   import "@shoelace-style/shoelace/dist/components/button/button.js";
   import Treemap from "$lib/components/Treemap.svelte";
   import Bubblemap from "$lib/components/Bubblemap.svelte";
-  import Slider from "$lib/components/Slider.svelte";
   import { sourceStore } from "$lib/stores/source.js";
   import { zoomStore } from "$lib/stores/zoom.js";
-  import { onMount } from "svelte";
+  import { resizeStore } from "$lib/stores/resize.js";
+  import { onDestroy, onMount } from "svelte";
+
+  let unsubscribeResize;
 
   sourceStore.push( "2021-04" );
 
-  let alert;
+  let left, alert;
 
   const handleReset = function ( event ) {
     event.preventDefault();
@@ -21,19 +23,30 @@
     zoomStore.push({ type: "reset" });
   };
 
-  const handleBack = function ( event ) {
-    event.preventDefault();
-    if ( (event.type === "keypress") && (event.key !== "Enter") ) {
-      return;
-    }
-    zoomStore.push({ type: "back parent" });
-  };
-
   onMount( function () {
     if ( window.innerWidth < 750 ) {
       alert.toast();
     }
-  })
+
+    unsubscribeResize = resizeStore.subscribe( function ( event ) {
+      if ( event != null && event.width == null ) {
+        console.log({
+          id: event.id,
+          width: left.clientWidth,
+          height: left.clientHeight
+        })
+        resizeStore.push({
+          id: event.id,
+          width: left.clientWidth,
+          height: left.clientHeight
+        });
+      }
+    });
+  });
+
+  onDestroy( function () {
+    unsubscribeResize();
+  });
 
 </script>
 
@@ -59,31 +72,12 @@
 
 <main>
 
-
-  <section class="left">
-    <div class="tree">
-      <Treemap></Treemap>
-    </div>
-    
-    <section class="control">
-      <sl-button
-        on:click={handleBack}
-        on:keypress={handleBack}
-        variant="primary"
-        pill>
-        Back
-      </sl-button>
-    </section>
+  <section bind:this={left} class="left">
+    <Treemap></Treemap>
   </section>
 
   <section class="right">
-    <div class="bubble">
-      <Bubblemap></Bubblemap>
-    </div>
-    
-    <section class="control">
-      <Slider></Slider>
-    </section>
+    <Bubblemap></Bubblemap>
   </section>
   
 </main>
@@ -112,7 +106,7 @@
     flex-direction: row;
     justify-content: flex-start;
     align-items: stretch;
-    padding: 1rem;
+    padding: 4rem 1rem 4rem 1rem;
     max-height: calc( 100vh - 4rem );
   }
 
@@ -120,24 +114,8 @@
     flex: 1 1 50%;
     display: flex;
     flex-direction: column;
-    justify-content: stretch;
+    justify-content: flex-start;
     align-items: stretch;
-  }
-
-  main .left .tree {
-    flex: 1 0 auto;
-  }
-
-  main .left .control {
-    height: 5rem;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 0 var(--gobo-width-spacer) 0 var(--gobo-width-spacer);
-  }
-
-  main .left .control sl-button {
-    width: 8rem;
   }
 
   main .right {
@@ -146,30 +124,18 @@
 
   @media( min-width: 750px ) {
     main .left {
-      padding: 4rem 1rem 4rem 0;
+      padding-right: 1rem;
+      max-height: 100%;
     }
 
     main .right {
       flex: 1 1 50%;
       display: flex;
       flex-direction: column;
-      justify-content: stretch;
+      justify-content: flex-start;
       align-items: stretch;
-      padding: 4rem 0 4rem 1rem;
-    }
-
-    main .right .bubble {
-      flex: 1 0 auto;
-    }
-
-    main .right .control {
-      height: 5rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: stretch;
-      padding-left: 10%;
-      padding-right: 10%;
+      padding-right: 1rem;
+      max-height: 100%;
     }
   }
  

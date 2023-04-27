@@ -1,27 +1,25 @@
 import { writable } from "svelte/store";
 
 
-const getSize = function () {
-  return `${ window.innerHeight }::${ window.innerWidth }`;
-};
-
 const createStore = function () {
   let resize = null;
   let timer;
 
   const { subscribe, update } = writable( resize );
 
-  const triggerResize = () => update ( getSize );
+  const triggerResize = value => {
+    return () => update ( () => value );
+  }
 
-  const debouncedUpdate = function () {
+  const debouncedUpdate = function ( value ) {
     clearTimeout( timer );
-    timer = setTimeout( triggerResize, 250 );
+    timer = setTimeout( triggerResize(value), 250 );
   };
 
   return {
     subscribe,
-    push: function () {
-      debouncedUpdate();
+    push: function ( value ) {
+      debouncedUpdate( value );
     }
   };
 };

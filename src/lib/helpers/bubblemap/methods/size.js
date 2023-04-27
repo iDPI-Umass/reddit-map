@@ -1,10 +1,10 @@
 import * as d3 from "d3";
 
-const size = function ( frame ) {
+const size = function ({ width, height }) {
   this.resolutionScale = 2;
   
-  this.width = frame.clientWidth * this.resolutionScale;
-  this.height = frame.clientHeight * this.resolutionScale;
+  this.width = width * this.resolutionScale;
+  this.height = height * this.resolutionScale;
   
   this.bubbleSize = 5 * this.resolutionScale;
   this.bubbleBorder = Math.round( 0.5 * this.resolutionScale);
@@ -23,6 +23,9 @@ const size = function ( frame ) {
 };
 
 const setScale = function ( domain, range ) {
+  this.currentDomain = domain;
+  this.currentRange = range;
+
   this.scaleX = d3.scaleLinear()
     .domain([ domain.x0, domain.x1 ])
     .rangeRound([ range.x0, range.x1 ]);
@@ -43,4 +46,22 @@ const scaleToBoundaries = function () {
   });
 };
 
-export { size, setScale, scaleToBoundaries }
+const setScaleRange = function ( range ) {
+  const domain = this.currentDomain;
+  this.currentRange = range;
+
+  this.scaleX = d3.scaleLinear()
+    .domain([ domain.x0, domain.x1 ])
+    .rangeRound([ range.x0, range.x1 ]);
+
+  this.scaleY = d3.scaleLinear()
+    .domain([ domain.y0, domain.y1 ])
+    .rangeRound([ range.y0, range.y1 ]);
+};
+
+export { 
+  size,
+  setScale, 
+  scaleToBoundaries,
+  setScaleRange
+}

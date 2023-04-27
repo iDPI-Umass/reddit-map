@@ -7,9 +7,18 @@
   import TreemapEngine from "$lib/helpers/treemap/index.js";
 
   let treemap, frame, engine;
-  let source, unsubscribeSource;
+  let unsubscribeSource;
   let unsubscribeResize, unsubscribeZoom;
+  let canvasWidth, canvasHeight;
   let hidden = true;
+
+  const handleBack = function ( event ) {
+    event.preventDefault();
+    if ( (event.type === "keypress") && (event.key !== "Enter") ) {
+      return;
+    }
+    zoomStore.push({ type: "back parent" });
+  };
   
   onMount(() => {
     engine = TreemapEngine.create({ 
@@ -25,7 +34,10 @@
 
     unsubscribeSource = sourceStore.subscribe( function ( source ) {
       if ( source != null ) {
-        engine.size( frame );
+        const width = frame.clientWidth;
+        const height = frame.clientHeight;
+
+        engine.size({ width, height });
         engine.loadData( source.data );
         engine.initialize();
         engine.render();
@@ -34,8 +46,19 @@
     });
 
     unsubscribeResize = resizeStore.subscribe( function ( resize ) {
-      if ( resize != null ) {
-        engine.size( frame );
+      if ( resize?.width != null ) {
+        const width = resize.width;
+        const height = resize.height - ( 16 * 5 );
+        canvasWidth = `${width}px`;
+        canvasHeight = `${height}px`;
+
+        engine.size({ width, height });
+        engine.setScaleRange({
+          x0: 0,
+          x1: engine.width,
+          y0: 0,
+          y1: engine.height
+        });
         engine.render();
       }
     });
@@ -69,23 +92,48 @@
 
   <canvas 
     bind:this={treemap}
+    style:width="{canvasWidth ? canvasWidth : 'auto'}"
+    style:height="{canvasHeight ? canvasHeight : 'auto'}"
     class:hidden="{hidden === true}">
   </canvas>
 </div>
+
+<section class="control">
+  <sl-button
+    on:click={handleBack}
+    on:keypress={handleBack}
+    class="action"
+    pill>
+    Back
+  </sl-button>
+</section>
 
 
 
 
 <style>
+  .hidden {
+    display: none;
+  }
+
   .spinner-frame {
-    width: 100%;
-    height:100%;
+    flex: 1 1 0;
+    max-height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
   }
 
-  .hidden {
-    display: none;
+  .control {
+    flex: 0 0 5rem;
+    min-height: 5rem;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0 var(--gobo-width-spacer) 0 var(--gobo-width-spacer);
+  }
+
+  .control sl-button {
+    width: 8rem;
   }
 </style>

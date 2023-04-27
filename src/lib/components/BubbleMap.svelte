@@ -1,6 +1,7 @@
 <script>
   import "@shoelace-style/shoelace/dist/components/button/button.js";
   import Spinner from "$lib/components/primitives/Spinner.svelte";
+  import Slider from "$lib/components/Slider.svelte";
   import { onDestroy, onMount } from "svelte";
   import { sourceStore } from "$lib/stores/source.js";
   import { resizeStore } from "$lib/stores/resize.js";
@@ -8,8 +9,9 @@
   import BubblemapEngine from "$lib/helpers/bubblemap/index.js";
 
   let bubblemap, frame, engine;
-  let source, unsubscribeSource;
+  let unsubscribeSource;
   let unsubscribeResize, unsubscribeZoom;
+  let canvasWidth, canvasHeight;
   let hidden = true;
 
   onMount(() => {
@@ -18,8 +20,11 @@
     unsubscribeSource = sourceStore.subscribe( function ( source ) {
       if ( source != null ) {
         if ( engine.data == null ) {
+          const width = frame.clientWidth;
+          const height = frame.clientHeight;
+
           engine.loadData( source.data );
-          engine.size( frame );
+          engine.size({ width, height });
           engine.initialize();
           engine.render();
           hidden = false;
@@ -30,8 +35,19 @@
     });
 
     unsubscribeResize = resizeStore.subscribe( function ( resize ) {
-      if ( resize != null ) {
-        engine.size( frame );
+      if ( resize?.width != null ) {
+        const width = resize.width;
+        const height = resize.height - ( 16 * 5 );
+        canvasWidth = `${width}px`;
+        canvasHeight = `${height}px`;
+
+        engine.size({ width, height });
+        engine.setScaleRange({
+          x0: 0,
+          x1: engine.width,
+          y0: 0,
+          y1: engine.height
+        });
         engine.render();
       }
     });
@@ -65,24 +81,41 @@
 
   <canvas 
     bind:this={bubblemap}
+    style:width="{canvasWidth ? canvasWidth : 'auto'}"
+    style:height="{canvasHeight ? canvasHeight : 'auto'}"
     class:hidden="{hidden === true}">
   </canvas>
 </div>
+
+<section class="control">
+  <Slider></Slider>
+</section>
 
 
 
 
 <style>
+  .hidden {
+    display: none;
+  }
+
   .spinner-frame {
-    width: 100%;
-    height: 100%;
-    background: #eee;
+    flex: 1 1 0;
+    max-height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
+    background: #eee;
   }
 
-  .hidden {
-    display: none;
+  .control {
+    flex: 0 0 5rem;
+    min-height: 5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    padding-left: 10%;
+    padding-right: 10%;
   }
 </style>
