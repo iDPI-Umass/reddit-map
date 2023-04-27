@@ -12,6 +12,9 @@ const resetView = function () {
   this.dragCenterX = 0;
   this.dragCenterY = 0;
   this.boundaries = this.data.boundaries;
+  const [ x0, x1, y0, y1 ] = this.boundaries
+  this.zoomWidth = x1 - x0;
+  this.zoomHeight = y1 - y0;
   
   this.scaleToBoundaries();
   this.render();

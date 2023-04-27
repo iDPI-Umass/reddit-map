@@ -1,6 +1,6 @@
 import * as h from "../helpers";
 
-const zoomIn = function ( event, node ) {
+const zoomIn = function ( node ) {
   console.log( "Zoom In", node );
   if ( node.children == null ) {
     console.log( "no children" );
@@ -17,7 +17,7 @@ const zoomIn = function ( event, node ) {
   const end = {
     x0: 0,
     x1: this.width,
-    y0: this.parentHeight,
+    y0: 0,
     y1: this.height
   };
 

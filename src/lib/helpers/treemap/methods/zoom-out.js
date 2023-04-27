@@ -1,6 +1,6 @@
 import * as h from "../helpers";
 
-const zoomOut = function ( event, node ) {
+const zoomOut = function ( node ) {
   console.log( "Zoom Out", node );
   if ( node.parent == null ) {
     console.log( "no parent (top level)" );
@@ -11,7 +11,7 @@ const zoomOut = function ( event, node ) {
     this.setScale( node.parent, {
       x0: 0, 
       x1: this.width, 
-      y0: this.parentHeight,
+      y0: 0,
       y1: this.height
     });
   };
@@ -19,7 +19,7 @@ const zoomOut = function ( event, node ) {
   const start = {
     x0: 0,
     x1: this.width,
-    y0: this.parentHeight,
+    y0: 0,
     y1: this.height
   };
 

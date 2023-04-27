@@ -1,11 +1,12 @@
 <script>
   import "@shoelace-style/shoelace/dist/components/alert/alert.js";
   import "@shoelace-style/shoelace/dist/components/icon/icon.js";
+  import "@shoelace-style/shoelace/dist/components/button/button.js";
   import Treemap from "$lib/components/Treemap.svelte";
   import Bubblemap from "$lib/components/Bubblemap.svelte";
   import Slider from "$lib/components/Slider.svelte";
-  import { sourceStore } from "$lib/stores/source";
-  import { resetStore } from "$lib/stores/reset";
+  import { sourceStore } from "$lib/stores/source.js";
+  import { zoomStore } from "$lib/stores/zoom.js";
   import { onMount } from "svelte";
 
   sourceStore.push( "2021-04" );
@@ -14,13 +15,18 @@
 
   const handleReset = function ( event ) {
     event.preventDefault();
-    resetStore.push( new Date().toISOString() );
+    if ( (event.type === "keypress") && (event.key !== "Enter") ) {
+      return;
+    }
+    zoomStore.push({ type: "reset" });
   };
 
-  const handleKeypress = function ( event ) {
-    if ( event.key === "Enter" ) {
-      handleReset( event );
+  const handleBack = function ( event ) {
+    event.preventDefault();
+    if ( (event.type === "keypress") && (event.key !== "Enter") ) {
+      return;
     }
+    zoomStore.push({ type: "back parent" });
   };
 
   onMount( function () {
@@ -45,7 +51,7 @@
     href="/"
     aria-label="reset view"
     on:click={handleReset}
-    on:keypress={handleKeypress}
+    on:keypress={handleReset}
     >
     <h1>RedditMap</h1>
     </a>
@@ -55,7 +61,19 @@
 
 
   <section class="left">
-    <Treemap></Treemap>
+    <div class="tree">
+      <Treemap></Treemap>
+    </div>
+    
+    <section class="control">
+      <sl-button
+        on:click={handleBack}
+        on:keypress={handleBack}
+        variant="primary"
+        pill>
+        Back
+      </sl-button>
+    </section>
   </section>
 
   <section class="right">
@@ -104,29 +122,48 @@
     flex-direction: column;
     justify-content: stretch;
     align-items: stretch;
-    max-height: 100%;
-  }  
+  }
+
+  main .left .tree {
+    flex: 1 0 auto;
+  }
+
+  main .left .control {
+    height: 5rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 var(--gobo-width-spacer) 0 var(--gobo-width-spacer);
+  }
+
+  main .left .control sl-button {
+    width: 8rem;
+  }
 
   main .right {
     display: none;
   }
 
   @media( min-width: 750px ) {
+    main .left {
+      padding: 4rem 1rem 4rem 0;
+    }
+
     main .right {
       flex: 1 1 50%;
       display: flex;
       flex-direction: column;
       justify-content: stretch;
       align-items: stretch;
-      max-height: 100%;
+      padding: 4rem 0 4rem 1rem;
     }
 
     main .right .bubble {
-      height: 90%;
+      flex: 1 0 auto;
     }
 
     main .right .control {
-      height: 10%;
+      height: 5rem;
       display: flex;
       flex-direction: column;
       justify-content: center;

@@ -2,7 +2,6 @@ import * as d3 from "d3";
 
 const size = function ( frame ) {
   this.resolutionScale = 2;
-  this.parentHeight = 30 * this.resolutionScale;
   this.width = frame.clientWidth * this.resolutionScale;
   this.height = frame.clientHeight * this.resolutionScale;
   this.lineWidth = 2 * this.resolutionScale;
@@ -19,7 +18,7 @@ const resetScale = function () {
   
   this.scaleY = d3.scaleLinear()
     .domain([ 0, 1 ])
-    .rangeRound([ this.parentHeight, this.height ]);
+    .rangeRound([ 0, this.height ]);
 };
 
 const setScale = function ( domain, range ) {

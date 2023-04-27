@@ -1,12 +1,16 @@
-const zoom = function ( event ) {
-  const match = this.findNode( event );
-  
-  if ( match.isParent ) {
-    return this.zoomOut( event, match.node );
-  }
+const zoom = function ( type, event ) {
+  if ( type === "select child" ) {
+    const node = this.findNode( event );
+    if ( node != null ) {
+      return this.zoomIn( node );
+    }
 
-  if ( match.node != null ) {
-    return this.zoomIn( event, match.node );
+  } else if ( type === "back parent" ) {
+    return this.zoomOut( this.parent );
+  
+  } else {
+    throw new Error( `unknown zoom event ${type}` );
+  
   }
 };
 

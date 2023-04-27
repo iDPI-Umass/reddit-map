@@ -1,10 +1,15 @@
 const getNearestLabel = function ( node ) {
-  let parent = this.hierarchyMap.get( node.parent.data.node_id );
+  const parent = node.parent;
+  if ( parent == null )  {
+    return null;
+  }
+  
   for ( const label of this.labels ) {
     if ( parent === label ) {
       return parent;
     }
   }
+
   return this.getNearestLabel( parent );
 };
 

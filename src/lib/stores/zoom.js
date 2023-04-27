@@ -2,7 +2,7 @@ import { writable } from "svelte/store";
 
 
 const createStore = function () {
-  let zoom = null;
+  let zoom = {};
 
   const { subscribe, update } = writable( zoom );
 

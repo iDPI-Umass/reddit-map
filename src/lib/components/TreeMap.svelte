@@ -4,12 +4,11 @@
   import { sourceStore } from "$lib/stores/source.js";
   import { resizeStore } from "$lib/stores/resize.js";
   import { zoomStore } from "$lib/stores/zoom.js";
-  import { resetStore } from "$lib/stores/reset";
   import TreemapEngine from "$lib/helpers/treemap/index.js";
 
   let treemap, frame, engine;
   let source, unsubscribeSource;
-  let unsubscribeResize, unsubscribeReset;
+  let unsubscribeResize, unsubscribeZoom;
   let hidden = true;
 
   const render = function () {
@@ -27,7 +26,10 @@
       canvas: treemap,
       // This gets bound to the engine's context.
       onViewUpdate: function () {
-        zoomStore.push({ subrootID: this.parent.data.node_id });
+        zoomStore.push({
+          type: "new selection", 
+          subrootID: this.parent.data.node_id 
+        });
       }
     });
 
@@ -44,9 +46,11 @@
       }
     });
 
-    unsubscribeReset = resetStore.subscribe( function ( reset ) {
-      if ( reset != null ) {
+    unsubscribeZoom = zoomStore.subscribe( function ( zoom ) {
+      if ( zoom.type === "reset" ) {
         engine.resetView();
+      } else if ( zoom.type === "back parent" ) {
+        engine.zoom( zoom.type );
       }
     });
   });
@@ -54,7 +58,7 @@
   onDestroy(() => {
     unsubscribeSource();
     unsubscribeResize();
-    unsubscribeReset();
+    unsubscribeZoom();
   });
 </script>
 
@@ -81,11 +85,10 @@
 <style>
   .spinner-frame {
     width: 100%;
-    height: 100%;
-  }
-
-  canvas{
-    border: 1px solid black;
+    height:100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .hidden {

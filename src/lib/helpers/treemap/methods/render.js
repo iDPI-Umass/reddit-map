@@ -13,25 +13,6 @@ const clearCanvas = function () {
   this.context.clearRect( 0, 0, this.width, this.height );
 };
 
-const drawParent = function () {
-  const fill = `${ this.parent?.data.color ?? "#FFFFFF" }80`;
-  const label = this.parent?.data.taxonomy_label ?? "All of Reddit";
-
-  const x0 = 0;
-  const x1 = this.scaleX( 1 );
-  const y0 = 0;
-  const y1 = this.parentHeight;
-  const tx = 4;   // 2 * this.resolutionScale
-  const ty = 28;  // 14 * this.resolutionScale
-
-  this.context.fillStyle = fill;
-  this.context.fillRect( x0, y0, x1, y1 );
-  this.context.strokeRect( x0, y0, x1, y1 );
-
-  this.context.fillStyle = "#000"
-  this.context.fillText( label, tx, ty, this.width );
-};
-
 const drawLeaf = function ( leaf ) {
   const x0 = this.scaleX( leaf.x0 );
   const x1 = this.scaleX( leaf.x1 );
@@ -72,7 +53,6 @@ const drawLeaves = function () {
 const render = function () {
   this.setStyleDefaults();
   this.clearCanvas();
-  this.drawParent();
   this.drawLeaves();
 };
 
@@ -80,7 +60,6 @@ const render = function () {
 export {
   setStyleDefaults,
   clearCanvas,
-  drawParent,
   drawLeaf,
   labelLeaf,
   drawLeaves,
