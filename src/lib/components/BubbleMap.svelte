@@ -41,13 +41,24 @@
         canvasWidth = `${width}px`;
         canvasHeight = `${height}px`;
 
+        const pWidth = ((width * engine.resolutionScale) - engine.width) / engine.width;
+        const pHeight = ((height * engine.resolutionScale) - engine.height) / engine.height;
+        const [ x0, x1, y0, y1 ] = engine.boundaries;
+        
+        const domainWidth = x1 - x0;
+        const dWidth = domainWidth * pWidth * 0.5;
+        const domainHeight = y1 - y0;
+        const dHeight = domainHeight * pHeight * 0.5;
+
         engine.size({ width, height });
-        engine.setScaleRange({
-          x0: 0,
-          x1: engine.width,
-          y0: 0,
-          y1: engine.height
-        });
+        engine.boundaries = [
+          x0 - dWidth,
+          x1 + dWidth,
+          y0 - dHeight,
+          y1 + dHeight
+        ];
+          
+        engine.scaleToBoundaries();
         engine.render();
       }
     });
