@@ -12,7 +12,6 @@ class BubblemapEngine {
       context: canvas.getContext( "2d" ),
       d3Canvas: d3.select( canvas )
     });
-
     self.wireEvents();
     return self;
   }
