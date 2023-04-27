@@ -37,8 +37,8 @@
         const width = frame.clientWidth;
         const height = frame.clientHeight;
 
-        engine.size({ width, height });
         engine.loadData( source.data );
+        engine.size({ width, height });
         engine.initialize();
         engine.render();
         hidden = false;

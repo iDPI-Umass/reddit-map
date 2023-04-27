@@ -1,10 +1,15 @@
 import * as d3 from "d3";
+import * as h from "../helpers.js";
+
 
 const size = function ({ width, height }) {
   this.resolutionScale = 2;
   this.width = width * this.resolutionScale;
   this.height = height * this.resolutionScale;
   this.lineWidth = 2 * this.resolutionScale;
+
+  const tile = h.tile( this.width, this.height );
+  d3.treemap().tile( tile )( this.data );
 
   this.d3Canvas
     .attr( "width", this.width )

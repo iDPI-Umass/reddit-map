@@ -30,11 +30,6 @@
 
     unsubscribeResize = resizeStore.subscribe( function ( event ) {
       if ( event != null && event.width == null ) {
-        console.log({
-          id: event.id,
-          width: left.clientWidth,
-          height: left.clientHeight
-        })
         resizeStore.push({
           id: event.id,
           width: left.clientWidth,
