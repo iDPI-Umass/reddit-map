@@ -10,16 +10,6 @@
   let source, unsubscribeSource;
   let unsubscribeResize, unsubscribeZoom;
   let hidden = true;
-
-  const render = function () {
-    if ( source == null ) {
-      return;
-    }
-    engine.size( frame );
-    engine.loadData( source );
-    engine.render();
-    hidden = false;
-  };
   
   onMount(() => {
     engine = TreemapEngine.create({ 
@@ -33,16 +23,20 @@
       }
     });
 
-    unsubscribeSource = sourceStore.subscribe( function ( _source ) {
-      if ( _source != null ) {
-        source = _source.data;
-        render();
+    unsubscribeSource = sourceStore.subscribe( function ( source ) {
+      if ( source != null ) {
+        engine.size( frame );
+        engine.loadData( source.data );
+        engine.initialize();
+        engine.render();
+        hidden = false;
       }
     });
 
     unsubscribeResize = resizeStore.subscribe( function ( resize ) {
       if ( resize != null ) {
-        render();
+        engine.size( frame );
+        engine.render();
       }
     });
 

@@ -10,10 +10,11 @@ const loadData = function ( data ) {
     });
 
   this.data = d3.treemap().tile( tile )( sortedData );
-  console.log( "treempa data", this.data );
+  console.log( "treemap data", this.data );
   this.data.data.color = "#FFFFFF";
   this.data.data.taxonomy_label = "All of Reddit";
-  this.resetView();
+  this.parent = this.data;
+  this.view = this.data.children;
 };
 
 export {

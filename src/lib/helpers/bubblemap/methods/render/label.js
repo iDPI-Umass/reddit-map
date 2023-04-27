@@ -10,7 +10,7 @@ const drawLabel = function ( label ) {
   const boxY = y - this.labelBoxHeightHalf;
   const boxWidth = metrics.width + this.labelBoxPaddingDouble;
 
-  this.context.fillStyle = "#FFFFFFC0";
+  this.context.fillStyle = "#FFFFFF";
   this.context.fillRect( boxX, boxY, boxWidth, this.labelBoxHeight );
   this.context.strokeRect( boxX, boxY, boxWidth, this.labelBoxHeight );
   this.context.fillStyle = "#000000";
@@ -35,7 +35,7 @@ const drawNeighborLabel = function ( end ) {
   const boxY = y1 - this.labelBoxHeightHalf;
   const boxWidth = metrics.width + this.labelBoxPaddingDouble;
 
-  this.context.fillStyle = "#000000C0";
+  this.context.fillStyle = "#000000";
   this.context.fillRect( boxX, boxY, boxWidth, this.labelBoxHeight );
   this.context.strokeRect( boxX, boxY, boxWidth, this.labelBoxHeight );
   this.context.fillStyle = "#FFFFFF";

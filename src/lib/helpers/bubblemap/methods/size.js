@@ -17,15 +17,6 @@ const size = function ( frame ) {
   this.labelBoxHeight = this.lineHeight + ( 2 * this.labelBoxPadding );
   this.labelBoxHeightHalf = this.labelBoxHeight / 2;
 
-  this.boundaries = this.data.boundaries;
-  const [ x0, x1, y0, y1 ] = this.boundaries
-  this.zoomWidth = x1 - x0;
-  this.zoomHeight = y1 - y0;
-  this.zoomRatioX = 0.5;
-  this.zoomRatioY = 0.5;
-
-  this.scaleToBoundaries();
-
   this.d3Canvas
     .attr( "width", this.width )
     .attr( "height", this.height );

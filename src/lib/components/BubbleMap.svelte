@@ -12,34 +12,27 @@
   let unsubscribeResize, unsubscribeZoom;
   let hidden = true;
 
-  const render = function () {
-    if ( source == null ) {
-        return;
-    }
-    engine.loadData( source );
-    engine.size( frame );
-    engine.render();
-    hidden = false;
-  };
-  
   onMount(() => {
     engine = BubblemapEngine.create({ canvas: bubblemap });
 
-    unsubscribeSource = sourceStore.subscribe( function ( _source ) {
-      if ( _source != null ) {
-        source = _source.data;
-      
+    unsubscribeSource = sourceStore.subscribe( function ( source ) {
+      if ( source != null ) {
         if ( engine.data == null ) {
-          render(); 
+          engine.loadData( source.data );
+          engine.size( frame );
+          engine.initialize();
+          engine.render();
+          hidden = false;
         } else {
-          engine.updateData( source );
+          engine.updateData( source.data );
         }
       }
     });
 
     unsubscribeResize = resizeStore.subscribe( function ( resize ) {
       if ( resize != null ) {
-        render();
+        engine.size( frame );
+        engine.render();
       }
     });
 

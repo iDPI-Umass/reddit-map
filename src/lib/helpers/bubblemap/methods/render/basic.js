@@ -15,8 +15,8 @@ const render = function () {
   this.drawBranches();
   this.drawNeighborBranches();
   this.drawSubview();
-  this.drawLabels();
   this.drawNeighborLabels();
+  this.drawLabels();
 }
 
 export {

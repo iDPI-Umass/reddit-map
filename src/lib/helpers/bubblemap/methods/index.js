@@ -1,5 +1,6 @@
 export * from "./drag-view.js";
 export * from "./load-data.js";
+export * from "./initialize.js";
 export * from "./map.js";
 export * from "./render";
 export * from "./reset-view.js";
