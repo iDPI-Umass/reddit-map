@@ -1,4 +1,5 @@
 export * from "./find-node.js";
+export * from "./hover.js";
 export * from "./initialize.js";
 export * from "./load-data.js";
 export * from "./render.js";

@@ -30,11 +30,17 @@ const publish = async function () {
   }
 };
 
+const prepareMetadata = async function () {
+  await Task.Metadata.prepare();
+};
+
 
 export {
   build,
 
   deploy,
   teardown,
-  publish
+  publish,
+
+  prepareMetadata
 }

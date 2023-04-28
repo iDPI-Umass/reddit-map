@@ -27,6 +27,8 @@ const zoomIn = function ( node ) {
   const dy0 = end.y0 - start.y0;
   const dy1 = end.y1 - start.y1;
 
+  this.stopHoverLoop();
+
   h.animate({
     from: 0,
     to: 1,
@@ -78,7 +80,12 @@ const zoomIn = function ( node ) {
       this.view = node.children;
       this.resetScale( node );
       this.render();
-      this.onViewUpdate.bind(this)();
+
+      const detail = { node: this.parent };
+      const event = new CustomEvent( "updateview", { detail } );
+      this.element.dispatchEvent( event );
+      
+      this.startHoverLoop();
     }
   });
 
