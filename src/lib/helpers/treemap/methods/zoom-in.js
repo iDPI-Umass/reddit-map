@@ -76,6 +76,7 @@ const zoomIn = function ( node ) {
     onComplete: () => {
       this.parent = node;
       this.view = node.children;
+      this.resetScale( node );
       this.render();
       this.onViewUpdate.bind(this)();
     }

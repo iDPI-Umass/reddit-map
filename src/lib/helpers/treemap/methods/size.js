@@ -29,8 +29,8 @@ const setScale = function ( domain, range ) {
     .rangeRound([ range.y0, range.y1 ]);
 };
 
-const resetScale = function () {
-  const domain = { 
+const resetScale = function ( domain ) {
+  domain ??= { 
     x0: 0,
     x1: 1,
     y0: 0,
@@ -47,17 +47,14 @@ const resetScale = function () {
   this.setScale( domain, range );
 };
 
+const setScaleDomain = function ( domain ) {
+  const range = this.currentRange;
+  this.setScale( domain, range );
+};
+
 const setScaleRange = function ( range ) {
   const domain = this.currentDomain;
-  this.currentRange = range;
-
-  this.scaleX = d3.scaleLinear()
-    .domain([ domain.x0, domain.x1 ])
-    .rangeRound([ range.x0, range.x1 ]);
-
-  this.scaleY = d3.scaleLinear()
-    .domain([ domain.y0, domain.y1 ])
-    .rangeRound([ range.y0, range.y1 ]);
+  this.setScale( domain, range );
 };
 
 
@@ -65,5 +62,6 @@ export {
   size,
   resetScale,
   setScale,
+  setScaleDomain,
   setScaleRange
 }
