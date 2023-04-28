@@ -13,7 +13,7 @@
   let unsubscribeResize, unsubscribeZoom;
   let canvasWidth, canvasHeight;
   let hidden = true;
-  let backDisabled = true;
+  let upDisabled = true;
 
   const handleBack = function ( event ) {
     event.preventDefault();
@@ -21,6 +21,14 @@
       return;
     }
     zoomStore.push({ type: "back parent" });
+  };
+
+  const handleReset = function ( event ) {
+    event.preventDefault();
+    if ( (event.type === "keypress") && (event.key !== "Enter") ) {
+      return;
+    }
+    zoomStore.push({ type: "reset" });
   };
 
   onMount(() => {
@@ -58,10 +66,10 @@
     unsubscribeZoom = zoomStore.subscribe( function ( zoom ) {
       if ( zoom.type === "reset" ) {
         engine.resetView();
-        backDisabled = engine.isTopLevel;
+        upDisabled = engine.isTopLevel;
       } else if ( zoom.type === "new selection" ) {
         engine.updateView( zoom );
-        backDisabled = engine.isTopLevel;
+        upDisabled = engine.isTopLevel;
       }
     });
   });
@@ -82,9 +90,17 @@
     on:click={handleBack}
     on:keypress={handleBack}
     class="action"
-    disabled="{backDisabled}"
+    disabled="{upDisabled}"
     pill>
-    Back
+    Up
+  </sl-button>
+
+  <sl-button
+    on:click={handleReset}
+    on:keypress={handleReset}
+    class="action"
+    pill>
+    Top
   </sl-button>
 </section>
 
@@ -133,6 +149,7 @@
   }
 
   .control sl-button {
-    width: 8rem;
+    width: 7rem;
+    margin-right: 1rem;
   }
 </style>

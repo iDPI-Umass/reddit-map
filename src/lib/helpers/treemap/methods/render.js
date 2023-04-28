@@ -1,8 +1,6 @@
 import * as h from "../helpers.js";
 
 const setStyleDefaults = function () {
-  this.fontSize = Math.round( 12 * this.resolutionScale );
-  this.lineHeight = Math.round( this.fontSize * 1.33 );
   this.context.lineWidth = this.lineWidth;
   this.context.strokeStyle = "#FFFFFF";
   this.context.font = `${ this.fontSize }px Roboto`;
@@ -37,7 +35,7 @@ const labelLeaf = function ( leaf ) {
 
   const width = x1 - x0;
   const tx = x0 + 4;  // 2 * this.resolutionScale
-  const ty = y0 + 28; // 14 * this.resolutionScale
+  const ty = y0 + 48; // 24 * this.resolutionScale
 
   this.context.fillStyle = "#000000"
   h.drawWrappedText.call( this, leaf.data.displayLabel, tx, ty, width );

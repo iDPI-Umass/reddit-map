@@ -22,7 +22,8 @@ const updateData = function ( data ) {
       const dx = newNode.data.tsne_x - oldNode.data.tsne_x;
       const dy = newNode.data.tsne_y - oldNode.data.tsne_y;
       const dSize = newNode.data.comment_count - oldNode.data.comment_count;
-      diffMap.set( subreddit, { oldNode, newNode, dx, dy, dSize });
+      const colorQuarter = this.getNearestLabel(oldNode).data.colorQuarter;
+      diffMap.set( subreddit, { oldNode, newNode, dx, dy, dSize, colorQuarter });
     }
   }
 
@@ -51,13 +52,14 @@ const updateData = function ( data ) {
       
 
       // Animate this frame, but avoid mutating old or new data structures.
-      for ( const [ subreddit, { oldNode, newNode, dx, dy, dSize } ] of diffMap.entries() ) {
+      for ( const [ subreddit, { oldNode, newNode, dx, dy, dSize, colorQuarter } ] of diffMap.entries() ) {
         this.drawQuarterNode({
+          data: { colorQuarter }
+        },{
           data: {
             tsne_x: oldNode.data.tsne_x + ( ratio * dx ),
             tsne_y: oldNode.data.tsne_y + ( ratio * dy ),
             comment_count: oldNode.data.comment_count + ( ratio * dSize ),
-            colorQuarter: oldNode.data.colorQuarter
           }
         });
       }
@@ -65,6 +67,7 @@ const updateData = function ( data ) {
     },
     onComplete: () => {
       this.loadData( data );
+      this.resetView();
       this.render();
       this.startZoomLoop();
     }

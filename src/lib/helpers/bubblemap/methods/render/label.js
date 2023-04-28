@@ -1,3 +1,18 @@
+const getNearestLabel = function ( node ) {
+  const parent = node.parent;
+  if ( parent == null )  {
+    return null;
+  }
+  
+  for ( const label of this.labels ) {
+    if ( parent === label ) {
+      return parent;
+    }
+  }
+
+  return this.getNearestLabel( parent );
+};
+
 const drawLabel = function ( label ) {
   const x = this.scaleX( label.data.tsne_x );
   const y = this.scaleY( label.data.tsne_y );
@@ -17,7 +32,7 @@ const drawLabel = function ( label ) {
   this.context.fillText( text, textX, textY );
 };
 
-const drawLabels = function () {
+const drawSubviewLabels = function () {
   for ( const label of this.labels ) {
     this.drawLabel( label );
   }
@@ -35,10 +50,10 @@ const drawNeighborLabel = function ( end ) {
   const boxY = y1 - this.labelBoxHeightHalf;
   const boxWidth = metrics.width + this.labelBoxPaddingDouble;
 
-  this.context.fillStyle = "#000000";
+  this.context.fillStyle = end.data.color;
   this.context.fillRect( boxX, boxY, boxWidth, this.labelBoxHeight );
   this.context.strokeRect( boxX, boxY, boxWidth, this.labelBoxHeight );
-  this.context.fillStyle = "#FFFFFF";
+  this.context.fillStyle = "#000";
   this.context.fillText( text, textX, textY );
 };
 
@@ -49,8 +64,9 @@ const drawNeighborLabels = function () {
 };
 
 export {
+  getNearestLabel,
   drawLabel,
-  drawLabels,
+  drawSubviewLabels,
   drawNeighborLabel,
   drawNeighborLabels
 }

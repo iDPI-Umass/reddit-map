@@ -10,9 +10,10 @@ const size = function ({ width, height }) {
   this.bubbleBorder = Math.round( 0.5 * this.resolutionScale);
   this.padding = this.bubbleSize * 2; // 2 for double radius and either side of width/height
   
-  this.lineHeight = 12 * this.resolutionScale;
+  this.fontSize = Math.round( 16 * this.resolutionScale );
+  this.lineHeight = Math.round( this.fontSize * 1 );
   this.lineHeightHalf = this.lineHeight / 2;
-  this.labelBoxPadding = 4 * this.resolutionScale;
+  this.labelBoxPadding = Math.round( this.fontSize / 3 );
   this.labelBoxPaddingDouble = 2 * this.labelBoxPadding;
   this.labelBoxHeight = this.lineHeight + ( 2 * this.labelBoxPadding );
   this.labelBoxHeightHalf = this.labelBoxHeight / 2;

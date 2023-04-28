@@ -1,5 +1,5 @@
 const MAX_ZOOM = 1.95;
-const MIN_ZOOM = 0.8;
+const MIN_ZOOM = 0.6;
 
 const scrollZoom = function ( event ) {
   event.preventDefault();

@@ -1,6 +1,6 @@
 const setStyleDefaults = function () {
   this.context.strokeStyle = "#000";
-  this.context.font = "24px Roboto";
+  this.context.font = `${ this.fontSize }px Roboto`;
   this.context.fontKerning = "normal";
 }
 
@@ -11,12 +11,12 @@ const clearCanvas = function () {
 const render = function () {
   this.setStyleDefaults();
   this.clearCanvas();
-  this.drawInertView();
-  this.drawBranches();
+  this.drawInertNodes();
+  this.drawNeighborNodes();
+  this.drawSubviewNodes();
   this.drawNeighborBranches();
-  this.drawSubview();
   this.drawNeighborLabels();
-  this.drawLabels();
+  this.drawSubviewLabels();
 }
 
 export {

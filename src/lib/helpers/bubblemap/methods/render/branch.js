@@ -1,18 +1,3 @@
-const getNearestLabel = function ( node ) {
-  const parent = node.parent;
-  if ( parent == null )  {
-    return null;
-  }
-  
-  for ( const label of this.labels ) {
-    if ( parent === label ) {
-      return parent;
-    }
-  }
-
-  return this.getNearestLabel( parent );
-};
-
 const drawBranch = function ( node ) {
   const x = this.scaleX( node.data.tsne_x );
   const y = this.scaleY( node.data.tsne_y );
@@ -59,7 +44,6 @@ const drawNeighborBranches = function () {
 };
 
 export {
-  getNearestLabel,
   drawBranch,
   drawBranches,
   drawNeighborBranch,

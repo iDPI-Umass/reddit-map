@@ -7,6 +7,8 @@ const size = function ({ width, height }) {
   this.width = width * this.resolutionScale;
   this.height = height * this.resolutionScale;
   this.lineWidth = 2 * this.resolutionScale;
+  this.fontSize = Math.round( 24 * this.resolutionScale );
+  this.lineHeight = Math.round( this.fontSize * 1.33 );
 
   const tile = h.tile( this.width, this.height );
   d3.treemap().tile( tile )( this.data );
