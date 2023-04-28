@@ -2,7 +2,7 @@ const loadData = function ( data ) {
   this.data = data
     .sum( d => Math.sqrt( d.comment_count ))
     .sort( function ( a, b ) {
-      return Math.sqrt(b.comment_count) - Math.sqrt(a.comment_count);
+      return Math.sqrt(a.value) - Math.sqrt(b.value);
     });
 
   console.log( "treemap data", this.data );
