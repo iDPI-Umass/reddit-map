@@ -41,7 +41,7 @@
     unsubscribeResize = resizeStore.subscribe( function ( resize ) {
       if ( resize?.width != null ) {
         const width = resize.width;
-        const height = resize.height - ( 16 * 5 );
+        const height = resize.height;
         canvasWidth = `${width}px`;
         canvasHeight = `${height}px`;
 

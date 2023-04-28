@@ -101,7 +101,7 @@
     flex-direction: row;
     justify-content: flex-start;
     align-items: stretch;
-    padding: 4rem 1rem 4rem 1rem;
+    padding: 1rem;
     max-height: calc( 100vh - 4rem );
   }
 

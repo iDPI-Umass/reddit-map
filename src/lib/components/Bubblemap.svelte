@@ -13,6 +13,7 @@
   let unsubscribeResize, unsubscribeZoom;
   let canvasWidth, canvasHeight;
   let hidden = true;
+  let backDisabled = true;
 
   const handleBack = function ( event ) {
     event.preventDefault();
@@ -45,28 +46,11 @@
     unsubscribeResize = resizeStore.subscribe( function ( resize ) {
       if ( resize?.width != null ) {
         const width = resize.width;
-        const height = resize.height - ( 16 * 5 );
+        const height = resize.height - 160;
         canvasWidth = `${width}px`;
         canvasHeight = `${height}px`;
 
-        const pWidth = ((width * engine.resolutionScale) - engine.width) / engine.width;
-        const pHeight = ((height * engine.resolutionScale) - engine.height) / engine.height;
-        const [ x0, x1, y0, y1 ] = engine.boundaries;
-        
-        const domainWidth = x1 - x0;
-        const dWidth = domainWidth * pWidth * 0.5;
-        const domainHeight = y1 - y0;
-        const dHeight = domainHeight * pHeight * 0.5;
-
-        engine.size({ width, height });
-        engine.boundaries = [
-          x0 - dWidth,
-          x1 + dWidth,
-          y0 - dHeight,
-          y1 + dHeight
-        ];
-          
-        engine.scaleToBoundaries();
+        engine.size({ width, height });        
         engine.render();
       }
     });
@@ -74,8 +58,10 @@
     unsubscribeZoom = zoomStore.subscribe( function ( zoom ) {
       if ( zoom.type === "reset" ) {
         engine.resetView();
+        backDisabled = engine.isTopLevel;
       } else if ( zoom.type === "new selection" ) {
         engine.updateView( zoom );
+        backDisabled = engine.isTopLevel;
       }
     });
   });
@@ -87,11 +73,16 @@
   });
 </script>
 
-<section class="top-control">
+<section class="control">
+  <Slider></Slider>
+</section>
+
+<section class="control">
   <sl-button
     on:click={handleBack}
     on:keypress={handleBack}
     class="action"
+    disabled="{backDisabled}"
     pill>
     Back
   </sl-button>
@@ -114,11 +105,6 @@
   </canvas>
 </div>
 
-<section class="bottom-control">
-  <Slider></Slider>
-</section>
-
-
 
 
 <style>
@@ -135,27 +121,18 @@
     background: #eee;
   }
 
-  .top-control {
+  .control {
     flex: 0 0 5rem;
     min-height: 5rem;
     display: flex;
+    flex-direction: row;
     justify-content: flex-start;
     align-items: center;
+    padding-left: 10%;
     padding: 0 var(--gobo-width-spacer) 0 var(--gobo-width-spacer);
   }
 
-  .top-control sl-button {
+  .control sl-button {
     width: 8rem;
-  }
-
-  .bottom-control {
-    flex: 0 0 5rem;
-    min-height: 5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: stretch;
-    padding-left: 10%;
-    padding-right: 10%;
   }
 </style>

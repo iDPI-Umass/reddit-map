@@ -6,6 +6,7 @@ const loadData = function ( data ) {
   this.indexHierachy();
 
   this.subroot = this.data;
+  this.isTopLevel = true;
   this.view = new Set( this.data.descendants() );
   this.subview = this.view;
   this.labels = h.pluckLabels( this.subroot );

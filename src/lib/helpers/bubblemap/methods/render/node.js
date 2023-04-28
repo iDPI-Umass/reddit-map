@@ -47,7 +47,7 @@ const drawInertView = function () {
 };
 
 const drawSubview = function () {
-  if ( this.subroot === this.data ) {
+  if ( this.isTopLevel === true ) {
     for ( const node of this.subview ) {
       if ( node.data.subreddit != null ) {
         this.drawQuarterNode( node );
