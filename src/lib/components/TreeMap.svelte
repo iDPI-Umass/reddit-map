@@ -12,14 +12,7 @@
   let canvasWidth, canvasHeight;
   let hidden = true;
 
-  const handleBack = function ( event ) {
-    event.preventDefault();
-    if ( (event.type === "keypress") && (event.key !== "Enter") ) {
-      return;
-    }
-    zoomStore.push({ type: "back parent" });
-  };
-  
+
   onMount(() => {
     engine = TreemapEngine.create({ 
       canvas: treemap,
@@ -98,19 +91,6 @@
   </canvas>
 </div>
 
-<section class="control">
-  <sl-button
-    on:click={handleBack}
-    on:keypress={handleBack}
-    class="action"
-    pill>
-    Back
-  </sl-button>
-</section>
-
-
-
-
 <style>
   .hidden {
     display: none;
@@ -122,18 +102,5 @@
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-
-  .control {
-    flex: 0 0 5rem;
-    min-height: 5rem;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    padding: 0 var(--gobo-width-spacer) 0 var(--gobo-width-spacer);
-  }
-
-  .control sl-button {
-    width: 8rem;
   }
 </style>
