@@ -86,6 +86,7 @@ const zoomOut = function ( node ) {
     },
     onComplete: () => {
       this.parent = node.parent;
+      this.isTopLevel = this.parent === this.data;
       this.view = node.parent.children;
       this.resetScale( node.parent );
       this.render();

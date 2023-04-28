@@ -12,6 +12,7 @@
   let unsubscribeResize, unsubscribeZoom;
   let canvasWidth, canvasHeight;
   let hidden = true;
+  let backDisabled = true;
   
   let totalCommentCount = 1;
   let currentDisplay = "none";
@@ -27,7 +28,27 @@
 
   let currentType = null;
 
-  
+  const handleBack = function ( event ) {
+    event.preventDefault();
+    if ( (event.type === "keypress") && (event.key !== "Enter") ) {
+      return;
+    }
+    zoomStore.push({ type: "back parent" });
+  };
+
+  const handleReset = function ( event ) {
+    event.preventDefault();
+    if ( (event.type === "keypress") && (event.key !== "Enter") ) {
+      return;
+    }
+    zoomStore.push({ type: "reset" });
+  };
+
+
+  // We want the tooltip to position itself either above or below the cursor
+  // where it's mostly likely to have the space it needs. It's absolutely positioned
+  // against the layout column grandparent, so we need to account for parent siblings.
+  // This is very brittle, but tooltips are a weird layout case.
   const positionTooltip = function ({ currentX, currentY })  {
     currentLeft = `${ currentX + 32 }px`;
     
@@ -36,7 +57,7 @@
       currentBottom = "unset";
     } else {
       currentTop = "unset";
-      currentBottom = `${ canvas.clientHeight - currentY + 32 }px`;
+      currentBottom = `${ canvas.clientHeight - currentY + 98 }px`;
     }
   };
 
@@ -83,8 +104,7 @@
 
   const fetchAbout = async function ( node ) {
     const metadata = await Metadata.get( node.data.subreddit );
-    currentAbout = metadata.about.description;
-    currentSubreddit = node.data.subreddit;
+    currentAbout = metadata?.about?.description;
   };
 
   const renderAbout = function ({ node }) {
@@ -92,6 +112,7 @@
       if ( currentSubreddit === node.data.subreddit ) {
         return;
       } else {
+        currentSubreddit = node.data.subreddit;
         currentAbout = null;
         fetchAbout( node );
       }
@@ -114,6 +135,8 @@
     });
 
     canvas.addEventListener( "updateview", function ( event ) {
+      backDisabled = engine.isTopLevel;
+
       zoomStore.push({
         type: "new selection", 
         subrootID: event.detail.node.data.node_id 
@@ -153,13 +176,14 @@
         engine.initialize();
         engine.render();
         hidden = false;
+        backDisabled = true;
       }
     });
 
     unsubscribeResize = resizeStore.subscribe( function ( resize ) {
       if ( resize?.width != null ) {
         const width = resize.width;
-        const height = resize.height;
+        const height = resize.height - 80;
         canvasWidth = `${width}px`;
         canvasHeight = `${height}px`;
 
@@ -177,8 +201,10 @@
     unsubscribeZoom = zoomStore.subscribe( function ( zoom ) {
       if ( zoom.type === "reset" ) {
         engine.resetView();
+        backDisabled = true;
       } else if ( zoom.type === "back parent" ) {
         engine.zoom( zoom.type );
+        backDisabled = engine.isTopLevel;
       }
     });
   });
@@ -253,6 +279,25 @@
   </canvas>
 </div>
 
+<section class="control">
+  <sl-button
+    on:click={handleBack}
+    on:keypress={handleBack}
+    class="action"
+    disabled="{backDisabled}"
+    pill>
+    Back
+  </sl-button>
+
+  <sl-button
+    on:click={handleReset}
+    on:keypress={handleReset}
+    class="action"
+    pill>
+    Top-Level
+  </sl-button>
+</section>
+
 <style>
   .hidden {
     display: none;
@@ -307,6 +352,20 @@
   }
 
   .tooltip .top-subreddits p {
+    margin-right: 1rem;
+  }
+
+  .control {
+    flex: 0 0 5rem;
+    min-height: 5rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .control sl-button {
+    width: 7rem;
     margin-right: 1rem;
   }
 

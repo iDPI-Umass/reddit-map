@@ -13,23 +13,7 @@
   let unsubscribeResize, unsubscribeZoom;
   let canvasWidth, canvasHeight;
   let hidden = true;
-  let upDisabled = true;
 
-  const handleBack = function ( event ) {
-    event.preventDefault();
-    if ( (event.type === "keypress") && (event.key !== "Enter") ) {
-      return;
-    }
-    zoomStore.push({ type: "back parent" });
-  };
-
-  const handleReset = function ( event ) {
-    event.preventDefault();
-    if ( (event.type === "keypress") && (event.key !== "Enter") ) {
-      return;
-    }
-    zoomStore.push({ type: "reset" });
-  };
 
   onMount(() => {
     engine = BubblemapEngine.create({ canvas: bubblemap });
@@ -54,7 +38,7 @@
     unsubscribeResize = resizeStore.subscribe( function ( resize ) {
       if ( resize?.width != null ) {
         const width = resize.width;
-        const height = resize.height - 160;
+        const height = resize.height - 80;
         canvasWidth = `${width}px`;
         canvasHeight = `${height}px`;
 
@@ -66,10 +50,8 @@
     unsubscribeZoom = zoomStore.subscribe( function ( zoom ) {
       if ( zoom.type === "reset" ) {
         engine.resetView();
-        upDisabled = engine.isTopLevel;
       } else if ( zoom.type === "new selection" ) {
         engine.updateView( zoom );
-        upDisabled = engine.isTopLevel;
       }
     });
   });
@@ -80,29 +62,6 @@
     unsubscribeZoom();
   });
 </script>
-
-<section class="control">
-  <Slider></Slider>
-</section>
-
-<section class="control">
-  <sl-button
-    on:click={handleBack}
-    on:keypress={handleBack}
-    class="action"
-    disabled="{upDisabled}"
-    pill>
-    Up
-  </sl-button>
-
-  <sl-button
-    on:click={handleReset}
-    on:keypress={handleReset}
-    class="action"
-    pill>
-    Top
-  </sl-button>
-</section>
 
 
 <div 
@@ -120,6 +79,12 @@
     class:hidden="{hidden === true}">
   </canvas>
 </div>
+
+<section class="control">
+  <Slider></Slider>
+</section>
+
+
 
 
 
@@ -144,12 +109,5 @@
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    padding-left: 10%;
-    padding: 0 var(--gobo-width-spacer) 0 var(--gobo-width-spacer);
-  }
-
-  .control sl-button {
-    width: 7rem;
-    margin-right: 1rem;
   }
 </style>

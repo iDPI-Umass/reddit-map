@@ -7,6 +7,7 @@ const loadData = function ( data ) {
 
   console.log( "treemap data", this.data );
   this.parent = this.data;
+  this.isTopLevel = true;
   this.view = this.data.children;
 };
 

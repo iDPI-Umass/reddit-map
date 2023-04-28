@@ -7,7 +7,12 @@ const updateData = function ( data ) {
   // Reset to top-level view of current data to start animation to another month.
   this.resetView();
 
-  const newView = new Set ( data.descendants() );
+  const newView = new Set();
+  for ( const node of data.descendants() ) {
+    if ( node.data.subreddit != null ) {
+      newView.add( node );
+    }
+  }
   const newBoundaries = data.boundaries;
   const dBoundaries = [];
   for ( let i = 0; i < this.boundaries.length; i++ ) {
