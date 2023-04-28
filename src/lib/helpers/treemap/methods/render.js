@@ -33,9 +33,9 @@ const labelLeaf = function ( leaf ) {
   const x1 = this.scaleX( leaf.x1 );
   const y0 = this.scaleY( leaf.y0 );
 
-  const width = x1 - x0;
-  const tx = x0 + 4;  // 2 * this.resolutionScale
-  const ty = y0 + 48; // 24 * this.resolutionScale
+  const width = x1 - x0 - this.leafPaddingDouble;
+  const tx = x0 + this.leafPadding;
+  const ty = y0 + this.lineHeight;
 
   this.context.fillStyle = "#000000"
   h.drawWrappedText.call( this, leaf.data.displayLabel, tx, ty, width );
