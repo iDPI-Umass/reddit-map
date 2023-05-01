@@ -14,12 +14,14 @@ const handleHoverEnter = function ( event ) {
   const detail = { currentX, currentY, node };
   const custom = new CustomEvent( "hoverenter", { detail });
   this.element.dispatchEvent( custom );
+  this.hoverActive = true;
 };
 
 const handleHoverLeave = function () {
   const detail = {};
   const event = new CustomEvent( "hoverleave", { detail });
   this.element.dispatchEvent( event );
+  this.hoverActive = false;
 };
 
 const startHoverLoop = function () {
@@ -50,8 +52,10 @@ const startHoverLoop = function () {
         this.element.dispatchEvent( event );
       }
       
-      const event = new CustomEvent( "hovermove", { detail });
-      this.element.dispatchEvent( event );
+      if ( this.hoverActive === true ) {
+        const event = new CustomEvent( "hovermove", { detail });
+        this.element.dispatchEvent( event );
+      }
     }
     
     this.hoverLoopID = window.requestAnimationFrame( update.bind(this) );

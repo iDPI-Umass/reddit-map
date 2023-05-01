@@ -74,7 +74,7 @@ const drawSubviewNodes = function () {
   } else if ( this.subroot.children?.[0]?.data.subreddit == null ) {
     for ( const node of this.subview ) {
       const label = this.getNearestLabel( node );
-      this.drawFullNode( label, node );
+      this.drawQuarterNode( label, node );
     }
 
   } else {

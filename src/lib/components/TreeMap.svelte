@@ -22,7 +22,8 @@
   let currentName = "";
   let currentComments = 0;
   let currentCommentPercent = 0;
-  let currentSubreddits = [];
+  let currentSubredditsOne = [];
+  let currentSubredditsTwo = [];
   let currentSubreddit = null;
   let currentAbout = null;
 
@@ -98,7 +99,8 @@
       for ( let i = 0; i < ax.length; i++ ) {
         ax[i] = `${ i + 1 }. ${ ax[i] }`;
       }
-      currentSubreddits = ax;
+      currentSubredditsOne = ax.slice( 0, 5 );
+      currentSubredditsTwo = ax.slice( 5, 10 );
     }
   }
 
@@ -250,10 +252,18 @@
     {#if currentType === "cluster"}
       <section class="top-subreddits">
         <h3>Top Subreddits By Number of Comments</h3>
-        <div>
-          {#each currentSubreddits as subreddit}
-            <p>{subreddit}</p>
-          {/each}
+        <div class="top-10-wrapper">
+          <div class="group">
+            {#each currentSubredditsOne as subreddit}
+              <p>{subreddit}</p>
+            {/each}
+          </div>
+
+          <div class="group">
+            {#each currentSubredditsTwo as subreddit}
+              <p>{subreddit}</p>
+            {/each}
+          </div>
         </div>
       </section>
     {/if}
@@ -342,12 +352,24 @@
     margin-bottom: 0;
   }
 
-  .tooltip .top-subreddits div {
+  .tooltip .top-subreddits .top-10-wrapper {
     display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
+    flex-direction: row;
+    flex-wrap: nowrap;
     justify-content: flex-start;
     max-height: 7rem;
+    padding: 0;
+  }
+
+  .tooltip .top-subreddits .top-10-wrapper .group {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
     padding: 0;
   }
 
