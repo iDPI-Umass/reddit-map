@@ -61,7 +61,7 @@
     on:click={handleReset}
     on:keypress={handleReset}
     >
-    <h1>iDPI</h1>
+    <h1>RedditMap</h1>
     </a>
 </header>
 
