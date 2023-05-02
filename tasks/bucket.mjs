@@ -60,11 +60,21 @@ const teardown = async function ( config ) {
 // in the S3 bucket relative to the local directory. Local directory is authoritative.
 const sync = async function( config, files ) {
   const bucket = config.buckets[0].name
+  const ignore = config.buckets[0].ignore ?? [];
   const operations = [];
 
   // first, get a dictionary of published items
   const published = {};
-  const objects = await S3.listObjects( bucket );
+  let objects = await S3.listObjects( bucket );
+  objects = objects.filter( o => {
+    for ( const prefix of ignore ) {
+      if ( o.Key.startsWith(prefix) ) {
+        return false;
+      }
+    }
+    return true;
+  });
+
   for ( const object of objects ) {
     published[ object.Key ] = Object.assign( object, {
       ETag: JSON.parse( object.ETag )

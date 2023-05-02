@@ -32,6 +32,8 @@ production-data:
     bucket: data.redditmap.social
   buckets:
     - name: data.redditmap.social
+      ignore:
+        - images
       website:
         index: index.html
         error: index.html

@@ -26,6 +26,7 @@
   let currentSubredditsTwo = [];
   let currentSubreddit = null;
   let currentAbout = null;
+  let currentImage = null;
 
   let currentType = null;
 
@@ -121,12 +122,17 @@
     }
   };
 
+  const renderImage = function ({ node }) {
+    currentImage = `https://data.redditmap.social/images/${ node.data.displayLabel }.png`;
+  };
+
   const renderTooltipNode = function ( detail ) {
     positionTooltip( detail );
     renderTooltipHeading( detail );
     renderTooltipMetadata( detail );
     renderTooltipSubreddits( detail );
     renderAbout( detail );
+    renderImage( detail );
 
     currentDisplay = "block";
   }
@@ -277,6 +283,15 @@
           <p>{currentAbout}</p>
         {/if}
       </section>
+    {/if}
+
+    {#if (currentType === "subreddit") && (currentImage != null)}
+      <div class="image-frame">
+        <img 
+          src={currentImage}
+          alt="screen capture for subreddit {currentName}"
+        >
+      </div>
     {/if}
   
   </section>

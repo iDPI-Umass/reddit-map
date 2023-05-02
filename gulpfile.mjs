@@ -35,6 +35,11 @@ const prepareMetadata = async function () {
 };
 
 
+const transferImages = async function () {
+  await Task.Image.transfer();
+};
+
+
 export {
   build,
 
@@ -42,5 +47,6 @@ export {
   teardown,
   publish,
 
-  prepareMetadata
+  prepareMetadata,
+  transferImages
 }
