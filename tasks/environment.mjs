@@ -13,9 +13,6 @@ const check = async function () {
     throw new Error( "Environment is not defined." );
   }
 
-  console.log(process.env.AWS_ACCESS_KEY_ID);
-  console.log(process.env.AWS_SECRET_ACCESS_KEY);
-
   config.environment = args.environment;
   config.args = args;
 
