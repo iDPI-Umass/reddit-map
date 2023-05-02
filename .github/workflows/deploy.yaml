@@ -19,11 +19,11 @@ jobs:
         run: npm install
       - name: Build Svelte Site
         env:
-          AWS_ACCESS_KEY_ID: {{ secrets.AWS_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: {{ secrets.AWS_ACCESS_SECRET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ACCESS_SECRET }}
           AWS_DEFAULT_REGION: us-east-1
         run: npx gulp publish --environment=production-www
       # - name: Signal Completion
       #   env:
-      #     DISCORD_WEBHOOK: {{ secrets.DISCORD_WEBHOOK }}
+      #     DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
       #   run: npx gulp signalDiscord
