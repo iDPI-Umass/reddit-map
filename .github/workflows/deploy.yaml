@@ -1,0 +1,29 @@
+name: publish
+on: 
+  push:
+    branches:
+      - deploy
+
+jobs:
+  publish:
+    name: Build and Publish RedditMap
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install Dependencies
+        run: npm install
+      - name: Build Svelte Site
+        env:
+          AWS_ACCESS_KEY_ID: {{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: {{ secrets.AWS_ACCESS_SECRET }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: npx gulp publish --environment=production-www
+      # - name: Signal Completion
+      #   env:
+      #     DISCORD_WEBHOOK: {{ secrets.DISCORD_WEBHOOK }}
+      #   run: npx gulp signalDiscord
