@@ -177,14 +177,14 @@
     </section>
   {/if}
 
-  {#if (currentType === "subreddit") && (currentImage != null)}
+  <!-- {#if (currentType === "subreddit") && (currentImage != null)}
     <div class="image-frame">
       <img 
         src={currentImage}
         alt="screen capture for subreddit {currentName}"
       >
     </div>
-  {/if}
+  {/if} -->
 
 </section>
 
