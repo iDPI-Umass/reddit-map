@@ -1,10 +1,17 @@
 # RedditMap
 Web Client Frontend for the RedditMap Project
 
+## Background
 
-## Developing
+RedditMap is a project of computer, data, and social scientists to explore and visualize Reddit as a space. The site running the visualizations is available at https://redditmap.social. The code that runs the application frontend is here.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Main Tasks
+
+### Dependencies
+Install dependencies with `npm install`.
+
+### Developing
+Start a development server:
 
 ```bash
 npm run dev
@@ -13,37 +20,37 @@ npm run dev
 npm run dev -- --open
 ```
 
-## Building
+### Publishing Changes to Site
 
-To build assets of the application to publish, use:
+After you commit changes to our development mainline branch, `main`, you'll want to cut a release and publish changes for the world to see. We've setup a GitHub action to make that easy for you.
+
+Merge the branch `main` into `publish`. The publish action will take care of the rest for you, building the site static resources, syncing remote files, and dealing with HTTP caching. It will take several minutes for the build, sync, and HTTP cache invalidation tasks to complete. 
+
+
+## Other Tasks
+
+There are Gulp tasks that allow you to perform other actions, but most people won't need to use them if they're working directly on the application layer.
+
+### Deploying Infrastructure
+
+You only need this if you're setting up an endpoint for the first time, or if the infrastructure configuration needs to be updated. Note that you'll need sufficient permissons in iDPI's AWS account.
+
+```bash
+AWS_PROFILE=idpi npx gulp deploy --environment=production-www
+```
+
+### Manually Building Assets
+
+To manually build assets, use:
 
 ```bash
 npx gulp build
 ```
 
-## Deploying Infrastructure
+### Publishing Changes to Site
 
-> NOTE: you only need to do this once per environment or if infrastructure itself changes.
+You can run the publish action locally, if you have permissions with iDPI's AWS account. Use the following command:
 
-### Website S3 + CloudFront Distribution
-```bash
-AWS_PROFILE=idpi npx gulp deploy --environment=production-www
-```
-
-### Data S3 + CloudFront Distribution for RedditMap API
-```bash
-AWS_PROFILE=idpi npx gulp deploy --environment=production-data
-```
-
-
-## Publish Code/File Changes
-
-### RedditMap Website
 ```bash
 AWS_PROFILE=idpi npx gulp publish --environment=production-www
-```
-
-### RedditMap Data Files
-```bash
-AWS_PROFILE=idpi npx gulp publish --environment=production-data
 ```

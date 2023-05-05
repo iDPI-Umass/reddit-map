@@ -1,4 +1,3 @@
-import Path from "node:path";
 import * as Task from "./tasks/index.mjs";
 
 
@@ -30,23 +29,11 @@ const publish = async function () {
   }
 };
 
-const prepareMetadata = async function () {
-  await Task.Metadata.prepare();
-};
-
-
-const transferImages = async function () {
-  await Task.Image.transfer();
-};
-
 
 export {
   build,
 
   deploy,
   teardown,
-  publish,
-
-  prepareMetadata,
-  transferImages
+  publish
 }
