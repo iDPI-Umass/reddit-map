@@ -17,6 +17,7 @@
   let currentSubredditsTwo = [];
   let currentSubreddit = null;
   let currentAbout = null;
+  let currentSubredditType = null;
   let currentImage = null;
 
   let currentType = null;
@@ -80,19 +81,22 @@
     }
   }
 
-  const fetchAbout = async function ( node ) {
+  const fetchAboutAndSubredditType = async function ( node ) {
     const metadata = await Metadata.get( node.data.subreddit );
     currentAbout = metadata?.about?.description;
+    currentSubredditType = metadata?.type;
+    console.log(node.data.subreddit, currentSubredditType)
   };
 
-  const renderAbout = function ({ node }) {
+  const renderAboutAndSubredditType = function ({ node }) {
     if ( currentType === "subreddit" ) {
       if ( currentSubreddit === node.data.subreddit ) {
         return;
       } else {
         currentSubreddit = node.data.subreddit;
         currentAbout = null;
-        fetchAbout( node );
+        currentSubredditType = null;
+        fetchAboutAndSubredditType( node );
       }
     }
   };
@@ -109,19 +113,16 @@
       renderTooltipHeading( detail );
       renderTooltipMetadata( detail );
       renderTooltipSubreddits( detail );
-      renderAbout( detail );
+      renderAboutAndSubredditType( detail );
       renderImage( detail );
 
       currentDisplay = "block";
     }
   };
 
-
   $: renderTooltipNode( event );
 
-
 </script>
-
 
 
 
@@ -134,60 +135,68 @@
   style:bottom={currentBottom}
   style:left={currentLeft}
   >
-  
-  <section>
-    <h2>{currentName}</h2>
-    <h3>Size Metadata</h3>
-    <p>Number of Comments: {currentComments}</p>
-    {#if currentType === "cluster"}
-      <p>Percentage of Reddit Comments: {currentCommentPercent}</p>
-    {:else}
-      <p>Percentage of Cluster: {currentCommentPercent}</p>
-    {/if}
-  </section>
-  
-
-  {#if currentType === "cluster"}
-    <section class="top-subreddits">
-      <h3>Top Subreddits By Number of Comments</h3>
-      <div class="top-10-wrapper">
-        <div class="group">
-          {#each currentSubredditsOne as subreddit}
-            <p>{subreddit}</p>
-          {/each}
-        </div>
-
-        <div class="group">
-          {#each currentSubredditsTwo as subreddit}
-            <p>{subreddit}</p>
-          {/each}
-        </div>
-      </div>
-    </section>
-  {/if}
-
-  {#if currentType === "subreddit"}
-    <section class="about">
-      <h3>About Subreddit</h3>
-      {#if currentAbout == null}
-        <Spinner></Spinner>
+    <section>
+      {#if currentSubredditType === "public" || currentType === "cluster"}
+        <h2>{currentName}</h2>
+      {/if}
+      {#if currentSubredditType === "nsfw"}
+        <h2>[NSFW] {currentName}</h2>
+      {/if}
+      {#if currentSubredditType === "banned"}
+        <h2>[BANNED] {currentName}</h2>
+      {/if}
+      {#if currentSubredditType === "private"}
+        <h2>[PRIVATE] {currentName}</h2>
+      {/if}
+      <h3>Size Metadata</h3>
+      <p>Number of Comments: {currentComments}</p>
+      {#if currentType === "cluster"}
+        <p>Percentage of Reddit Comments: {currentCommentPercent}</p>
       {:else}
-        <p>{currentAbout}</p>
+        <p>Percentage of Cluster: {currentCommentPercent}</p>
       {/if}
     </section>
-  {/if}
+    
 
-  <!-- {#if (currentType === "subreddit") && (currentImage != null)}
-    <div class="image-frame">
-      <img 
-        src={currentImage}
-        alt="screen capture for subreddit {currentName}"
-      >
-    </div>
-  {/if} -->
+    {#if currentType === "cluster"}
+      <section class="top-subreddits">
+        <h3>Top Subreddits By Number of Comments</h3>
+        <div class="top-10-wrapper">
+          <div class="group">
+            {#each currentSubredditsOne as subreddit}
+              <p>{subreddit}</p>
+            {/each}
+          </div>
 
-</section>
+          <div class="group">
+            {#each currentSubredditsTwo as subreddit}
+              <p>{subreddit}</p>
+            {/each}
+          </div>
+        </div>
+      </section>
+    {/if}
 
+    {#if currentType === "subreddit"}
+      <section class="about">
+        <h3>About Subreddit</h3>
+        {#if currentAbout == null}
+          <Spinner></Spinner>
+        {:else}
+          <p>{currentAbout}</p>
+        {/if}
+      </section>
+    {/if}
+
+    <!-- {#if (currentType === "subreddit") && (currentImage != null)}
+      <div class="image-frame">
+        <img 
+          src={currentImage}
+          alt="screen capture for subreddit {currentName}"
+        >
+      </div>
+    {/if} -->
+  </section>
 <style>
   .tooltip {
     position: absolute;
