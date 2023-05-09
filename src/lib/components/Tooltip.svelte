@@ -141,25 +141,23 @@
   >
     <section>
       <h2>
-        {#if currentBadge === "public"}
-          <sl-badge variant="primary" pill>
-            Public
-          </sl-badge>
-        {:else if currentBadge === "nsfw"}
+        {#if currentBadge === "nsfw"}
           <sl-badge variant="warning" pill>
             NSFW
           </sl-badge>
+          {currentName}
         {:else if currentBadge ===  "banned"}
           <sl-badge variant="danger" pill>
             Banned
           </sl-badge>
+          {currentName}
         {:else if currentBadge === "private"}
           <sl-badge variant="neutral" pill>
             Private
           </sl-badge>
+        {:else}
+          {currentName}
         {/if}
-
-        {currentName}
       </h2>
     
       <h3>Size Metadata</h3>
