@@ -29,6 +29,14 @@ const drawLeaf = function ( leaf ) {
 };
 
 const labelLeaf = function ( leaf ) {
+  if (leaf.data.displayLabel === "Dankchristianmemes2") {
+    console.log( leaf.data );
+  }
+
+  if ( leaf.data.isPrivate === true ) {
+    return;
+  }
+
   const x0 = this.scaleX( leaf.x0 );
   const x1 = this.scaleX( leaf.x1 );
   const y0 = this.scaleY( leaf.y0 );
