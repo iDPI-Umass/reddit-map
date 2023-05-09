@@ -2,6 +2,7 @@
   import "@shoelace-style/shoelace/dist/components/alert/alert.js";
   import "@shoelace-style/shoelace/dist/components/icon/icon.js";
   import "@shoelace-style/shoelace/dist/components/button/button.js";
+  import MainHeader from "$lib/components/MainHeader.svelte";
   import Treemap from "$lib/components/Treemap.svelte";
   import Bubblemap from "$lib/components/Bubblemap.svelte";
   import { sourceStore } from "$lib/stores/source.js";
@@ -54,16 +55,7 @@
   For the best experience, we recommend viewing RedditMap on a large screen.
 </sl-alert>
 
-<header>
-  <a
-    href="/"
-    aria-label="reset view"
-    on:click={handleReset}
-    on:keypress={handleReset}
-    >
-    <h1>RedditMap</h1>
-    </a>
-</header>
+<MainHeader></MainHeader>
 
 <main>
 
@@ -79,22 +71,6 @@
 
 
 <style>
-  header {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    padding: 1rem;
-    background: var(--gobo-color-panel);
-    border-bottom: var(--gobo-border-panel);
-    height: 4rem;
-  }
-
-  header a {
-    color: inherit;
-    text-decoration: none;
-  }
-
   main {
     position: relative;
     flex: 1 0 auto;
