@@ -1,4 +1,5 @@
 <script>
+  import "@shoelace-style/shoelace/dist/components/badge/badge.js";
   import Spinner from "$lib/components/primitives/Spinner.svelte";
   import * as Metadata from "$lib/resources/metadata.js";
 
@@ -17,6 +18,7 @@
   let currentSubredditsTwo = [];
   let currentSubreddit = null;
   let currentAbout = null;
+  let currentBadge = null;
   let currentImage = null;
 
   let currentType = null;
@@ -80,20 +82,26 @@
     }
   }
 
-  const fetchAbout = async function ( node ) {
+  const fetchMetadata = async function ( node ) {
     const metadata = await Metadata.get( node.data.subreddit );
     currentAbout = metadata?.about?.description;
+    currentBadge = metadata?.type ?? "public";
+    // console.log( node.data.subreddit, currentBadge );
   };
 
-  const renderAbout = function ({ node }) {
+  const renderMetadata = function ({ node }) {
     if ( currentType === "subreddit" ) {
       if ( currentSubreddit === node.data.subreddit ) {
         return;
       } else {
         currentSubreddit = node.data.subreddit;
         currentAbout = null;
-        fetchAbout( node );
+        currentBadge = null;
+        fetchMetadata( node );
       }
+    } else {
+      currentAbout = null;
+      currentBadge = null;
     }
   };
 
@@ -109,19 +117,16 @@
       renderTooltipHeading( detail );
       renderTooltipMetadata( detail );
       renderTooltipSubreddits( detail );
-      renderAbout( detail );
+      renderMetadata( detail );
       renderImage( detail );
 
       currentDisplay = "block";
     }
   };
 
-
   $: renderTooltipNode( event );
 
-
 </script>
-
 
 
 
@@ -134,60 +139,74 @@
   style:bottom={currentBottom}
   style:left={currentLeft}
   >
-  
-  <section>
-    <h2>{currentName}</h2>
-    <h3>Size Metadata</h3>
-    <p>Number of Comments: {currentComments}</p>
-    {#if currentType === "cluster"}
-      <p>Percentage of Reddit Comments: {currentCommentPercent}</p>
-    {:else}
-      <p>Percentage of Cluster: {currentCommentPercent}</p>
-    {/if}
-  </section>
-  
+    <section>
+      <h2>
+        {#if currentBadge === "public"}
+          <sl-badge variant="primary" pill>
+            Public
+          </sl-badge>
+        {:else if currentBadge === "nsfw"}
+          <sl-badge variant="warning" pill>
+            NSFW
+          </sl-badge>
+        {:else if currentBadge ===  "banned"}
+          <sl-badge variant="danger" pill>
+            Banned
+          </sl-badge>
+        {:else if currentBadge === "private"}
+          <sl-badge variant="neutral" pill>
+            Private
+          </sl-badge>
+        {/if}
 
-  {#if currentType === "cluster"}
-    <section class="top-subreddits">
-      <h3>Top Subreddits By Number of Comments</h3>
-      <div class="top-10-wrapper">
-        <div class="group">
-          {#each currentSubredditsOne as subreddit}
-            <p>{subreddit}</p>
-          {/each}
-        </div>
-
-        <div class="group">
-          {#each currentSubredditsTwo as subreddit}
-            <p>{subreddit}</p>
-          {/each}
-        </div>
-      </div>
-    </section>
-  {/if}
-
-  {#if currentType === "subreddit"}
-    <section class="about">
-      <h3>About Subreddit</h3>
-      {#if currentAbout == null}
-        <Spinner></Spinner>
+        {currentName}
+      </h2>
+    
+      <h3>Size Metadata</h3>
+      <p>Number of Comments: {currentComments}</p>
+      {#if currentType === "cluster"}
+        <p>Percentage of Reddit Comments: {currentCommentPercent}</p>
       {:else}
-        <p>{currentAbout}</p>
+        <p>Percentage of Cluster: {currentCommentPercent}</p>
       {/if}
     </section>
-  {/if}
+    
 
-  <!-- {#if (currentType === "subreddit") && (currentImage != null)}
-    <div class="image-frame">
-      <img 
-        src={currentImage}
-        alt="screen capture for subreddit {currentName}"
-      >
-    </div>
-  {/if} -->
+    {#if currentType === "cluster"}
+      <section class="top-subreddits">
+        <h3>Top Subreddits By Number of Comments</h3>
+        <div class="top-10-wrapper">
+          <div class="group">
+            {#each currentSubredditsOne as subreddit}
+              <p>{subreddit}</p>
+            {/each}
+          </div>
 
-</section>
+          <div class="group">
+            {#each currentSubredditsTwo as subreddit}
+              <p>{subreddit}</p>
+            {/each}
+          </div>
+        </div>
+      </section>
+    {/if}
 
+    {#if currentType === "subreddit" && currentAbout != null}
+      <section class="about">
+        <h3>About Subreddit</h3>
+        <p>{currentAbout}</p>
+      </section>
+    {/if}
+
+    <!-- {#if (currentType === "subreddit") && (currentImage != null)}
+      <div class="image-frame">
+        <img 
+          src={currentImage}
+          alt="screen capture for subreddit {currentName}"
+        >
+      </div>
+    {/if} -->
+  </section>
 <style>
   .tooltip {
     position: absolute;
@@ -205,6 +224,17 @@
     font-size: 1.125rem;
     font-weight: var(--gobo-font-weight-black);
     margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .tooltip h2 sl-badge {
+    margin-right: 0.5rem;
+  }
+
+  .tooltip h2 sl-badge::part(base) {
+    font-size: 1rem;
+    font-weight: var(--gobo-font-weight-black);
   }
 
   .tooltip h3 {
