@@ -11,6 +11,9 @@
   let currentTop = 0;
   let currentLeft = 0;
   let currentBottom = "unset";
+
+  let tooltipReady = false;
+  let currentNode = null;
   let currentName = "";
   let currentComments = 0;
   let currentCommentPercent = 0;
@@ -42,12 +45,6 @@
 
   const renderTooltipHeading = function ({ node }) {
     currentName = node.data.displayLabel;
-    
-    if ( node.data.subreddit == null ) {
-      currentType = "cluster";
-    } else {
-      currentType = "subreddit";
-    }
   };
 
   const renderTooltipMetadata = function ({ node }) {
@@ -58,7 +55,7 @@
     pretty = new Intl.NumberFormat( "en-US" );
     currentComments = pretty.format( count );
 
-    if ( data.subreddit == null ) {
+    if ( currentType === "cluster" ) {
       ratio = count / totalCommentCount;
     } else {
       ratio = count / node.parent.data.comment_count;
@@ -83,22 +80,23 @@
   }
 
   const fetchMetadata = async function ( node ) {
-    const metadata = await Metadata.get( node.data.subreddit );
-    currentAbout = metadata?.about?.description;
-    currentBadge = metadata?.type ?? "public";
-    // console.log( node.data.subreddit, currentBadge );
+    // We don't want to update the tooltip values until we have the metadata
+    // because it affects how some subreddits are displayed.
+    try {
+      const metadata = await Metadata.get( node.data.subreddit );
+      currentAbout = metadata?.about?.description;
+      currentBadge = metadata?.type ?? "public";
+    } catch (error) {
+      // If we get a 404 or other error for metadata, make a best effort.
+      currentAbout = null;
+      currentBadge = null;
+    }
   };
 
-  const renderMetadata = function ({ node }) {
+  const renderMetadata = async function ({ node }) {
     if ( currentType === "subreddit" ) {
-      if ( currentSubreddit === node.data.subreddit ) {
-        return;
-      } else {
-        currentSubreddit = node.data.subreddit;
-        currentAbout = null;
-        currentBadge = null;
-        fetchMetadata( node );
-      }
+      currentSubreddit = node.data.subreddit;
+      await fetchMetadata( node );
     } else {
       currentAbout = null;
       currentBadge = null;
@@ -109,19 +107,38 @@
     currentImage = `https://data.redditmap.social/images/${ node.data.displayLabel }.png`;
   };
 
-  const renderTooltipNode = function ( detail ) {
+  const renderFlow = async function ( detail ) {
+    renderTooltipHeading( detail );
+    renderTooltipMetadata( detail );
+    renderTooltipSubreddits( detail );
+    await renderMetadata( detail );
+    renderImage( detail );
+  };
+
+  const renderTooltipNode = async function ( detail ) {
     if ( detail?.node == null ) {
       currentDisplay = "none";
+      return;
     } else {
-      positionTooltip( detail );
-      renderTooltipHeading( detail );
-      renderTooltipMetadata( detail );
-      renderTooltipSubreddits( detail );
-      renderMetadata( detail );
-      renderImage( detail );
-
       currentDisplay = "block";
     }
+
+    if ( currentNode === detail.node ) {
+      positionTooltip( detail );
+      return;
+    } else {
+      tooltipReady = false;
+      currentNode = detail.node;
+    }
+      
+    if ( detail.node.data.subreddit == null ) {
+      currentType = "cluster";
+    } else {
+      currentType = "subreddit";
+    }
+      
+    await renderFlow( detail );
+    tooltipReady = true;
   };
 
   $: renderTooltipNode( event );
@@ -139,71 +156,79 @@
   style:bottom={currentBottom}
   style:left={currentLeft}
   >
-    <section>
-      <h2>
-        {#if currentBadge === "nsfw"}
-          <sl-badge variant="warning" pill>
-            NSFW
-          </sl-badge>
-          {currentName}
-        {:else if currentBadge ===  "banned"}
-          <sl-badge variant="danger" pill>
-            Banned
-          </sl-badge>
-          {currentName}
-        {:else if currentBadge === "private"}
-          <sl-badge variant="neutral" pill>
-            Private
-          </sl-badge>
+    {#if tooltipReady !== true}
+      <Spinner></Spinner>
+    
+    {:else}
+
+      <section>
+        <h2>
+          {#if currentBadge === "nsfw"}
+            <sl-badge variant="warning" pill>
+              NSFW
+            </sl-badge>
+            {currentName}
+          {:else if currentBadge ===  "banned"}
+            <sl-badge variant="danger" pill>
+              Banned
+            </sl-badge>
+            {currentName}
+          {:else if currentBadge === "private"}
+            <sl-badge variant="neutral" pill>
+              Private
+            </sl-badge>
+          {:else}
+            {currentName}
+          {/if}
+        </h2>
+      
+        <h3>Size Metadata</h3>
+        <p>Number of Comments: {currentComments}</p>
+        {#if currentType === "cluster"}
+          <p>Percentage of Reddit Comments: {currentCommentPercent}</p>
         {:else}
-          {currentName}
+          <p>Percentage of Cluster: {currentCommentPercent}</p>
         {/if}
-      </h2>
-    
-      <h3>Size Metadata</h3>
-      <p>Number of Comments: {currentComments}</p>
+      </section>
+      
+
       {#if currentType === "cluster"}
-        <p>Percentage of Reddit Comments: {currentCommentPercent}</p>
-      {:else}
-        <p>Percentage of Cluster: {currentCommentPercent}</p>
+        <section class="top-subreddits">
+          <h3>Top Subreddits By Number of Comments</h3>
+          <div class="top-10-wrapper">
+            <div class="group">
+              {#each currentSubredditsOne as subreddit}
+                <p>{subreddit}</p>
+              {/each}
+            </div>
+
+            <div class="group">
+              {#each currentSubredditsTwo as subreddit}
+                <p>{subreddit}</p>
+              {/each}
+            </div>
+          </div>
+        </section>
       {/if}
-    </section>
-    
 
-    {#if currentType === "cluster"}
-      <section class="top-subreddits">
-        <h3>Top Subreddits By Number of Comments</h3>
-        <div class="top-10-wrapper">
-          <div class="group">
-            {#each currentSubredditsOne as subreddit}
-              <p>{subreddit}</p>
-            {/each}
-          </div>
+      {#if currentType === "subreddit" && currentAbout != null}
+        <section class="about">
+          <h3>About Subreddit</h3>
+          <p>{currentAbout}</p>
+        </section>
+      {/if}
 
-          <div class="group">
-            {#each currentSubredditsTwo as subreddit}
-              <p>{subreddit}</p>
-            {/each}
-          </div>
+      <!-- {#if (currentType === "subreddit") && (currentImage != null)}
+        <div class="image-frame">
+          <img 
+            src={currentImage}
+            alt="screen capture for subreddit {currentName}"
+          >
         </div>
-      </section>
+      {/if} -->
     {/if}
 
-    {#if currentType === "subreddit" && currentAbout != null}
-      <section class="about">
-        <h3>About Subreddit</h3>
-        <p>{currentAbout}</p>
-      </section>
-    {/if}
 
-    <!-- {#if (currentType === "subreddit") && (currentImage != null)}
-      <div class="image-frame">
-        <img 
-          src={currentImage}
-          alt="screen capture for subreddit {currentName}"
-        >
-      </div>
-    {/if} -->
   </section>
 <style>
   .tooltip {
