@@ -1,3 +1,4 @@
+export * from "./click.js";
 export * from "./find-node.js";
 export * from "./hover.js";
 export * from "./initialize.js";
