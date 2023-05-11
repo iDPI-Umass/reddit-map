@@ -47,11 +47,11 @@
       </p>
       <p>This work was made possible by support from:</p>
 
-      <div class="wrapper">
-        <div><img src="/images/ford.png"></div>
-        <div><img src="/images/knight.png"></div>
-        <div><img src="/images/macarthur.jpg"></div>
-      </div>
+      <ul class="acknowledgments">
+        <li><img src="/images/ford.png" alt="Ford Foundation"></li>
+        <li><img src="/images/knight.png" alt="Knight Foundation"></li>
+        <li><img src="/images/macarthur.jpg" alt="MacArthur Foundation"></li>
+      </ul>
       
 
 
@@ -126,11 +126,41 @@
     overflow-y: scroll;
     background-color: var(--gobo-color-null);
   }
-  .wrapper {
-    display: grid;
+
+  .acknowledgments {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 0;
+
+    /* display: grid;
     grid-template-columns: repeat(3, 175px);
     gap: 30px;
-    grid-auto-rows: minmax(100px, auto);
+    grid-auto-rows: minmax(100px, auto); */
   }
+
+  .acknowledgments {
+    list-style-type: none;
+    width: 100%;
+    margin-bottom: 0;
+  }
+
+  .acknowledgments li {
+    padding: 1rem;
+    flex: 1 1 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .acknowledgments img {
+    border: none;
+    border-radius: 0;
+    max-width: 175px;
+  }
+
+
   
 </style>

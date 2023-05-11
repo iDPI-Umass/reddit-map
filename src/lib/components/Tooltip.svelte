@@ -2,22 +2,16 @@
   import "@shoelace-style/shoelace/dist/components/badge/badge.js";
   import Spinner from "$lib/components/primitives/Spinner.svelte";
   import * as Metadata from "$lib/resources/metadata.js";
-  import { createEventDispatcher } from "svelte";
 
   export let event = null;
   export let totalCommentCount = 1;
   export let canvas;
-
-  const dispatch = createEventDispatcher();
   
   let currentDisplay = "none";
   let currentTop = 0;
   let currentLeft = 0;
-  let currentRight = "unset";
   let currentBottom = "unset";
-  let currentMaxWidth = "36rem";
 
-  let tooltipMode = "mouse";
   let tooltipReady = false;
   let currentNode = null;
   let currentName = "";
@@ -25,82 +19,32 @@
   let currentCommentPercent = 0;
   let currentSubredditsOne = [];
   let currentSubredditsTwo = [];
+  let currentClustersOne = [];
+  let currentClustersTwo = [];
+  let currentNearestNeighborsOne = [];
+  let currentNearestNeighborsTwo = [];
+  let currentNearestNeighborsStr = "";
   let currentSubreddit = null;
   let currentAbout = null;
   let currentBadge = null;
   let currentImage = null;
-  let currentSubredditURL = "https://reddit.com/"
 
   let currentType = null;
-
-
-  const handleTooltipClose = function () {
-		dispatch( "dismiss", {} );
-  }
 
 
   // We want the tooltip to position itself either above or below the cursor
   // where it's mostly likely to have the space it needs. It's absolutely positioned
   // against the layout column grandparent, so we need to account for parent siblings.
   // This is very brittle, but tooltips are a weird layout case.
-  const positionMouseTooltip = function ({ currentX, currentY })  {
-    currentMaxWidth = "36rem";
+  const positionTooltip = function ({ currentX, currentY })  {
     currentLeft = `${ currentX + 32 }px`;
     
     if ( currentY < canvas.clientHeight / 2 ) {
-      currentTop = `${ currentY + 32 }px`;
+      currentTop = `${ currentY + 32  }px`;
       currentBottom = "unset";
     } else {
       currentTop = "unset";
       currentBottom = `${ canvas.clientHeight - currentY + 98 }px`;
-    }
-  };
-
-  // TODO: This is so wrong, but it's sufficient until we can redo the math.
-  const positionTouchTooltip = function ({ currentY }) {
-    currentMaxWidth = "unset";
-
-    let top, bottom, left, right, halfFromTop, halfFromBottom;
-
-    top = 24;
-    if ( window.innerWidth > 750 ) {
-      left = 24;
-      bottom = 16 * 10;
-      right = ( window.innerWidth / 2 ) + 16;
-      halfFromTop = 16 + (canvas.clientHeight / 2);
-      halfFromBottom = (16 * 10) + ( canvas.clientHeight / 2 );
-    } else {
-      left = 16;
-      right = 16;
-      bottom = 16 * 10;
-      halfFromTop = 16 + (canvas.clientHeight / 2) + 16;
-      halfFromBottom = (16 * 10) + ( canvas.clientHeight / 2 ) + 16;
-    }
-
-    if ( currentY < canvas.clientHeight / 2 ) {
-      // Tapped top of canvas
-      currentTop = `${ halfFromTop }px`;
-      currentBottom = `${ bottom }px`;
-      currentLeft = `${ left }px`;
-      currentRight = `${ right }px`;
-    } else {
-      // Tapped bottom of canvas
-      currentTop = `${ top }px`;
-      currentBottom = `${ halfFromBottom }px`;
-      currentLeft = `${ left }px`;
-      currentRight = `${ right }px`;
-    }
-  };
-
-  const positionTooltip = function ( detail ) {
-    if ( detail.type === "mouse" ) {
-      tooltipMode = "mouse";
-      positionMouseTooltip( detail );
-    } else if ( detail.type === "touch" ) {
-      tooltipMode = "touch";
-      positionTouchTooltip( detail );
-    } else {
-      throw new Error ("unknown tooltip event type");
     }
   };
 
@@ -140,6 +84,56 @@
     }
   }
 
+  const renderTooltipClusters = function ({ node }) {
+    currentClustersOne = []
+    currentClustersTwo = []
+    if ( currentType === "subreddit cluster" ) {
+      let length = 0;
+      let listLength = 5;
+      if ( node.data.children.length <= listLength ) {
+        length = node.data.children.length;
+      }
+      else {
+        length = node.data.children.length / 2
+      }
+      for ( let i = 0; i < length; i++ ) {
+        currentClustersOne.push(`- ${ node.data.children[i].taxonomy_label }`)
+        
+      }
+      if ( length > listLength / 2 ) {
+        for ( let i = listLength + 1; i < node.data.children.length; i++ ) {
+          currentClustersTwo.push(`- ${ node.data.children[i].taxonomy_label }`)
+        }
+      }
+    }
+  }
+
+  const renderTooltipNearestNeighbors = function ({ node }) {
+    currentNearestNeighborsOne = []
+    currentNearestNeighborsTwo = []
+    if ( currentType === "subreddit" ) {
+      const ax = node.data.nearest_neighbors;
+      let subredditBadgePairs = []
+      for ( let i = 0; i < ax.length; i++ ) {
+        const subreddit = ax[i][0]
+        const taxonomy_label = ax[i][1];
+        if (node.data.taxonomy_label != taxonomy_label) {
+          subredditBadgePairs.push([`${ subreddit } (${ taxonomy_label })`, "public"]);
+        }
+        else {
+          subredditBadgePairs.push([`${ subreddit }`, "public"]);
+        }
+    
+
+        
+      }
+      currentNearestNeighborsOne = subredditBadgePairs.slice( 0, 5 );
+      currentNearestNeighborsTwo = subredditBadgePairs.slice( 5, 10 );
+      console.log("currentNearestNeighborsOne: ", currentNearestNeighborsOne)
+      console.log("currentNearestNeighborsTwo: ", currentNearestNeighborsTwo)
+    }
+  }
+
   const fetchMetadata = async function ( node ) {
     // We don't want to update the tooltip values until we have the metadata
     // because it affects how some subreddits are displayed.
@@ -154,11 +148,39 @@
     }
   };
 
+  const fetchNearestNeighborBadge = async function ( node ) {
+    // We don't want to update the tooltip values until we have the metadata
+    // because it affects how some subreddits are displayed.
+    
+    for ( let i = 0; i < node.data.nearest_neighbors.length; i++ ) {
+      try {
+        const metadata = await Metadata.get( node.data.subreddit );
+        if (i < 5) {
+          
+          currentNearestNeighborsOne[i][1] = metadata?.type ?? "public";
+          if (metadata?.type == "private") {
+            currentNearestNeighborsOne[i][0] = ""
+          }
+          
+        }
+        else {
+          currentNearestNeighborsTwo[i][1] = metadata?.type ?? "public";
+          if (metadata?.type == "private") {
+            currentNearestNeighborsOne[i][1] = ""
+          }
+        }
+      } catch (error) {
+        // If we get a 404 or other error for metadata, make a best effort.
+        
+      } 
+    } 
+  };
+
   const renderMetadata = async function ({ node }) {
     if ( currentType === "subreddit" ) {
       currentSubreddit = node.data.subreddit;
-      currentSubredditURL = `https://www.reddit.com/r/${ currentSubreddit }/`
       await fetchMetadata( node );
+      await fetchNearestNeighborBadge( node );
     } else {
       currentAbout = null;
       currentBadge = null;
@@ -173,6 +195,8 @@
     renderTooltipHeading( detail );
     renderTooltipMetadata( detail );
     renderTooltipSubreddits( detail );
+    renderTooltipClusters ( detail );
+    renderTooltipNearestNeighbors ( detail );
     await renderMetadata( detail );
     renderImage( detail );
   };
@@ -185,9 +209,8 @@
       currentDisplay = "block";
     }
 
-    positionTooltip( detail );
-
     if ( currentNode === detail.node ) {
+      positionTooltip( detail );
       return;
     } else {
       tooltipReady = false;
@@ -195,7 +218,19 @@
     }
       
     if ( detail.node.data.subreddit == null ) {
-      currentType = "cluster";
+      let isSubredditCluster = false;
+      for ( let i = 0; i < detail.node.data.children.length; i++ ) {
+        if (detail.node.data.children[i].subreddit != null) {
+          isSubredditCluster = true;
+          break;
+        }
+      }
+      if ( isSubredditCluster === false ) {
+        currentType = "subreddit cluster";
+      }
+      else {
+        currentType = "cluster";
+      }
     } else {
       currentType = "subreddit";
     }
@@ -218,8 +253,6 @@
   style:top={currentTop}
   style:bottom={currentBottom}
   style:left={currentLeft}
-  style:right={currentRight}
-  style:max-width={currentMaxWidth}
   >
     {#if tooltipReady !== true}
       <Spinner></Spinner>
@@ -227,63 +260,25 @@
     {:else}
 
       <section>
-        {#if tooltipMode === "touch"}
-          <header class="close-header">
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <sl-button
-              on:click={handleTooltipClose}
-              variant="primary"
-              size="small"
-              pill>
-              Close
-            </sl-button>
-          </header>
-        {/if}
-
-        {#if tooltipMode === "touch" && currentType == "subreddit"}
-          <a href="{currentSubredditURL}" target="_blank" rel="noopener noreferrer">
-            <h2>
-              {#if currentBadge === "nsfw"}
-                <sl-badge variant="warning" pill>
-                  NSFW
-                </sl-badge>
-                {currentName}
-              {:else if currentBadge ===  "banned"}
-                <sl-badge variant="danger" pill>
-                  Banned
-                </sl-badge>
-                {currentName}
-              {:else if currentBadge === "private"}
-                <sl-badge variant="neutral" pill>
-                  Private
-                </sl-badge>
-              {:else}
-                {currentName}
-              {/if}
-            </h2>
-          </a>
-        {:else}
-          <h2>
-            {#if currentBadge === "nsfw"}
-              <sl-badge variant="warning" pill>
-                NSFW
-              </sl-badge>
-              {currentName}
-            {:else if currentBadge ===  "banned"}
-              <sl-badge variant="danger" pill>
-                Banned
-              </sl-badge>
-              {currentName}
-            {:else if currentBadge === "private"}
-              <sl-badge variant="neutral" pill>
-                Private
-              </sl-badge>
-            {:else}
-              {currentName}
-            {/if}
-          </h2>
-        {/if}
-       
+        <h2>
+          {#if currentBadge === "nsfw"}
+            <sl-badge variant="warning" pill>
+              NSFW
+            </sl-badge>
+            {currentName}
+          {:else if currentBadge ===  "banned"}
+            <sl-badge variant="danger" pill>
+              Banned
+            </sl-badge>
+            {currentName}
+          {:else if currentBadge === "private"}
+            <sl-badge variant="neutral" pill>
+              Private
+            </sl-badge>
+          {:else}
+            {currentName}
+          {/if}
+        </h2>
       
         <h3>Size Metadata</h3>
         <p>Number of Comments: {currentComments}</p>
@@ -294,6 +289,23 @@
         {/if}
       </section>
       
+      {#if currentType === "subreddit cluster"}
+        <section class="child-clusters">
+          <h3>Topics</h3>
+          <div class="child-clusters-wrapper">
+            <div class="group">
+              {#each currentClustersOne as cluster}
+                <p>{cluster}</p>
+              {/each}
+            </div>
+            <div class="group">
+              {#each currentClustersTwo as cluster}
+                <p>{cluster}</p>
+              {/each}
+            </div>
+          </div>
+        </section>
+      {/if}
 
       {#if currentType === "cluster"}
         <section class="top-subreddits">
@@ -314,12 +326,32 @@
         </section>
       {/if}
 
+      {#if currentType === "subreddit"}
+        <section class="nearest-neighbors">
+          <h3>Closest Subreddits: </h3>
+          <div class="nearest-neighbors-wrapper">
+            <div class="group">
+              {#each currentNearestNeighborsOne as subreddit}
+                <p>
+                    {subreddit[0]}
+                </p>
+              {/each}
+              
+            </div>
+      
+          </div>
+          
+        </section>
+      {/if}
+
       {#if currentType === "subreddit" && currentAbout != null}
         <section class="about">
           <h3>About Subreddit</h3>
           <p>{currentAbout}</p>
         </section>
       {/if}
+
+      
 
       <!-- {#if (currentType === "subreddit") && (currentImage != null)}
         <div class="image-frame">
@@ -339,13 +371,7 @@
     background: #FFFFFF;
     padding: var(--gobo-height-spacer) var(--gobo-width-spacer);
     border-radius: 1rem;
-    overflow: scroll;
-  }
-
-  .tooltip header.close-header {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 0.5rem;
+    max-width: 36rem;
   }
 
   .tooltip section:not(:last-child) {
@@ -403,6 +429,56 @@
   }
 
   .tooltip .top-subreddits p {
+    margin-right: 1rem;
+  }
+
+  .tooltip .child-clusters .child-clusters-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    max-height: 7rem;
+    padding: 0;
+  }
+
+  .tooltip .child-clusters .child-clusters-wrapper .group {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .tooltip .child-clusters p {
+    margin-right: 1rem;
+  }
+
+  .tooltip .nearest-neighbors .nearest-neighbors-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    max-height: 15rem;
+    padding: 0;
+  }
+
+  .tooltip .nearest-neighbors .nearest-neighbors-wrapper .group {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .tooltip .nearest-neighbors p {
     margin-right: 1rem;
   }
 
