@@ -130,7 +130,7 @@ const decorate = function ( root ) {
 };
 
 const get = async function ( date ) {
-  const path = `RC_${ date }.json`;
+  const path = `RC_${ date }_KMeans_Agglom_100_Clusters_Rules_Mapping.json`;
   const data = d3.hierarchy( await getJSON( path ));
   return decorate( data )
 };
