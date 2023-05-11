@@ -3,7 +3,9 @@ Web Client Frontend for the Reddit Map Project
 
 ## Background
 
-Reddit Map is a project of computer, data, and social scientists to explore and visualize Reddit as a space. The site running the visualizations is available at https://redditmap.social. The code that runs the application frontend is here.
+Reddit Map is a project of computer, data, and social scientists to explore and visualize Reddit. The website running the visualizations is available at https://redditmap.social. The code that runs the website frontend is here. 
+
+Reddit Map is a collaboration between the [Initiative for Digital Public Infrastructure](https://publicinfrastructure.org) (iDPI), [Media Cloud](https://www.mediacloud.org), and the UMass Amherst [Center for Data Science](https://ds.cs.umass.edu).
 
 ## Main Tasks
 
