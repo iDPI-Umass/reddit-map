@@ -102,6 +102,13 @@
       </a>
       
       <p>In the example above, the Online Multiplayer Action Games cluster is open. The bubble map displays the clusters that have the highest number of overlapping user comments with Online Multiplayer Action Games: Rap and Youtube Promotion and Casual Teen Video Games/Interests, for example.</p>
+
+    <h3>Data Slider</h3>
+      <a href="/images/data-slider.png">
+        <img src="/images/data-slider.png">
+      </a>
+      
+      <p>You can use the data slider to select which month’s data to use for the treemap and bubble map.</p>
   </section>
 </main>
 
