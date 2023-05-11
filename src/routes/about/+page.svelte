@@ -41,7 +41,7 @@
     </ul>
       
 
-    <h1>Acknowledgments</h1>
+    <h2>Acknowledgments</h2>
       <p>Reddit Map is a collaboration between the <a href="https://publicinfrastructure.org">Initiative for Digital Public Infrastructure</a> (iDPI), <a href="https://www.mediacloud.org">Media Cloud</a>, and the UMass Amherst <a href="https://ds.cs.umass.edu">Center for Data Science</a>.</p>
       <p>David Harper, from our development partner <a href="https://pandastrike.com/">Panda Strike</a>, for helping us take this project from an academic demo to a production website. <a href="https://usefathom.com/">Fathom</a>’s privacy preserving analytics, for making it possible to monitor our site in a way that is consistent with our values.
       </p>
