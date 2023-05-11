@@ -1,0 +1,55 @@
+name: Bug Report
+description: If something isn't working as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Make sure that you are submitting a new bug that was not previously reported or already fixed.
+
+        Please use a concise and distinct title for the issue.
+  - type: textarea
+    attributes:
+      label: Steps to reproduce the problem
+      description: What were you trying to do?
+      value: |
+        1.
+        2.
+        3.
+        ...
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Expected behaviour
+      description: What should have happened?
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Actual behaviour
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Detailed description
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Specifications
+      description: |
+        If a front-end issue, what browser and operating systems were you using?
+
+        if a data issue, which month of data were you viewing and how were the treemap and bubble map configured?
+      placeholder: |
+        Google Chrome 106.0.5249.119
+        Firefox 105.0.3
+
+        Treemap: Hobbies and Media Interests --> Online Nerd Culture --> SciFi/Fantasy Pop Culture --> Comic Properties
+        Bubblemap: Viewing the nearest neighbors of Comic Properties
+
+        etc...
+    validations:
+      required: true
