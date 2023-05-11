@@ -39,15 +39,6 @@ const _decorate = function ( child, boundaries, counts ) {
   child.data.colorHalf = `${ color }80`;
   child.data.colorQuarter = `${ color }40`;
 
-
-  if ( (child.data.nearest_neighbors == null) || (child.data.nearest_neighbors === "") ) {
-    child.data.nearest_neighbors = [];
-  } else {
-    child.data.nearest_neighbors = child.data.nearest_neighbors.split(",");
-  }
-
-
-
   if ( child.data.tsne_x != null ) {
     child.data.tsne_x = Number( child.data.tsne_x );
   }
