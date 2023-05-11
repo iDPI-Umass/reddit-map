@@ -55,10 +55,3 @@ You can run the publish action locally, if you have permissions with iDPI's AWS 
 ```bash
 AWS_PROFILE=idpi npx gulp publish --environment=production-www
 ```
-
-## Contributing
-
-Reddit Map is **free, open-source software** licensed under the **MIT License**.
-
-You can open issues for bugs you've found or features you think are missing. You can also submit pull requests to this repository. To get started, take a look at [CONTRIBUTING.md](CONTRIBUTING.md).
-
