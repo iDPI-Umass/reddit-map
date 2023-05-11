@@ -11,7 +11,7 @@
 
     <h2>Introduction</h2>
 
-      <p>Reddit is home to thousands of self-moderated communities with millions of accounts. These communities contain a wealth of information that researchers, sociologists, and journalists can access and study. The combination of user anonymity, community moderation, and the freedom for a subreddit to be about any interest make Reddit an exciting area of study. Reddit Map is an open-source tool that makes navigating Reddit data easier by displaying clusters of communities with overlapping community members. 
+      <p>Reddit is home to thousands of self-moderated communities with millions of accounts. These communities contain a wealth of information that researchers, sociologists, and journalists can access and study. The combination of user anonymity, community moderation, and the freedom for a subreddit to be about any interest make Reddit an exciting area of study. Reddit Map is an open-source tool that makes navigating Reddit data easier by displaying clusters of communities with overlapping community members. Check out this <a href="https://publicinfrastructure.org/2023/05/11/we-mapped-reddit-introducing-redditmap-social/">blog post</a> for more detail on the motivations and goals for this project.
       </p>
       
     <h2>Feedback</h2>
