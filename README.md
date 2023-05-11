@@ -1,5 +1,5 @@
 # Reddit Map
-Web Frontend for the Reddit Map Project
+Web frontend for the Reddit Map Project
 
 ## Background
 
