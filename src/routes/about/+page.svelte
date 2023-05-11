@@ -33,11 +33,6 @@
         </a>
       </li>
       <li>
-        <a href="https://github.com/iDPI-Umass/reddit-map" target="_blank" rel="noopener noreferrer">
-          Code of conduct for contributors
-        </a>
-      </li>
-      <li>
         Email:
         <a href="mailto:redditmap@gmail.com" target="_blank" rel="noopener noreferrer">
           redditmap@gmail.com
@@ -47,7 +42,7 @@
       
 
     <h1>Acknowledgments</h1>
-      <p>Reddit Map is a collaboration between the Initiative for Digital Public Infrastructure, Media Cloud, and the UMass Center for Data Science.</p>
+      <p>Reddit Map is a collaboration between the <a href="https://publicinfrastructure.org">Initiative for Digital Public Infrastructure</a> (iDPI), <a href="https://www.mediacloud.org">Media Cloud</a>, and the UMass <a href="https://ds.cs.umass.edu">Center for Data Science</a>.</p>
       <p>David Harper, from our development partner <a href="https://pandastrike.com/">Panda Strike</a>, for helping us take this project from an academic demo to a production website. <a href="https://usefathom.com/">Fathom</a>’s privacy preserving analytics, for making it possible to monitor our site in a way that is consistent with iDPI’s values.
       </p>
       <p>This work was made possible by support from:</p>
