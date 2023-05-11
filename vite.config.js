@@ -5,6 +5,9 @@ const config = {
 	plugins: [sveltekit()],
   chokidarWatchOptions: {
     usePolling: true
+  },
+  server: {
+    host: true
   }
 };
 
