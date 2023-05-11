@@ -53,6 +53,15 @@
       <p>This work was made possible by support from:</p>
 
       <div class="wrapper">
+        <div class="one"><img src="/images/ford.png"></div>
+        <div class="two"><img src="/images/knight.png"></div>
+        <div class="three"><img src="/images/macarthur.jpg"></div>
+      </div>
+      
+
+
+
+      <div class="wrapper">
         <div><img src="/images/ford.png"></div>
         <div><img src="/images/knight.png"></div>
         <div><img src="/images/macarthur.jpg"></div>
