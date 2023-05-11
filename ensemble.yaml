@@ -21,6 +21,6 @@ production-www:
       - redditmap.social
       - www.redditmap.social
     ttl:
-      default: 3600 # 1 hour
+      default: 86400 # 1 day
       min: 0
       max: 31536000 # 1 year

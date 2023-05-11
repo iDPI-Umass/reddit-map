@@ -2,16 +2,22 @@
   import "@shoelace-style/shoelace/dist/components/badge/badge.js";
   import Spinner from "$lib/components/primitives/Spinner.svelte";
   import * as Metadata from "$lib/resources/metadata.js";
+  import { createEventDispatcher } from "svelte";
 
   export let event = null;
   export let totalCommentCount = 1;
   export let canvas;
+
+  const dispatch = createEventDispatcher();
   
   let currentDisplay = "none";
   let currentTop = 0;
   let currentLeft = 0;
+  let currentRight = "unset";
   let currentBottom = "unset";
+  let currentMaxWidth = "36rem";
 
+  let tooltipMode = "mouse";
   let tooltipReady = false;
   let currentNode = null;
   let currentName = "";
@@ -23,23 +29,78 @@
   let currentAbout = null;
   let currentBadge = null;
   let currentImage = null;
+  let currentSubredditURL = "https://reddit.com/"
 
   let currentType = null;
+
+
+  const handleTooltipClose = function () {
+		dispatch( "dismiss", {} );
+  }
 
 
   // We want the tooltip to position itself either above or below the cursor
   // where it's mostly likely to have the space it needs. It's absolutely positioned
   // against the layout column grandparent, so we need to account for parent siblings.
   // This is very brittle, but tooltips are a weird layout case.
-  const positionTooltip = function ({ currentX, currentY })  {
+  const positionMouseTooltip = function ({ currentX, currentY })  {
+    currentMaxWidth = "36rem";
     currentLeft = `${ currentX + 32 }px`;
     
     if ( currentY < canvas.clientHeight / 2 ) {
-      currentTop = `${ currentY + 32  }px`;
+      currentTop = `${ currentY + 32 }px`;
       currentBottom = "unset";
     } else {
       currentTop = "unset";
       currentBottom = `${ canvas.clientHeight - currentY + 98 }px`;
+    }
+  };
+
+  // TODO: This is so wrong, but it's sufficient until we can redo the math.
+  const positionTouchTooltip = function ({ currentY }) {
+    currentMaxWidth = "unset";
+
+    let top, bottom, left, right, halfFromTop, halfFromBottom;
+
+    top = 24;
+    if ( window.innerWidth > 750 ) {
+      left = 24;
+      bottom = 16 * 10;
+      right = ( window.innerWidth / 2 ) + 16;
+      halfFromTop = 16 + (canvas.clientHeight / 2);
+      halfFromBottom = (16 * 10) + ( canvas.clientHeight / 2 );
+    } else {
+      left = 16;
+      right = 16;
+      bottom = 16 * 10;
+      halfFromTop = 16 + (canvas.clientHeight / 2) + 16;
+      halfFromBottom = (16 * 10) + ( canvas.clientHeight / 2 ) + 16;
+    }
+
+    if ( currentY < canvas.clientHeight / 2 ) {
+      // Tapped top of canvas
+      currentTop = `${ halfFromTop }px`;
+      currentBottom = `${ bottom }px`;
+      currentLeft = `${ left }px`;
+      currentRight = `${ right }px`;
+    } else {
+      // Tapped bottom of canvas
+      currentTop = `${ top }px`;
+      currentBottom = `${ halfFromBottom }px`;
+      currentLeft = `${ left }px`;
+      currentRight = `${ right }px`;
+    }
+  };
+
+  const positionTooltip = function ( detail ) {
+    if ( detail.type === "mouse" ) {
+      tooltipMode = "mouse";
+      positionMouseTooltip( detail );
+    } else if ( detail.type === "touch" ) {
+      tooltipMode = "touch";
+      positionTouchTooltip( detail );
+    } else {
+      throw new Error ("unknown tooltip event type");
     }
   };
 
@@ -96,6 +157,7 @@
   const renderMetadata = async function ({ node }) {
     if ( currentType === "subreddit" ) {
       currentSubreddit = node.data.subreddit;
+      currentSubredditURL = `https://www.reddit.com/r/${ currentSubreddit }/`
       await fetchMetadata( node );
     } else {
       currentAbout = null;
@@ -123,8 +185,9 @@
       currentDisplay = "block";
     }
 
+    positionTooltip( detail );
+
     if ( currentNode === detail.node ) {
-      positionTooltip( detail );
       return;
     } else {
       tooltipReady = false;
@@ -155,6 +218,8 @@
   style:top={currentTop}
   style:bottom={currentBottom}
   style:left={currentLeft}
+  style:right={currentRight}
+  style:max-width={currentMaxWidth}
   >
     {#if tooltipReady !== true}
       <Spinner></Spinner>
@@ -162,25 +227,63 @@
     {:else}
 
       <section>
-        <h2>
-          {#if currentBadge === "nsfw"}
-            <sl-badge variant="warning" pill>
-              NSFW
-            </sl-badge>
-            {currentName}
-          {:else if currentBadge ===  "banned"}
-            <sl-badge variant="danger" pill>
-              Banned
-            </sl-badge>
-            {currentName}
-          {:else if currentBadge === "private"}
-            <sl-badge variant="neutral" pill>
-              Private
-            </sl-badge>
-          {:else}
-            {currentName}
-          {/if}
-        </h2>
+        {#if tooltipMode === "touch"}
+          <header class="close-header">
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <sl-button
+              on:click={handleTooltipClose}
+              variant="primary"
+              size="small"
+              pill>
+              Close
+            </sl-button>
+          </header>
+        {/if}
+
+        {#if tooltipMode === "touch" && currentType == "subreddit"}
+          <a href="{currentSubredditURL}" target="_blank" rel="noopener noreferrer">
+            <h2>
+              {#if currentBadge === "nsfw"}
+                <sl-badge variant="warning" pill>
+                  NSFW
+                </sl-badge>
+                {currentName}
+              {:else if currentBadge ===  "banned"}
+                <sl-badge variant="danger" pill>
+                  Banned
+                </sl-badge>
+                {currentName}
+              {:else if currentBadge === "private"}
+                <sl-badge variant="neutral" pill>
+                  Private
+                </sl-badge>
+              {:else}
+                {currentName}
+              {/if}
+            </h2>
+          </a>
+        {:else}
+          <h2>
+            {#if currentBadge === "nsfw"}
+              <sl-badge variant="warning" pill>
+                NSFW
+              </sl-badge>
+              {currentName}
+            {:else if currentBadge ===  "banned"}
+              <sl-badge variant="danger" pill>
+                Banned
+              </sl-badge>
+              {currentName}
+            {:else if currentBadge === "private"}
+              <sl-badge variant="neutral" pill>
+                Private
+              </sl-badge>
+            {:else}
+              {currentName}
+            {/if}
+          </h2>
+        {/if}
+       
       
         <h3>Size Metadata</h3>
         <p>Number of Comments: {currentComments}</p>
@@ -236,7 +339,13 @@
     background: #FFFFFF;
     padding: var(--gobo-height-spacer) var(--gobo-width-spacer);
     border-radius: 1rem;
-    max-width: 36rem;
+    overflow: scroll;
+  }
+
+  .tooltip header.close-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem;
   }
 
   .tooltip section:not(:last-child) {

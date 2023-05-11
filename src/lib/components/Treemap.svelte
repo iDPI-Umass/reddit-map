@@ -5,7 +5,6 @@
   import { sourceStore } from "$lib/stores/source.js";
   import { resizeStore } from "$lib/stores/resize.js";
   import { zoomStore } from "$lib/stores/zoom.js";
-  import * as Metadata from "$lib/resources/metadata.js";
   import TreemapEngine from "$lib/helpers/treemap/index.js";
 
   let canvas, frame, engine;
@@ -15,11 +14,12 @@
   let hidden = true;
   let backDisabled = true;
   let totalCommentCount = 1;
-  let currentHover = null;  
+  let tooltipEvent = null;
 
 
   const handleBack = function ( event ) {
     event.preventDefault();
+    resetTouchNode();
     if ( (event.type === "keypress") && (event.key !== "Enter") ) {
       return;
     }
@@ -28,6 +28,7 @@
 
   const handleReset = function ( event ) {
     event.preventDefault();
+    resetTouchNode();
     if ( (event.type === "keypress") && (event.key !== "Enter") ) {
       return;
     }
@@ -35,7 +36,55 @@
   };
 
   const handleHover = function ( event ) {
-    currentHover = event?.detail;
+    resetTouchNode();
+    tooltipEvent = {
+      type: "mouse",
+      ...event?.detail
+    };
+  };
+
+  const handleTouchSelect = function ( event ) {
+    tooltipEvent = {
+      type: "touch",
+      ...event?.detail
+    };
+
+    // TODO: This should probably go somewhere else.
+    if ( event?.detail == null ) {
+      engine.touchCurrentNode = null;
+    }
+  }
+
+  const resetTouchNode = function () {
+    if ( tooltipEvent?.type === "touch" ) {
+      handleTouchSelect( null );
+    }
+  };
+
+
+  const handleResize = function ( resize ) {
+    let width, height;
+    if ( resize == null ) {
+      width = frame.clientWidth;
+      height = frame.clientHeight;
+    } else {
+      width = resize.width;
+      height = resize.height;
+
+      if ( window.innerWidth > 750 ) {
+        //       button panel
+        height -= ( 16 * 5 );
+      } else {
+        //       button panel
+        height -= ( 16 * 4 );
+      }
+    }
+    
+    resetTouchNode();
+    canvasWidth = `${ width }px`;
+    canvasHeight = `${ height }px`;
+    
+    return { width, height };
   };
 
 
@@ -57,11 +106,11 @@
     canvas.addEventListener( "hoverenter", handleHover );
     canvas.addEventListener( "hoverleave", handleHover );
     canvas.addEventListener( "hovermove", handleHover );
+    canvas.addEventListener( "touchSelect", handleTouchSelect );
 
     unsubscribeSource = sourceStore.subscribe( function ( source ) {
       if ( source != null ) {
-        const width = frame.clientWidth;
-        const height = frame.clientHeight;
+        const { width, height } = handleResize();
 
         engine.loadData( source.data );
         totalCommentCount = engine.data.data.comment_count;
@@ -75,10 +124,7 @@
 
     unsubscribeResize = resizeStore.subscribe( function ( resize ) {
       if ( resize?.width != null ) {
-        const width = resize.width;
-        const height = resize.height - 80;
-        canvasWidth = `${width}px`;
-        canvasHeight = `${height}px`;
+        const { width, height } = handleResize( resize );
 
         engine.size({ width, height });
         engine.setScaleRange({
@@ -121,9 +167,10 @@
   {/if}
 
   <Tooltip 
-    event={currentHover} 
+    event={tooltipEvent}
     totalCommentCount={totalCommentCount}
     canvas={canvas}
+    on:dismiss={resetTouchNode}
     >
   </Tooltip>
 
@@ -150,7 +197,7 @@
     on:keypress={handleReset}
     class="action"
     pill>
-    Top-Level
+    Top Level
   </sl-button>
 </section>
 
@@ -170,7 +217,7 @@
 
   .control {
     flex: 0 0 5rem;
-    min-height: 5rem;
+    max-height: 3rem;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
@@ -180,6 +227,12 @@
   .control sl-button {
     width: 7rem;
     margin-right: 1rem;
+  }
+
+  @media( min-width: 750px ) {
+    .control {
+      max-height: 5rem;
+    }
   }
 
 

@@ -9,9 +9,6 @@ html, body {
   background: var(--gobo-color-panel);
   color: var(--gobo-color-text);
 }
-html {
-  background: var(--gobo-color-primary);
-}
 img, picture, video, canvas, svg {
   display: block;
   max-width: 100%;

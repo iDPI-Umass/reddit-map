@@ -4,7 +4,15 @@ const MIN_ZOOM = 0.6;
 const scrollZoom = function ( event ) {
   event.preventDefault();
 
-  this.zoomScale += event.deltaY * -0.0015;
+  this.applyZoom({
+    dy: event.deltaY,
+    x: event.offsetX,
+    y: event.offsetY
+  });
+};
+
+const applyZoom = function ({ dy, x, y }) {
+  this.zoomScale += dy * -0.0015;
   if ( this.zoomScale < MIN_ZOOM ) {
     this.zoomScale = MIN_ZOOM;
   }
@@ -12,9 +20,9 @@ const scrollZoom = function ( event ) {
     this.zoomScale = MAX_ZOOM;
   }
 
-  this.zoomRatioX = (event.offsetX * this.resolutionScale) / this.width;
-  this.zoomRatioY = (event.offsetY * this.resolutionScale) / this.height;
-};
+  this.zoomRatioX = (x * this.resolutionScale) / this.width;
+  this.zoomRatioY = (y * this.resolutionScale) / this.height;
+}
 
 
 const startZoomLoop = function () {
@@ -70,6 +78,7 @@ const stopZoomLoop = function () {
 
 export {
   scrollZoom,
+  applyZoom,
   startZoomLoop,
   stopZoomLoop
 }

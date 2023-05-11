@@ -1,3 +1,18 @@
+const handleMouseDown = function ( event ) {
+  const node = this.findNode( event );
+  if ( node == null ) {
+    console.warn( "Click event had no matching node" );
+    return;
+  }
+
+  if ( node.data.subreddit != null ) {
+    this.openTab( node.data.subreddit );
+  } else {
+    this.zoomIn( node );
+  }
+};
+
+
 const handleHover = function ( event ) {
   this.hoverX = event.offsetX;
   this.hoverY = event.offsetY;
@@ -69,6 +84,7 @@ const stopHoverLoop = function () {
 };
 
 export {
+  handleMouseDown,
   handleHover,
   handleHoverEnter,
   handleHoverLeave,
