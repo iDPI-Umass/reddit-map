@@ -24,7 +24,13 @@
   margin-bottom: 1rem;
 }
 
-.gobo-copy p + h2 {
+.gobo-copy h3 {
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+  font-weight: var(--gobo-font-weight-bold);
+}
+
+.gobo-copy p + h2, ul + h2 {
   font-size: var(--sl-font-size-large);
   margin-top: 2rem;
 }
@@ -44,6 +50,17 @@
 
 .gobo-copy sl-divider {
   --color: var(--gobo-color-border-panel);
+}
+
+.gobo-copy ul {
+  font-size: var(--sl-font-size-medium);
+  margin-bottom: 1rem;
+}
+
+.gobo-copy img {
+  margin-bottom: 1rem;
+  border-radius: var(--gobo-border-radius);
+  border: var(--gobo-border-panel);
 }
 
 

@@ -86,7 +86,7 @@
     max="{max}"
     step="{step}"
     value="{rangeValue}"
-    label="RedditMap for {displayMonth}"
+    label="Reddit Map for {displayMonth}"
     >
   </sl-range>
 </div>

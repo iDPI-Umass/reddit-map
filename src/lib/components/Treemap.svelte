@@ -171,7 +171,7 @@
     on:keypress={handleReset}
     class="action"
     pill>
-    Top-Level
+    Top Level
   </sl-button>
 </section>
 

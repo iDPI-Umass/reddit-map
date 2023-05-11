@@ -7,7 +7,7 @@
   <nav>
     <sl-button href="/">
         <img slot="prefix" src="/favicon.png" alt="">
-        RedditMap
+        Reddit Map
     </sl-button>
 
     <sl-button href="/about">

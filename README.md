@@ -1,9 +1,9 @@
-# RedditMap
-Web Client Frontend for the RedditMap Project
+# Reddit Map
+Web Client Frontend for the Reddit Map Project
 
 ## Background
 
-RedditMap is a project of computer, data, and social scientists to explore and visualize Reddit as a space. The site running the visualizations is available at https://redditmap.social. The code that runs the application frontend is here.
+Reddit Map is a project of computer, data, and social scientists to explore and visualize Reddit as a space. The site running the visualizations is available at https://redditmap.social. The code that runs the application frontend is here.
 
 ## Main Tasks
 
