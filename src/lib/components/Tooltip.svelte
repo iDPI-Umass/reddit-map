@@ -25,6 +25,11 @@
   let currentCommentPercent = 0;
   let currentSubredditsOne = [];
   let currentSubredditsTwo = [];
+  let currentClustersOne = [];
+  let currentClustersTwo = [];
+  let currentNearestNeighborsOne = [];
+  let currentNearestNeighborsTwo = [];
+  let currentNearestNeighborsStr = "";
   let currentSubreddit = null;
   let currentAbout = null;
   let currentBadge = null;
@@ -140,6 +145,56 @@
     }
   }
 
+  const renderTooltipClusters = function ({ node }) {
+    currentClustersOne = []
+    currentClustersTwo = []
+    if ( currentType === "subreddit cluster" ) {
+      let length = 0;
+      let listLength = 5;
+      if ( node.data.children.length <= listLength ) {
+        length = node.data.children.length;
+      }
+      else {
+        length = node.data.children.length / 2
+      }
+      for ( let i = 0; i < length; i++ ) {
+        currentClustersOne.push(`- ${ node.data.children[i].taxonomy_label }`)
+        
+      }
+      if ( length > listLength / 2 ) {
+        for ( let i = listLength + 1; i < node.data.children.length; i++ ) {
+          currentClustersTwo.push(`- ${ node.data.children[i].taxonomy_label }`)
+        }
+      }
+    }
+  }
+
+  const renderTooltipNearestNeighbors = function ({ node }) {
+    currentNearestNeighborsOne = []
+    currentNearestNeighborsTwo = []
+    if ( currentType === "subreddit" ) {
+      const ax = node.data.nearest_neighbors;
+      let subredditBadgePairs = []
+      for ( let i = 0; i < ax.length; i++ ) {
+        const subreddit = ax[i][0]
+        const taxonomy_label = ax[i][1];
+        if (node.data.taxonomy_label != taxonomy_label) {
+          subredditBadgePairs.push([`${ subreddit } (${ taxonomy_label })`, "public"]);
+        }
+        else {
+          subredditBadgePairs.push([`${ subreddit }`, "public"]);
+        }
+    
+
+        
+      }
+      currentNearestNeighborsOne = subredditBadgePairs.slice( 0, 5 );
+      currentNearestNeighborsTwo = subredditBadgePairs.slice( 5, 10 );
+      console.log("currentNearestNeighborsOne: ", currentNearestNeighborsOne)
+      console.log("currentNearestNeighborsTwo: ", currentNearestNeighborsTwo)
+    }
+  }
+
   const fetchMetadata = async function ( node ) {
     // We don't want to update the tooltip values until we have the metadata
     // because it affects how some subreddits are displayed.
@@ -154,11 +209,40 @@
     }
   };
 
+  const fetchNearestNeighborBadge = async function ( node ) {
+    // We don't want to update the tooltip values until we have the metadata
+    // because it affects how some subreddits are displayed.
+    
+    for ( let i = 0; i < node.data.nearest_neighbors.length; i++ ) {
+      try {
+        const metadata = await Metadata.get( node.data.subreddit );
+        if (i < 5) {
+          
+          currentNearestNeighborsOne[i][1] = metadata?.type ?? "public";
+          if (metadata?.type == "private") {
+            currentNearestNeighborsOne[i][0] = ""
+          }
+          
+        }
+        else {
+          currentNearestNeighborsTwo[i][1] = metadata?.type ?? "public";
+          if (metadata?.type == "private") {
+            currentNearestNeighborsOne[i][1] = ""
+          }
+        }
+      } catch (error) {
+        // If we get a 404 or other error for metadata, make a best effort.
+        
+      } 
+    } 
+  };
+
   const renderMetadata = async function ({ node }) {
     if ( currentType === "subreddit" ) {
       currentSubreddit = node.data.subreddit;
       currentSubredditURL = `https://www.reddit.com/r/${ currentSubreddit }/`
       await fetchMetadata( node );
+      await fetchNearestNeighborBadge( node );
     } else {
       currentAbout = null;
       currentBadge = null;
@@ -173,6 +257,8 @@
     renderTooltipHeading( detail );
     renderTooltipMetadata( detail );
     renderTooltipSubreddits( detail );
+    renderTooltipClusters ( detail );
+    renderTooltipNearestNeighbors ( detail );
     await renderMetadata( detail );
     renderImage( detail );
   };
@@ -195,7 +281,19 @@
     }
       
     if ( detail.node.data.subreddit == null ) {
-      currentType = "cluster";
+      let isSubredditCluster = false;
+      for ( let i = 0; i < detail.node.data.children.length; i++ ) {
+        if (detail.node.data.children[i].subreddit != null) {
+          isSubredditCluster = true;
+          break;
+        }
+      }
+      if ( isSubredditCluster === false ) {
+        currentType = "subreddit cluster";
+      }
+      else {
+        currentType = "cluster";
+      }
     } else {
       currentType = "subreddit";
     }
@@ -294,6 +392,23 @@
         {/if}
       </section>
       
+      {#if currentType === "subreddit cluster"}
+        <section class="child-clusters">
+          <h3>Topics</h3>
+          <div class="child-clusters-wrapper">
+            <div class="group">
+              {#each currentClustersOne as cluster}
+                <p>{cluster}</p>
+              {/each}
+            </div>
+            <div class="group">
+              {#each currentClustersTwo as cluster}
+                <p>{cluster}</p>
+              {/each}
+            </div>
+          </div>
+        </section>
+      {/if}
 
       {#if currentType === "cluster"}
         <section class="top-subreddits">
@@ -311,6 +426,24 @@
               {/each}
             </div>
           </div>
+        </section>
+      {/if}
+
+      {#if currentType === "subreddit"}
+        <section class="nearest-neighbors">
+          <h3>Closest Subreddits: </h3>
+          <div class="nearest-neighbors-wrapper">
+            <div class="group">
+              {#each currentNearestNeighborsOne as subreddit}
+                <p>
+                    {subreddit[0]}
+                </p>
+              {/each}
+              
+            </div>
+      
+          </div>
+          
         </section>
       {/if}
 
@@ -403,6 +536,56 @@
   }
 
   .tooltip .top-subreddits p {
+    margin-right: 1rem;
+  }
+
+  .tooltip .child-clusters .child-clusters-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    max-height: 7rem;
+    padding: 0;
+  }
+
+  .tooltip .child-clusters .child-clusters-wrapper .group {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .tooltip .child-clusters p {
+    margin-right: 1rem;
+  }
+
+  .tooltip .nearest-neighbors .nearest-neighbors-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    max-height: 15rem;
+    padding: 0;
+  }
+
+  .tooltip .nearest-neighbors .nearest-neighbors-wrapper .group {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .tooltip .nearest-neighbors p {
     margin-right: 1rem;
   }
 
