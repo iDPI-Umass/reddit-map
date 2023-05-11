@@ -95,6 +95,7 @@
 
 <style>
   main {
+    touch-action: none;
     position: relative;
     flex: 1 0 auto;
     display: flex;
