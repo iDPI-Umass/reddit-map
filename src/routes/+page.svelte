@@ -12,7 +12,7 @@
 
   let unsubscribeResize;
 
-  sourceStore.push( "2021-04" );
+  sourceStore.push( "2022-12" );
 
   let left, alert;
 
