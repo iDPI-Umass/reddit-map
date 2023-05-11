@@ -11,30 +11,53 @@
   import { onDestroy, onMount } from "svelte";
 
   let unsubscribeResize;
+  let left, right, alert;
 
   sourceStore.push( "2021-04" );
 
-  let left, alert;
 
-  const handleReset = function ( event ) {
-    event.preventDefault();
-    if ( (event.type === "keypress") && (event.key !== "Enter") ) {
-      return;
+  // For mobile devices, we can't rely on 100vh sizing, with downstream effects
+  // for treemap and bubblemap sizing. Use window.innerWidth to always get the
+  // visible viewport.
+  const handleResize = function () {
+    let width, height;
+
+    if ( window.innerWidth > 750 ) {
+      //                            main's pad   midline gutter
+      width = ( window.innerWidth - ( 16 * 2 ) - ( 16 * 1 ) ) / 2;
+    } else {
+      //                          main's pad
+      width = window.innerWidth - ( 16 * 1 );
     }
-    zoomStore.push({ type: "reset" });
+   
+    
+    //                            header       main's vertical padding
+    height = window.innerHeight - ( 16 * 4 ) - ( 16 * 1 );
+
+
+    left.style.width = `${ width }px`;
+    left.style.height = `${ height }px`;
+    right.style.width = `${ width }px`;
+    right.style.height = `${ height }px`;
+    
+    return { width, height };
   };
 
+
   onMount( function () {
+    handleResize();
+
     if ( window.innerWidth < 750 ) {
       alert.toast();
     }
 
     unsubscribeResize = resizeStore.subscribe( function ( event ) {
+      const { width, height } = handleResize();
       if ( event != null && event.width == null ) {
         resizeStore.push({
           id: event.id,
-          width: left.clientWidth,
-          height: left.clientHeight
+          width: width,
+          height: height
         });
       }
     });
@@ -63,7 +86,7 @@
     <Treemap></Treemap>
   </section>
 
-  <section class="right">
+  <section bind:this={right} class="right">
     <Bubblemap></Bubblemap>
   </section>
   
@@ -78,8 +101,8 @@
     flex-direction: row;
     justify-content: flex-start;
     align-items: stretch;
-    padding: 1rem;
-    max-height: calc( 100vh - 4rem );
+    padding: 0.5rem;
+    height: calc( 100vh - 4rem );
   }
 
   main .left {
@@ -95,8 +118,12 @@
   }
 
   @media( min-width: 750px ) {
+    main {
+      padding: 1rem;
+    }
+
     main .left {
-      padding-right: 1rem;
+      margin-right: 1rem;
       max-height: 100%;
     }
 

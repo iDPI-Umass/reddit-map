@@ -39,6 +39,31 @@
   };
 
 
+  const handleResize = function ( resize ) {
+    let width, height;
+    if ( resize == null ) {
+      width = frame.clientWidth;
+      height = frame.clientHeight;
+    } else {
+      width = resize.width;
+      height = resize.height;
+
+      if ( window.innerWidth > 750 ) {
+        //       button panel
+        height -= ( 16 * 5 );
+      } else {
+        //       button panel
+        height -= ( 16 * 4 );
+      }
+    }
+    
+    canvasWidth = `${ width }px`;
+    canvasHeight = `${ height }px`;
+    
+    return { width, height };
+  };
+
+
   onMount(() => {
     engine = TreemapEngine.create({ 
       canvas: canvas
@@ -60,8 +85,7 @@
 
     unsubscribeSource = sourceStore.subscribe( function ( source ) {
       if ( source != null ) {
-        const width = frame.clientWidth;
-        const height = frame.clientHeight;
+        const { width, height } = handleResize();
 
         engine.loadData( source.data );
         totalCommentCount = engine.data.data.comment_count;
@@ -75,10 +99,7 @@
 
     unsubscribeResize = resizeStore.subscribe( function ( resize ) {
       if ( resize?.width != null ) {
-        const width = resize.width;
-        const height = resize.height - 80;
-        canvasWidth = `${width}px`;
-        canvasHeight = `${height}px`;
+        const { width, height } = handleResize( resize );
 
         engine.size({ width, height });
         engine.setScaleRange({
@@ -170,7 +191,7 @@
 
   .control {
     flex: 0 0 5rem;
-    min-height: 5rem;
+    max-height: 3rem;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
@@ -180,6 +201,12 @@
   .control sl-button {
     width: 7rem;
     margin-right: 1rem;
+  }
+
+  @media( min-width: 750px ) {
+    .control {
+      max-height: 5rem;
+    }
   }
 
 
