@@ -39,6 +39,12 @@ const _decorate = function ( child, boundaries, counts ) {
   child.data.colorHalf = `${ color }80`;
   child.data.colorQuarter = `${ color }40`;
 
+
+  if ( child.data.nearest_neighbors == null ) {
+    child.data.nearest_neighbors = [];
+  }
+
+
   if ( child.data.tsne_x != null ) {
     child.data.tsne_x = Number( child.data.tsne_x );
   }
