@@ -46,10 +46,20 @@
     </ul>
       
 
-
-    <h2>Acknowledgments</h2>
-      <p>David Harper, from our development partner Panda Strike, for helping us take this project from an academic demo to a production website. Fathom’s privacy preserving analytics, for making it possible to monitor our site in a way that is consistent with iDPI’s values.
+    <h1>Acknowledgments</h1>
+      <p>Reddit Map is a collaboration between the Initiative for Digital Public Infrastructure, Media Cloud, and the UMass Center for Data Science.</p>
+      <p>David Harper, from our development partner <a href="https://pandastrike.com/">Panda Strike</a>, for helping us take this project from an academic demo to a production website. <a href="https://usefathom.com/">Fathom</a>’s privacy preserving analytics, for making it possible to monitor our site in a way that is consistent with iDPI’s values.
       </p>
+      <p>This work was made possible by support from:</p>
+
+      <div class="wrapper">
+        <div><img src="/images/ford.png"></div>
+        <div><img src="/images/knight.png"></div>
+        <div><img src="/images/macarthur.jpg"></div>
+      </div>
+      
+
+
 
     <h2>Background</h2>
     <h3>Community Embedding</h3>
@@ -114,4 +124,11 @@
     overflow-y: scroll;
     background-color: var(--gobo-color-null);
   }
+  .wrapper {
+    display: grid;
+    grid-template-columns: repeat(3, 175px);
+    gap: 30px;
+    grid-auto-rows: minmax(100px, auto);
+  }
+  
 </style>
