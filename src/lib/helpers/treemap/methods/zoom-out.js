@@ -1,9 +1,9 @@
 import * as h from "../helpers";
 
 const zoomOut = function ( node ) {
-  console.log( "Zoom Out", node );
+  console.debug( "Zoom Out", node );
   if ( node.parent == null ) {
-    console.log( "no parent (top level)" );
+    console.debug( "no parent (top level)" );
     return;
   }
 
