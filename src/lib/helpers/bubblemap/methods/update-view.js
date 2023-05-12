@@ -14,11 +14,16 @@ const updateView = function ({ subrootID }) {
   
   this.neighbors = [];
   if ( this.labels.length === 1 ) {
-    for ( const [ id ] of this.labels[0].data.nearest_neighbors.slice(0, 5) ) {
+    for ( const [ id ] of this.labels[0].data.nearest_neighbors ) {
       const node = this.hierarchyMap.get( id );
+      
       if ( node != null ) {
         this.neighbors.push( node );
-      } 
+      }
+      
+      if ( this.neighbors.length === 5 ) {
+        break;
+      }
     }
   }
 
