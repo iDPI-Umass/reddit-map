@@ -1,7 +1,7 @@
 <script>
   import "@shoelace-style/shoelace/dist/components/button/button.js";
   import Spinner from "$lib/components/primitives/Spinner.svelte";
-  import Slider from "$lib/components/Slider.svelte";
+  import DataSelector from "$lib/components/DataSelector.svelte";
   import { onDestroy, onMount } from "svelte";
   import { sourceStore } from "$lib/stores/source.js";
   import { resizeStore } from "$lib/stores/resize.js";
@@ -81,7 +81,7 @@
 </div>
 
 <section class="control">
-  <Slider></Slider>
+  <DataSelector></DataSelector>
 </section>
 
 
