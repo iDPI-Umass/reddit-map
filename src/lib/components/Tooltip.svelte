@@ -190,59 +190,60 @@
       }
       currentNearestNeighborsOne = subredditBadgePairs.slice( 0, 5 );
       currentNearestNeighborsTwo = subredditBadgePairs.slice( 5, 10 );
-      console.log("currentNearestNeighborsOne: ", currentNearestNeighborsOne)
-      console.log("currentNearestNeighborsTwo: ", currentNearestNeighborsTwo)
+      // console.log("currentNearestNeighborsOne: ", currentNearestNeighborsOne)
+      // console.log("currentNearestNeighborsTwo: ", currentNearestNeighborsTwo)
     }
   }
 
-  const fetchMetadata = async function ( node ) {
-    // We don't want to update the tooltip values until we have the metadata
-    // because it affects how some subreddits are displayed.
+  // 404s return null. For now, translate other error classes into null.
+  const fetchMetadata = async function ( subreddit ) {
     try {
-      const metadata = await Metadata.get( node.data.subreddit );
-      currentAbout = metadata?.about?.description;
-      currentBadge = metadata?.type ?? "public";
-    } catch (error) {
-      // If we get a 404 or other error for metadata, make a best effort.
-      currentAbout = null;
-      currentBadge = null;
-    }
+      return await Metadata.get( subreddit );
+    } catch ( error ) {
+      console.warn( error );
+      return null;
+    } 
   };
 
-  const fetchNearestNeighborBadge = async function ( node ) {
-    // We don't want to update the tooltip values until we have the metadata
-    // because it affects how some subreddits are displayed.
-    
-    for ( let i = 0; i < node.data.nearest_neighbors.length; i++ ) {
-      try {
-        const metadata = await Metadata.get( node.data.subreddit );
-        if (i < 5) {
-          
-          currentNearestNeighborsOne[i][1] = metadata?.type ?? "public";
-          if (metadata?.type == "private") {
-            currentNearestNeighborsOne[i][0] = ""
-          }
-          
-        }
-        else {
-          currentNearestNeighborsTwo[i][1] = metadata?.type ?? "public";
-          if (metadata?.type == "private") {
-            currentNearestNeighborsOne[i][1] = ""
-          }
-        }
-      } catch (error) {
-        // If we get a 404 or other error for metadata, make a best effort.
-        
-      } 
-    } 
+  const fetchPrimaryMetadata = async function ( node ) {
+    const metadata = await fetchMetadata( node.data.subreddit );
+    currentAbout = metadata?.about?.description;
+    currentBadge = metadata?.type ?? "public";
+  };
+
+  const fetchNeighbor = async function ( node, subreddit, label ) {
+    const metadata = await fetchMetadata( subreddit );
+    const type = metadata?.type ?? "public";
+
+    if ( type === "private" ) {
+      return [ "", "private" ];
+    } else if ( node.data.taxonomy_label != label ) {
+      return [ `${ subreddit } (${ label })`, type ];
+    } else {
+      return [ subreddit, type ];
+    }
+  }
+
+  const fetchNearestNeighbors = async function ( node ) {
+    if ( currentType === "subreddit" ) {
+      const promises = [];
+
+      for ( const [ subreddit, label ] of node.data.nearest_neighbors ) {
+        promises.push( fetchNeighbor( node, subreddit, label ) );
+      }
+
+      const pairs = await Promise.all( promises );
+      currentNearestNeighborsOne = pairs.slice( 0, 5 );
+      currentNearestNeighborsTwo = pairs.slice( 5, 10 );
+    }
   };
 
   const renderMetadata = async function ({ node }) {
     if ( currentType === "subreddit" ) {
       currentSubreddit = node.data.subreddit;
       currentSubredditURL = `https://www.reddit.com/r/${ currentSubreddit }/`
-      await fetchMetadata( node );
-      await fetchNearestNeighborBadge( node );
+      await fetchPrimaryMetadata( node );
+      await fetchNearestNeighbors( node );
     } else {
       currentAbout = null;
       currentBadge = null;
@@ -263,6 +264,10 @@
     renderImage( detail );
   };
 
+
+  // For new nodes:
+  // We want to hide the tooltip until we have the metadata to display.
+  // We get that asynchronously, so we're outside the default Svelte cycle.
   const renderTooltipNode = async function ( detail ) {
     if ( detail?.node == null ) {
       currentDisplay = "none";

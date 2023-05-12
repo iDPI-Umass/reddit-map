@@ -1,6 +1,7 @@
 // TODO: Move to configuration.
 import * as d3 from "d3";
 import { Library } from "@observablehq/stdlib";
+import * as Type from "@dashkite/joy/type";
 
 const baseURL = "https://data.redditmap.social";
 const library = new Library();
@@ -39,11 +40,20 @@ const _decorate = function ( child, boundaries, counts ) {
   child.data.colorHalf = `${ color }80`;
   child.data.colorQuarter = `${ color }40`;
 
-
-  if ( child.data.nearest_neighbors == null ) {
+  const neighbors = child.data.nearest_neighbors
+  if ( Type.isArray(neighbors) ) {
+    // Noop
+  } else if ( Type.isString(neighbors) ) {
+    const n = [];
+    for ( const neighbor of neighbors.split(",") ) {
+      n.push([ neighbor, "" ]);
+    }
+    child.data.nearest_neighbors = n;
+  } else if ( neighbors == null ) {
     child.data.nearest_neighbors = [];
-  }
-
+  } else {
+    throw new Error( "unable to parse nearest neighbors" );
+  } 
 
   if ( child.data.tsne_x != null ) {
     child.data.tsne_x = Number( child.data.tsne_x );

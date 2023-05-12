@@ -1,9 +1,9 @@
 import * as h from "../helpers";
 
 const zoomIn = function ( node ) {
-  console.log( "Zoom In", node );
+  console.debug( "Zoom In", node );
   if ( node.children == null ) {
-    console.log( "no children" );
+    console.debug( "no children" );
     return;
   }
   
