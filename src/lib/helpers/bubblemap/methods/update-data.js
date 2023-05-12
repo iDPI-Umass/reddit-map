@@ -2,8 +2,6 @@ import * as h from "../helpers.js";
 
 // Updates when we look at another month of data.
 const updateData = function ( data ) {
-  console.log( "New Month" );
-
   // Reset to top-level view of current data to start animation to another month.
   this.resetView();
 
