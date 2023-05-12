@@ -103,12 +103,44 @@
       
       <p>In the example above, the Online Multiplayer Action Games cluster is open. The bubble map displays the clusters that have the highest number of overlapping user comments with Online Multiplayer Action Games: Rap and Youtube Promotion and Casual Teen Video Games/Interests, for example.</p>
 
-    <h3>Data Slider</h3>
-      <a href="/images/data-slider.png">
-        <img src="/images/data-slider.png">
+    
+    <h2>Reddit Map Navigation</h2>
+
+    <h3>Treemap Drill Down</h3>
+
+    <p>The Reddit Map treemap is interactive and supports multiple devices:</p>
+    
+    <h4>Mouse</h4>
+    <p>Hovering your cursor over a tile will reveal a tooltip with relevant information. Clicking on a tile will trigger a drill down into a lower level.</p>
+    <p>Eventually, you'll reach a level that displays a collection of subreddits as tiles. Clicking on a subreddit tile will open a new browser tab that navigates to that subreddit for you.</p>
+
+    <h4>Touch Interface</h4>
+    <p>Tapping a tile will reveal an overlay with relevant information. You can dismiss this overlay by tapping the "close" button at the overlay's top. Tapping the tile again will trigger a drill down into a lower level.</p>
+    <p>Eventually, you'll reach a level that displays a collection of subreddits as tiles. Tapping on a subreddit tile will reveal an overlay that includes a link to that subreddit. That link will open in another tab, so you won't lose your place.</p>
+
+    <h3>Treemap Level Selectors</h3>
+    <a href="/images/level-selectors.png">
+      <img src="/images/level-selectors.png">
+    </a>
+
+    <p>The treemap tiles offer a way to drill down into Reddit Map. It's the level selectors along the treemap's bottom that allow you to navigate back up the hierarchy. "Back" pops up one level. "Top Level" takes you all the way to the top.</p>
+
+    <h3>Bubblemap Pan And Zoom</h3>
+
+    <p>The Reddit Map bubblemap is interactive and supports multiple devices. Note that the bubble map is only visible on devices wider than 750 pixels, which excludes most phones.</p>
+    
+    <h4>Mouse</h4>
+    <p>Clicking an holding your mouse allows you to pan the current view of the bubblemap. Scrolling controls the view's zoom.</p>
+
+    <h4>Touch Interface</h4>
+    <p>Tap-holding and dragging the bubblemap will pan the current view. Using a two-finger pinch gesture controls the view's zoom.</p>
+
+    <h3>Month Data Selector</h3>
+      <a href="/images/data-selector.png">
+        <img src="/images/data-selector.png">
       </a>
       
-      <p>You can use the data slider to select which month’s data to use for the treemap and bubble map.</p>
+      <p>The month data selector is located under the bubblemap. The data selector lets you choose which month’s data to use for the treemap and bubble map.</p>
   </section>
 </main>
 
