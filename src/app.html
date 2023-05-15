@@ -1,11 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
-		<meta name="viewport" content="width=device-width" />
+    <!-- Web Standards -->
+    <title>Reddit Map</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.png" type="image/png" />
+    <meta name="description" content="Reddit Map is an open-source tool that lets you navigate Reddit data by displaying clusters of communities with overlapping community members."/>
+    <meta name="publisher" content="Reddit Map"/>
+    <link rel="canonical" href="https://redditmap.social"/>
+
+        
+    <!-- Progressive Web App Headers
+    <link rel="manifest" href="/hype.webmanifest"/>
+    <link rel="apple-touch-icon" href="/images/icons/hype-180x180.png" sizes="180x180"/> 
+    -->
+
+
+    <!-- OpenGraph Tags -->
+    <meta property="og:site_name" content="Reddit Map"/>
+    <meta property="og:title" content="Reddit Map"/>
+    <meta property="og:description" content="Reddit Map is an open-source tool that lets you navigate Reddit data by displaying clusters of communities with overlapping community members."/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:image" content="/favicon.png"/>
+    <meta property="og:url" content="https://redditmap.social"/>
+
+
+    <!-- Twitter Tags -->
+    <meta name="twitter:title" content="Reddit Map"/>
+    <meta name="twitter:text:description" content="Reddit Map is an open-source tool that lets you navigate Reddit data by displaying clusters of communities with overlapping community members."/>
+    <meta name="twitter:image" content="/favicon.png"/>
+    <meta name="twitter:card" content="summary"/>
+    
+    <!-- Scripts -->
     <script src="https://cdn.usefathom.com/script.js" data-site="FLUFQKYA" defer></script>
-		%sveltekit.head%
+    
+    %sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
