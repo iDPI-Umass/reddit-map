@@ -62,12 +62,12 @@
       <p>Consider the following user and the subreddits they comment on:</p>
       <p>Dataset 1:</p>
       <ul>
-        <li>User 1: r/NBA, r/knitting, r/cooking</li>
+        <li>User 1: r/basketball, r/knitting, r/cooking</li>
       </ul>
       <p>Now consider the introduction of two more users into the dataset:</p>
       <p>Dataset 2:</p>
       <ul>
-        <li>User 1: r/NBA, r/knitting, r/cooking</li>
+        <li>User 1: r/basketball, r/knitting, r/cooking</li>
         <li>User 2: r/basketball, r/baseball, r/frisbee</li>
         <li>User 3: r/basketball, r/football, r/baseball</li>
       </ul>
