@@ -5,11 +5,13 @@
   import { sourceStore } from "$lib/stores/source.js";
   import { resizeStore } from "$lib/stores/resize.js";
   import { zoomStore } from "$lib/stores/zoom.js";
+  import { searchStore } from "$lib/stores/search.js";
   import TreemapEngine from "$lib/helpers/treemap/index.js";
 
   let canvas, frame, engine;
   let unsubscribeSource;
   let unsubscribeResize, unsubscribeZoom;
+  let unsubscribeSearch;
   let canvasWidth, canvasHeight;
   let hidden = true;
   let backDisabled = true;
@@ -83,7 +85,6 @@
     resetTouchNode();
     canvasWidth = `${ width }px`;
     canvasHeight = `${ height }px`;
-    
     return { width, height };
   };
 
@@ -95,7 +96,6 @@
 
     canvas.addEventListener( "updateview", function ( event ) {
       backDisabled = engine.isTopLevel;
-
       zoomStore.push({
         type: "new selection", 
         subrootID: event.detail.node.data.node_id 
@@ -144,6 +144,13 @@
       } else if ( zoom.type === "back parent" ) {
         engine.zoom( zoom.type );
         backDisabled = engine.isTopLevel;
+      }
+    });
+
+    unsubscribeSearch = searchStore.subscribe( function ( search ) {
+      if (search.term != null) {
+        engine.search( search.term )
+        backDisabled = false
       }
     });
   });
@@ -199,6 +206,8 @@
     pill>
     Top Level
   </sl-button>
+
+  
 </section>
 
 <style>

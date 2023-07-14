@@ -11,3 +11,5 @@ export * from "./zoom-in.js";
 export * from "./zoom-out.js";
 export * from "./zoom.js";
 export * from "./wire-events.js";
+export * from "./search.js";
+export * from "../../map.js";
