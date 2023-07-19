@@ -6,17 +6,23 @@
   import { resizeStore } from "$lib/stores/resize.js";
   import { zoomStore } from "$lib/stores/zoom.js";
   import { searchStore } from "$lib/stores/search.js";
+  import { filterStore } from "$lib/stores/filter.js";
   import TreemapEngine from "$lib/helpers/treemap/index.js";
+  import "@shoelace-style/shoelace/dist/components/switch/switch.js";
+
+
 
   let canvas, frame, engine;
   let unsubscribeSource;
-  let unsubscribeResize, unsubscribeZoom;
   let unsubscribeSearch;
+  let unsubscribeResize, unsubscribeZoom, unsubscribeFilter;
   let canvasWidth, canvasHeight;
   let hidden = true;
   let backDisabled = true;
   let totalCommentCount = 1;
   let tooltipEvent = null;
+  let protestToggle;
+  let isProtestVisible = false;
 
 
   const handleBack = function ( event ) {
@@ -88,6 +94,18 @@
     return { width, height };
   };
 
+  const handleProtest = function ( event ) {
+    event.preventDefault();
+    isProtestVisible = !isProtestVisible
+    if ( isProtestVisible ) {
+      filterStore.push( { key: "type" , value: "protest" } )
+    }
+    else {
+      filterStore.push( null )
+    }
+    
+  }
+
 
   onMount(() => {
     engine = TreemapEngine.create({ 
@@ -107,6 +125,8 @@
     canvas.addEventListener( "hoverleave", handleHover );
     canvas.addEventListener( "hovermove", handleHover );
     canvas.addEventListener( "touchSelect", handleTouchSelect );
+
+    protestToggle.addEventListener('sl-change', handleProtest);
 
     unsubscribeSource = sourceStore.subscribe( function ( source ) {
       if ( source != null ) {
@@ -153,12 +173,19 @@
         backDisabled = false
       }
     });
+
+    unsubscribeFilter = filterStore.subscribe( function ( filter ) {
+      if ( filter !== undefined ) {
+        engine.render();
+      }
+    });
   });
 
   onDestroy(() => {
     unsubscribeSource();
     unsubscribeResize();
     unsubscribeZoom();
+    unsubscribeFilter();
   });
 </script>
 
@@ -190,23 +217,27 @@
 </div>
 
 <section class="control">
-  <sl-button
-    on:click={handleBack}
-    on:keypress={handleBack}
-    class="action"
-    disabled="{backDisabled}"
-    pill>
-    Back
-  </sl-button>
+  <div>
+    <sl-button
+      on:click={handleBack}
+      on:keypress={handleBack}
+      class="action"
+      disabled="{backDisabled}"
+      pill>
+      Back
+    </sl-button>
 
-  <sl-button
-    on:click={handleReset}
-    on:keypress={handleReset}
-    class="action"
-    pill>
-    Top Level
-  </sl-button>
-
+    <sl-button
+      on:click={handleReset}
+      on:keypress={handleReset}
+      class="action"
+      pill>
+      Top Level
+    </sl-button>
+  </div>
+  <sl-switch 
+    bind:this={protestToggle}
+    size="large">Protest View</sl-switch>
   
 </section>
 
@@ -229,7 +260,7 @@
     max-height: 3rem;
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
   }
 
@@ -237,6 +268,12 @@
     width: 7rem;
     margin-right: 1rem;
   }
+
+  .control sl-switch {
+    width: 7rem;
+    margin-right: 1rem;
+  }
+
 
   @media( min-width: 750px ) {
     .control {
