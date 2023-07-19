@@ -3,6 +3,8 @@
   import Spinner from "$lib/components/primitives/Spinner.svelte";
   import * as Metadata from "$lib/resources/metadata.js";
   import { createEventDispatcher } from "svelte";
+  import { get } from 'svelte/store'
+  import { filterStore } from "$lib/stores/filter.js";
 
   export let event = null;
   export let totalCommentCount = 1;
@@ -207,16 +209,22 @@
 
   const fetchPrimaryMetadata = async function ( node ) {
     const metadata = await fetchMetadata( node.data.subreddit );
+    const filter = get( filterStore );
     currentAbout = metadata?.about?.description;
-    currentBadge = metadata?.type ?? "public";
+    currentBadge = node.data.type ?? "public";
+
+    if ( !filter || !( filter.key in node.data ) || node.data[filter.key] != filter.value ) {
+      currentBadge = "public";
+    }
   };
 
   const fetchNeighbor = async function ( node, subreddit, label ) {
-    const metadata = await fetchMetadata( subreddit );
-    const type = metadata?.type ?? "public";
-
+    const type = node.data.type;
+    const filter = get( filterStore );
     if ( type === "private" ) {
       return [ "", "private" ];
+    } else if ( filter && filter.key in node.data && node.data[filter.key] === filter.value ) {
+      return [ "", "protest" ];
     } else if ( node.data.taxonomy_label != label ) {
       return [ `${ subreddit } (${ label })`, type ];
     } else {
@@ -360,6 +368,10 @@
                 <sl-badge variant="neutral" pill>
                   Private
                 </sl-badge>
+              {:else if currentBadge === "protest"}
+                <sl-badge variant="primary" pill>
+                  Protest
+                </sl-badge>
               {:else}
                 {currentName}
               {/if}
@@ -380,6 +392,10 @@
             {:else if currentBadge === "private"}
               <sl-badge variant="neutral" pill>
                 Private
+              </sl-badge>
+            {:else if currentBadge === "protest"}
+              <sl-badge variant="primary" pill>
+                Protest
               </sl-badge>
             {:else}
               {currentName}
@@ -434,7 +450,7 @@
         </section>
       {/if}
 
-      {#if currentType === "subreddit"}
+      {#if currentType === "subreddit" && currentBadge != "private" && currentBadge != "protest" }
         <section class="nearest-neighbors">
           <h3>Closest Subreddits: </h3>
           <div class="nearest-neighbors-wrapper">
@@ -452,7 +468,7 @@
         </section>
       {/if}
 
-      {#if currentType === "subreddit" && currentAbout != null}
+      {#if currentType === "subreddit" && currentAbout != null && currentBadge != "private"  && currentBadge != "protest" }
         <section class="about">
           <h3>About Subreddit</h3>
           <p>{currentAbout}</p>
