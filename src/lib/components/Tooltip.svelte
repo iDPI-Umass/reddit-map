@@ -212,8 +212,7 @@
     const filter = get( filterStore );
     currentAbout = metadata?.about?.description;
     currentBadge = node.data.type ?? "public";
-
-    if ( !filter || !( filter.key in node.data ) || node.data[filter.key] != filter.value ) {
+    if ( currentBadge === "protest" && (!filter || !( filter.key in node.data ) || node.data[filter.key] != filter.value) ) {
       currentBadge = "public";
     }
   };
