@@ -1,6 +1,8 @@
 <script>
   import "@shoelace-style/shoelace/dist/components/button/button.js";
   import "@shoelace-style/shoelace/dist/components/icon/icon.js";
+  import Search from "$lib/components/Search.svelte";
+
 </script>
 
 <header>
@@ -15,6 +17,10 @@
     </sl-button>
   </nav>
 </header>
+
+<div>
+  <Search></Search>
+</div>
 
 <style>
   header {
@@ -65,4 +71,5 @@
     height: 1.5rem;
     margin-right: 0.5rem;
   }
+
 </style>

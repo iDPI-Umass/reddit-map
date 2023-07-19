@@ -5,6 +5,7 @@
   import { sourceStore } from "$lib/stores/source.js";
   import { resizeStore } from "$lib/stores/resize.js";
   import { zoomStore } from "$lib/stores/zoom.js";
+  import { searchStore } from "$lib/stores/search.js";
   import { filterStore } from "$lib/stores/filter.js";
   import TreemapEngine from "$lib/helpers/treemap/index.js";
   import "@shoelace-style/shoelace/dist/components/switch/switch.js";
@@ -13,6 +14,7 @@
 
   let canvas, frame, engine;
   let unsubscribeSource;
+  let unsubscribeSearch;
   let unsubscribeResize, unsubscribeZoom, unsubscribeFilter;
   let canvasWidth, canvasHeight;
   let hidden = true;
@@ -89,7 +91,6 @@
     resetTouchNode();
     canvasWidth = `${ width }px`;
     canvasHeight = `${ height }px`;
-    
     return { width, height };
   };
 
@@ -113,7 +114,6 @@
 
     canvas.addEventListener( "updateview", function ( event ) {
       backDisabled = engine.isTopLevel;
-
       zoomStore.push({
         type: "new selection", 
         subrootID: event.detail.node.data.node_id 
@@ -164,6 +164,13 @@
       } else if ( zoom.type === "back parent" ) {
         engine.zoom( zoom.type );
         backDisabled = engine.isTopLevel;
+      }
+    });
+
+    unsubscribeSearch = searchStore.subscribe( function ( search ) {
+      if (search.term != null) {
+        engine.search( search.term )
+        backDisabled = false
       }
     });
 
@@ -231,7 +238,7 @@
   <sl-switch 
     bind:this={protestToggle}
     size="large">Protest View</sl-switch>
-
+  
 </section>
 
 <style>
