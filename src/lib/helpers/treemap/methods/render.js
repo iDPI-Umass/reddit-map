@@ -1,4 +1,6 @@
 import * as h from "../helpers.js";
+import { get } from 'svelte/store'
+import { filterStore } from "$lib/stores/filter.js";
 
 const setStyleDefaults = function () {
   this.context.lineWidth = this.lineWidth;
@@ -29,10 +31,10 @@ const drawLeaf = function ( leaf ) {
 };
 
 const labelLeaf = function ( leaf ) {
-  if ( leaf.data.isPrivate === true ) {
+  const filter = get( filterStore )
+  if ( leaf.data.type === "private" ) {
     return;
   }
-
   const x0 = this.scaleX( leaf.x0 );
   const x1 = this.scaleX( leaf.x1 );
   const y0 = this.scaleY( leaf.y0 );
@@ -42,7 +44,12 @@ const labelLeaf = function ( leaf ) {
   const ty = y0 + this.lineHeight;
 
   this.context.fillStyle = "#000000"
-  h.drawWrappedText.call( this, leaf.data.displayLabel, tx, ty, width );
+
+  if ( !filter || !( filter.key in leaf.data ) || leaf.data[filter.key] != filter.value ) {
+    h.drawWrappedText.call( this, leaf.data.displayLabel, tx, ty, width );
+  }
+  
+
 };
 
 const drawLeaves = function () {

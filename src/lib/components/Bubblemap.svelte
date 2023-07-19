@@ -6,11 +6,12 @@
   import { sourceStore } from "$lib/stores/source.js";
   import { resizeStore } from "$lib/stores/resize.js";
   import { zoomStore } from "$lib/stores/zoom";
+  import { filterStore } from "$lib/stores/filter.js";
   import BubblemapEngine from "$lib/helpers/bubblemap/index.js";
 
   let bubblemap, frame, engine;
   let unsubscribeSource;
-  let unsubscribeResize, unsubscribeZoom;
+  let unsubscribeResize, unsubscribeZoom, unsubscribeFilter;
   let canvasWidth, canvasHeight;
   let hidden = true;
 
@@ -54,12 +55,19 @@
         engine.updateView( zoom );
       }
     });
+
+    unsubscribeFilter = filterStore.subscribe( function ( filter ) {
+      if ( filter !== undefined ) {
+        engine.render();
+      }
+    });
   });
 
   onDestroy(() => {
     unsubscribeSource();
     unsubscribeResize();
     unsubscribeZoom();
+    unsubscribeFilter();
   });
 </script>
 
