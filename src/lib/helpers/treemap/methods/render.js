@@ -14,6 +14,7 @@ const clearCanvas = function () {
 };
 
 const drawLeaf = function ( leaf ) {
+  const filter = get( filterStore );
   const x0 = this.scaleX( leaf.x0 );
   const x1 = this.scaleX( leaf.x1 );
   const y0 = this.scaleY( leaf.y0 );
@@ -23,10 +24,15 @@ const drawLeaf = function ( leaf ) {
   const height = y1 - y0;
 
   this.context.clearRect( x0, y0, width, height );
+
+  if ( !filter || !( filter.key in leaf.data ) || leaf.data[filter.key] != filter.value ) {
+    this.context.fillStyle = leaf.data.colorHalf;
+  }
+  else {
+    this.context.fillStyle = leaf.data.color;
+  }
   
-  this.context.fillStyle = leaf.data.colorHalf;
   this.context.fillRect( x0, y0, width, height );
-  
   this.context.strokeRect( x0, y0, width, height );
 };
 
