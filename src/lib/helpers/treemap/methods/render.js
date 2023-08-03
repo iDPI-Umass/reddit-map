@@ -1,6 +1,7 @@
 import * as h from "../helpers.js";
 import { get } from 'svelte/store'
 import { filterStore } from "$lib/stores/filter.js";
+import { searchStore } from "../../../stores/search.js";
 
 const setStyleDefaults = function () {
   this.context.lineWidth = this.lineWidth;
@@ -23,8 +24,12 @@ const drawLeaf = function ( leaf ) {
   const height = y1 - y0;
 
   this.context.clearRect( x0, y0, width, height );
-  
-  this.context.fillStyle = leaf.data.colorHalf;
+  if ( leaf.data.subreddit != undefined && get( searchStore ) != undefined && leaf.data.subreddit === get( searchStore ).searchTerm) {
+    this.context.fillStyle = leaf.data.color;
+  }
+  else {
+    this.context.fillStyle = leaf.data.colorHalf;
+  }
   this.context.fillRect( x0, y0, width, height );
   
   this.context.strokeRect( x0, y0, width, height );

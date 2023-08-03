@@ -359,6 +359,11 @@
                   NSFW
                 </sl-badge>
                 {currentName}
+              {:else if currentBadge ===  "quarantine"}
+                <sl-badge variant="danger" pill>
+                  Quarantined
+                </sl-badge>
+                {currentName}
               {:else if currentBadge ===  "banned"}
                 <sl-badge variant="danger" pill>
                   Banned
@@ -382,6 +387,11 @@
             {#if currentBadge === "nsfw"}
               <sl-badge variant="warning" pill>
                 NSFW
+              </sl-badge>
+              {currentName}
+            {:else if currentBadge ===  "quarantine"}
+              <sl-badge variant="danger" pill>
+                Quarantined
               </sl-badge>
               {currentName}
             {:else if currentBadge ===  "banned"}

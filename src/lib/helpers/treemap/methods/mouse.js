@@ -1,14 +1,19 @@
-const handleMouseDown = function ( event ) {
-  const node = this.findNode( event );
-  if ( node == null ) {
-    console.warn( "Click event had no matching node" );
-    return;
-  }
+import { openResultsStore } from "../../../stores/open-results";
+import { get } from "svelte/store";
 
-  if ( node.data.subreddit != null ) {
-    this.openTab( node.data.subreddit );
-  } else {
-    this.zoomIn( node );
+const handleMouseDown = function ( event ) {
+  if ( !get( openResultsStore ) ) {
+    const node = this.findNode( event );
+    if ( node == null ) {
+      console.warn( "Click event had no matching node" );
+      return;
+    }
+
+    if ( node.data.subreddit != null ) {
+      this.openTab( node.data.subreddit );
+    } else {
+      this.zoomIn( node );
+    }
   }
 };
 
@@ -40,6 +45,7 @@ const handleHoverLeave = function () {
 };
 
 const startHoverLoop = function () {
+  console.log
   let currentX = this.hoverX;
   let currentY = this.hoverY;
   let currentNode = null;

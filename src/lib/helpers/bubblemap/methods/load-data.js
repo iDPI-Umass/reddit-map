@@ -1,9 +1,12 @@
 import * as h from "../helpers.js";
+import { hierarchyMapStore } from "$lib/stores/hierarchy-map.js";
 
 const loadData = function ( data ) {
   this.data = data
   console.log( "bubblemap data", this.data );
   this.indexHierachy();
+
+  hierarchyMapStore.push( this.hierarchyMap )
 
   this.subroot = this.data;
   this.isTopLevel = true;
