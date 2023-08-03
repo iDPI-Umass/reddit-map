@@ -26,7 +26,7 @@
     let openResults = false;
     openResultsStore.push(openResults);
     let headerToResults = { "Subreddits": [], "Clusters": [], "NSFW Subreddits": [] }
-    let headerToId = { "Subreddits": crypto.randomUUID(), "Clusters": crypto.randomUUID(), "NSFW Subreddits": crypto.randomUUID() }
+    let headerToId = { "Subreddits": 1, "Clusters": 2, "NSFW Subreddits": 3 }
     let foundDefault = false;
 
     function randomSearchSelection ( results ) {
