@@ -212,6 +212,7 @@
     const filter = get( filterStore );
     currentAbout = metadata?.about?.description;
     currentBadge = node.data.type ?? "public";
+
     if ( currentBadge === "protest" && (!filter || !( filter.key in node.data ) || node.data[filter.key] != filter.value) ) {
       currentBadge = "public";
     }
@@ -358,6 +359,11 @@
                   NSFW
                 </sl-badge>
                 {currentName}
+              {:else if currentBadge ===  "quarantine"}
+                <sl-badge variant="danger" pill>
+                  Quarantined
+                </sl-badge>
+                {currentName}
               {:else if currentBadge ===  "banned"}
                 <sl-badge variant="danger" pill>
                   Banned
@@ -381,6 +387,11 @@
             {#if currentBadge === "nsfw"}
               <sl-badge variant="warning" pill>
                 NSFW
+              </sl-badge>
+              {currentName}
+            {:else if currentBadge ===  "quarantine"}
+              <sl-badge variant="danger" pill>
+                Quarantined
               </sl-badge>
               {currentName}
             {:else if currentBadge ===  "banned"}

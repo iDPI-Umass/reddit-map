@@ -1,4 +1,5 @@
 import * as h from "../helpers.js";
+import { labelsStore } from "../../../stores/labels.js";
 
 // Updates when we drill down into a treemap category.
 const updateView = function ({ subrootID }) {
@@ -11,6 +12,7 @@ const updateView = function ({ subrootID }) {
     }
   }
   this.labels = h.pluckLabels( this.subroot );
+  labelsStore.push( this.labels )
   
   this.neighbors = [];
   if ( this.labels.length === 1 ) {

@@ -1,6 +1,7 @@
 import * as h from "../helpers.js";
 import { get } from 'svelte/store'
 import { filterStore } from "$lib/stores/filter.js";
+import { searchStore } from "../../../stores/search.js";
 
 const setStyleDefaults = function () {
   this.context.lineWidth = this.lineWidth;
@@ -14,7 +15,7 @@ const clearCanvas = function () {
 };
 
 const drawLeaf = function ( leaf ) {
-  const filter = get( filterStore );
+  const filter = get( filterStore )
   const x0 = this.scaleX( leaf.x0 );
   const x1 = this.scaleX( leaf.x1 );
   const y0 = this.scaleY( leaf.y0 );
@@ -25,11 +26,18 @@ const drawLeaf = function ( leaf ) {
 
   this.context.clearRect( x0, y0, width, height );
 
-  if ( !filter || !( filter.key in leaf.data ) || leaf.data[filter.key] != filter.value ) {
+  let isProtestModeOff = !filter || !( filter.key in leaf.data ) || leaf.data[filter.key] != filter.value
+  let hasSearchTerm = leaf.data.subreddit != undefined && get( searchStore ) != undefined && leaf.data.subreddit === get( searchStore ).searchTerm
+
+  if ( hasSearchTerm && isProtestModeOff) {
+    this.context.fillStyle = leaf.data.color;
+  }
+
+  if ( isProtestModeOff && !hasSearchTerm ) {
     this.context.fillStyle = leaf.data.colorHalf;
   }
-  else {
-    this.context.fillStyle = leaf.data.color;
+  if ( !isProtestModeOff ) {
+    this.context.fillStyle = leaf.data.colorQuarter;
   }
   
   this.context.fillRect( x0, y0, width, height );

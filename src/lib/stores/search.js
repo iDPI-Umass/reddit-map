@@ -2,8 +2,8 @@ import { writable } from "svelte/store";
 
 
 const createStore = function () {
-  let search = {};
-
+  let search;
+  
   const { subscribe, update } = writable( search );
 
   return {

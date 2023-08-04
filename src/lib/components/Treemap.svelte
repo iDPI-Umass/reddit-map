@@ -1,21 +1,29 @@
-<script>
+<script >
   import Spinner from "$lib/components/primitives/Spinner.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
+  import Search from "./search/Search.svelte";
   import { onDestroy, onMount } from "svelte";
   import { sourceStore } from "$lib/stores/source.js";
   import { resizeStore } from "$lib/stores/resize.js";
   import { zoomStore } from "$lib/stores/zoom.js";
   import { searchStore } from "$lib/stores/search.js";
   import { filterStore } from "$lib/stores/filter.js";
+  import { searchStore } from "$lib/stores/search.js";
+  import { openResultsStore } from "$lib/stores/open-results.js";
+  import { labelsStore } from "../stores/labels";
+  import { get } from "svelte/store";
   import TreemapEngine from "$lib/helpers/treemap/index.js";
   import "@shoelace-style/shoelace/dist/components/switch/switch.js";
-
+  import '@shoelace-style/shoelace/dist/components/breadcrumb/breadcrumb.js';
+  import '@shoelace-style/shoelace/dist/components/icon/icon.js';
 
 
   let canvas, frame, engine;
   let unsubscribeSource;
   let unsubscribeSearch;
   let unsubscribeResize, unsubscribeZoom, unsubscribeFilter;
+  let unsubscribeSearch;
+  let unsubscribeOpenResults;
   let canvasWidth, canvasHeight;
   let hidden = true;
   let backDisabled = true;
@@ -23,32 +31,45 @@
   let tooltipEvent = null;
   let protestToggle;
   let isProtestVisible = false;
+  let data;
+  let searchBar;
+  let unsubscribeLabels;
+  let parents = [];
+
 
 
   const handleBack = function ( event ) {
-    event.preventDefault();
-    resetTouchNode();
-    if ( (event.type === "keypress") && (event.key !== "Enter") ) {
-      return;
+    if ( !get( openResultsStore )) {
+      event.preventDefault();
+      resetTouchNode();
+      if ( (event.type === "keypress") && (event.key !== "Enter") ) {
+        return;
+      }
+      zoomStore.push({ type: "back parent" });
     }
-    zoomStore.push({ type: "back parent" });
   };
 
   const handleReset = function ( event ) {
-    event.preventDefault();
-    resetTouchNode();
-    if ( (event.type === "keypress") && (event.key !== "Enter") ) {
-      return;
+    if ( !get( openResultsStore ) ) {
+      event.preventDefault();
+      resetTouchNode();
+      if ( (event.type === "keypress") && (event.key !== "Enter") ) {
+        return;
+      }
+      zoomStore.push({ type: "reset" });
+      parents = [];
+      console.log("parent after reset: ", parents)
     }
-    zoomStore.push({ type: "reset" });
   };
 
   const handleHover = function ( event ) {
-    resetTouchNode();
-    tooltipEvent = {
-      type: "mouse",
-      ...event?.detail
-    };
+    if ( !get( openResultsStore ) ) {
+      resetTouchNode();
+      tooltipEvent = {
+        type: "mouse",
+        ...event?.detail
+      };
+    }
   };
 
   const handleTouchSelect = function ( event ) {
@@ -81,13 +102,13 @@
 
       if ( window.innerWidth > 750 ) {
         //       button panel
-        height -= ( 16 * 5 );
+        height -= ( 16 * 7 );
       } else {
         //       button panel
-        height -= ( 16 * 4 );
+        height -= ( 16 * 6 );
       }
     }
-    
+
     resetTouchNode();
     canvasWidth = `${ width }px`;
     canvasHeight = `${ height }px`;
@@ -95,15 +116,16 @@
   };
 
   const handleProtest = function ( event ) {
-    event.preventDefault();
-    isProtestVisible = !isProtestVisible
-    if ( isProtestVisible ) {
-      filterStore.push( { key: "type" , value: "protest" } )
+    if ( !get( openResultsStore ) ) {
+      event.preventDefault();
+      isProtestVisible = !isProtestVisible
+      if ( isProtestVisible ) {
+        filterStore.push( { key: "type" , value: "protest" } )
+      }
+      else {
+        filterStore.push( null )
+      }
     }
-    else {
-      filterStore.push( null )
-    }
-    
   }
 
 
@@ -118,6 +140,21 @@
         type: "new selection", 
         subrootID: event.detail.node.data.node_id 
       });
+      let labels = get( labelsStore );
+      if ( labels != undefined && !(labels[0].parent.parent === null) ) {
+        console.log("before 1: ", parent.length === 0)
+        if ( parents.length === 0 ) {
+          console.log(1)
+          parents.push( labels[0].parent )
+        }
+        else {
+          if ( parents[ parent.length - 1 ] !== labels[0].parent ) {
+            console.log(2)
+            parents.push( labels[0].parent )
+          }
+        }
+      }
+      console.log("parent after push: ", parents)
     });
 
     canvas.addEventListener( "hovernode", handleHover );
@@ -164,6 +201,11 @@
       } else if ( zoom.type === "back parent" ) {
         engine.zoom( zoom.type );
         backDisabled = engine.isTopLevel;
+        let labels = get( labelsStore );
+        if ( labels.length != undefined && labels.length > 0 ) {
+          parents.pop()
+        }
+        console.log("parent after pop: ", parents)
       }
     });
 
@@ -179,6 +221,19 @@
         engine.render();
       }
     });
+
+    unsubscribeSearch = searchStore.subscribe( function ( search ) {
+      if (search != null) {
+        engine.search( search )
+        backDisabled = false
+      }
+    });
+
+    console.log("TREEMAP DATA: ", engine)
+    unsubscribeLabels = labelsStore.subscribe( function ( labels ) {
+      console.log("label: ", labels, parents)
+    });
+
   });
 
   onDestroy(() => {
@@ -186,34 +241,52 @@
     unsubscribeResize();
     unsubscribeZoom();
     unsubscribeFilter();
+    unsubscribeSearch();
+    unsubscribeLabels();
   });
 </script>
 
 
 
+<div class="search-bar" 
+  style:--accordion-width="{canvasWidth ? canvasWidth : 'auto'}">
+  <Search></Search>
+</div>
+
+<div class="breadcrumbs">
+  {#each parents as parent}
+    <sl-button variant="text" size="small">{ parent.taxonomy_label }</sl-button>              
+  {/each}
+</div>
 
 <div 
   bind:this={frame}
   class="spinner-frame">
   
-  {#if hidden === true}
-    <Spinner></Spinner>
-  {/if}
 
-  <Tooltip 
-    event={tooltipEvent}
-    totalCommentCount={totalCommentCount}
-    canvas={canvas}
-    on:dismiss={resetTouchNode}
-    >
-  </Tooltip>
+  <div>
+    {#if hidden === true}
+      <Spinner></Spinner>
+    {/if}
 
-  <canvas 
-    bind:this={canvas}
-    style:width="{canvasWidth ? canvasWidth : 'auto'}"
-    style:height="{canvasHeight ? canvasHeight : 'auto'}"
-    class:hidden="{hidden === true}">
-  </canvas>
+    <Tooltip 
+      event={tooltipEvent}
+      totalCommentCount={totalCommentCount}
+      canvas={canvas} 
+      on:dismiss={resetTouchNode}
+      >
+    </Tooltip>
+
+
+    <canvas 
+      bind:this={canvas}
+      style:width="{canvasWidth ? canvasWidth : 'auto'}"
+      style:height="{canvasHeight ? canvasHeight : 'auto'}"
+      class:hidden="{hidden === true}">
+    </canvas>
+    
+  </div>
+  
 </div>
 
 <section class="control">
@@ -224,7 +297,7 @@
       class="action"
       disabled="{backDisabled}"
       pill>
-      Back
+      Up
     </sl-button>
 
     <sl-button
@@ -242,6 +315,11 @@
 </section>
 
 <style>
+
+  :root {
+      --accordion-width: var(canvasWidth);
+  }
+
   .hidden {
     display: none;
   }
@@ -280,6 +358,5 @@
       max-height: 5rem;
     }
   }
-
 
 </style>

@@ -9,3 +9,4 @@ export * from "./update-view.js";
 export * from "./update-data.js";
 export * from "./wire-events.js";
 export * from "./zoom.js";
+export * from "./search.js"
