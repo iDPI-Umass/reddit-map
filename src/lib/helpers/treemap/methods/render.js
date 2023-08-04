@@ -15,6 +15,7 @@ const clearCanvas = function () {
 };
 
 const drawLeaf = function ( leaf ) {
+  const filter = get( filterStore )
   const x0 = this.scaleX( leaf.x0 );
   const x1 = this.scaleX( leaf.x1 );
   const y0 = this.scaleY( leaf.y0 );
@@ -24,12 +25,21 @@ const drawLeaf = function ( leaf ) {
   const height = y1 - y0;
 
   this.context.clearRect( x0, y0, width, height );
-  if ( leaf.data.subreddit != undefined && get( searchStore ) != undefined && leaf.data.subreddit === get( searchStore ).searchTerm) {
+
+  let isProtestModeOff = !filter || !( filter.key in leaf.data ) || leaf.data[filter.key] != filter.value
+  let hasSearchTerm = leaf.data.subreddit != undefined && get( searchStore ) != undefined && leaf.data.subreddit === get( searchStore ).searchTerm
+
+  if ( hasSearchTerm && isProtestModeOff) {
     this.context.fillStyle = leaf.data.color;
   }
-  else {
+
+  if ( isProtestModeOff && !hasSearchTerm ) {
     this.context.fillStyle = leaf.data.colorHalf;
   }
+  if ( !isProtestModeOff ) {
+    this.context.fillStyle = leaf.data.colorQuarter;
+  }
+
   this.context.fillRect( x0, y0, width, height );
   
   this.context.strokeRect( x0, y0, width, height );

@@ -9,12 +9,9 @@
     import { collapseStore } from "$lib/stores/accordion-collapse.js"; 
     import { sourceStore } from "$lib/stores/source.js";
     import "@shoelace-style/shoelace/dist/components/input/input.js";
-    import { head_selector, validate_each_argument } from "svelte/internal";
     import { filterStore } from "$lib/stores/filter.js";
     import { searchStore } from "$lib/stores/search.js";
 
-
-    export let data = new Map();
     let unsubscribeHierarchyMap;
     let unsubscribeSearch;
     let unsubscribeSource;
@@ -33,7 +30,7 @@
         if ( results.length > 5 ) {
             let randomSearchResults = []
             let randomIndexSet = new Set();
-            let randomIndex;;
+            let randomIndex;
             for (let i = 0; i < 5; i++) {
                 while ( randomIndex === undefined || randomIndexSet.has( randomIndex ) ) {
                     randomIndex = Math.floor( Math.random() * results.length);
@@ -49,12 +46,6 @@
         return results
 
     }
-
-    // function searchFilter ( input ) {
-    //     headerToResults["Subreddits"] = randomSearchSelection( subreddits.filter((subreddit) => input.length !== 0 && subreddit.toLowerCase().startsWith(input.toLowerCase())) )
-    //     headerToResults["Clusters"] = clusters.filter((cluster) => input.length !== 0 && cluster.toLowerCase().startsWith(input.toLowerCase()))
-    //     headerToResults["NSFW Subreddits"] = nsfwSubreddits.filter((nsfwSubreddit) => input.length !== 0 && nsfwSubreddit.toLowerCase().startsWith(input.toLowerCase()))
-    // }
 
     function searchFilter ( input ) {
         headerToResults["Subreddits"] = randomSearchSelection( subreddits.filter((subreddit) => {
@@ -91,11 +82,6 @@
             if ( header === "Clusters" && headerToResults["Clusters"].length > 0 ) {
                 console.log(true)
                 collapseStore.push(headerToId["Clusters"])
-                return true;
-            }
-            else if ( header === "NSFW Subreddits" && headerToResults["Clusters"].length === 0 && headerToResults["NSFW Subreddits"].length > 0 ) {
-                console.log(true)
-                collapseStore.push(headerToId["NSFW Subreddits"])
                 return true;
             }
         }
@@ -187,32 +173,6 @@
             openResultsStore.push(openResults);
         });
 
-
-        // unsubscribeHierarchyMap = hierarchyMapStore.subscribe( function ( hierarchyMap ) {
-        //     console.log("in unsubscribeHierarchyMap")
-        //     const filter = get(filterStore);
-        //     data = new Map();
-        //     clusters = [];
-        //     subreddits = [];
-        //     nsfwSubreddits = [];
-        //     for (let [key, value] of new Map(hierarchyMap)) {
-        //         if (Number(key) && value.data.taxonomy_label.length > 0) {
-        //             data.set(value.data.taxonomy_label, value);
-        //             clusters.push(value.data.taxonomy_label)
-        //         }
-        //         else {
-        //             data.set(key, value);
-        //             if (value.data.type === "nsfw") {
-        //                 nsfwSubreddits.push(key)
-        //             } 
-        //             else if (value.data.type != "private" || ( !filter || !( filter.key in value.data ) || value.data[filter.key] != filter.value )) {
-        //                 subreddits.push(key)
-        //             }
-        //         }
-        //     }
-        //     console.log("results: ", data)
-        // });
-
         unsubscribeHierarchyMap = hierarchyMapStore.subscribe( function ( hierarchyMap ) {
             console.log("NEW HIERARCHY")
             const filter = get(filterStore);
@@ -245,44 +205,6 @@
         unsubscribeSearch();
     });
 </script>
-
-
-
-<!-- <div class="search" tabindex=-1>
-    <sl-input bind:this={ search } 
-        placeholder="Search" 
-        size="medium" 
-        class="search-input" clearable></sl-input>
-    <Accordion bind:accordion={accordion}>
-        {#if openResults}
-            {#each Object.entries(headerToResults) as [header, results]}
-                <AccordionHeader isDefault={ getIsDefault( header ) }>
-                    <div slot="title">{header}</div>
-                    {#if results.length > 0 }
-                        {#each results as result}
-                            {#if data !== undefined}
-                                {#if data.get( result ).data.type != "private" && !isFilterOn( data.get( result ) ) }
-                                    {#if data.get( result ).data.type == "public" || data.get( result ).data.type == "protest" || data.get( result ).data.type == null}
-                                        <AccordionItem slot="item" nodeID={data.get( result ).data.node_id}>
-                                            <div slot="item-name">{ result }</div>
-                                        </AccordionItem>
-                                    {:else}
-                                        <AccordionItem slot="item" nodeID={data.get( result ).data.node_id}>
-                                            <div slot="item-name">{ result }</div>
-                                            <div slot="item-badge"><sl-badge variant={getBadgeColor( data.get( result ) )}>{getBadgeName( data.get( result ) )}</sl-badge></div>
-                                        </AccordionItem>
-                                    {/if}
-                                {/if}
-                            {/if}
-                            
-                        {/each}
-                    {/if}
-                </AccordionHeader>
-            {/each}
-        {/if}
-    </Accordion>
-        
-</div> -->
 
 <div class="search" tabindex=-1>
     <sl-input bind:this={ search } 
@@ -321,6 +243,7 @@
             {/each}
         {/if}
     </Accordion>
+    
         
 </div>
 
@@ -330,6 +253,5 @@
     .search-input {
         width: 100%;
     }
-  
 
 </style>
