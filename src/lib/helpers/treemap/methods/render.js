@@ -39,9 +39,8 @@ const drawLeaf = function ( leaf ) {
   if ( !isProtestModeOff ) {
     this.context.fillStyle = leaf.data.colorQuarter;
   }
-
-  this.context.fillRect( x0, y0, width, height );
   
+  this.context.fillRect( x0, y0, width, height );
   this.context.strokeRect( x0, y0, width, height );
 };
 

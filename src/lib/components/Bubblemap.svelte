@@ -6,12 +6,14 @@
   import { sourceStore } from "$lib/stores/source.js";
   import { resizeStore } from "$lib/stores/resize.js";
   import { zoomStore } from "$lib/stores/zoom";
+  import { searchStore } from "$lib/stores/search.js";
   import { filterStore } from "$lib/stores/filter.js";
   import { searchStore } from "../stores/search";
   import BubblemapEngine from "$lib/helpers/bubblemap/index.js";
 
   let bubblemap, frame, engine;
   let unsubscribeSource;
+  let unsubscribeSearch;
   let unsubscribeResize, unsubscribeZoom, unsubscribeFilter;
   let unsubscribeSearch;
   let canvasWidth, canvasHeight;
@@ -58,6 +60,15 @@
       }
     });
 
+    unsubscribeSearch = searchStore.subscribe( function ( search ) {
+      if (search.term != null) {
+        const subreddit = engine.hierarchyMap.get( search.term )
+        const parent_cluster = subreddit.parent
+        const parent_node_id = parent_cluster.data.node_id
+        engine.updateView( {subrootID: parent_node_id} );
+      }
+    });
+      
     unsubscribeFilter = filterStore.subscribe( function ( filter ) {
       if ( filter !== undefined ) {
         engine.render();

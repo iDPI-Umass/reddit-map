@@ -6,6 +6,7 @@
   import { sourceStore } from "$lib/stores/source.js";
   import { resizeStore } from "$lib/stores/resize.js";
   import { zoomStore } from "$lib/stores/zoom.js";
+  import { searchStore } from "$lib/stores/search.js";
   import { filterStore } from "$lib/stores/filter.js";
   import { searchStore } from "$lib/stores/search.js";
   import { openResultsStore } from "$lib/stores/open-results.js";
@@ -19,6 +20,7 @@
 
   let canvas, frame, engine;
   let unsubscribeSource;
+  let unsubscribeSearch;
   let unsubscribeResize, unsubscribeZoom, unsubscribeFilter;
   let unsubscribeSearch;
   let unsubscribeOpenResults;
@@ -110,7 +112,6 @@
     resetTouchNode();
     canvasWidth = `${ width }px`;
     canvasHeight = `${ height }px`;
-    
     return { width, height };
   };
 
@@ -205,6 +206,13 @@
           parents.pop()
         }
         console.log("parent after pop: ", parents)
+      }
+    });
+
+    unsubscribeSearch = searchStore.subscribe( function ( search ) {
+      if (search.term != null) {
+        engine.search( search.term )
+        backDisabled = false
       }
     });
 
@@ -303,7 +311,7 @@
   <sl-switch 
     bind:this={protestToggle}
     size="large">Protest View</sl-switch>
-
+  
 </section>
 
 <style>
