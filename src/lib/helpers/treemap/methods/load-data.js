@@ -5,7 +5,6 @@ const loadData = function ( data ) {
       return Math.sqrt(a.value) - Math.sqrt(b.value);
     });
 
-  console.log( "treemap data", this.data );
   this.parent = this.data;
   this.isTopLevel = true;
   this.view = this.data.children;

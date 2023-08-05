@@ -1,4 +1,7 @@
 import * as h from "../helpers.js";
+import { get } from 'svelte/store'
+import { filterStore } from "$lib/stores/filter.js";
+import { searchStore } from "../../../stores/search.js";
 
 const setStyleDefaults = function () {
   this.context.lineWidth = this.lineWidth;
@@ -12,6 +15,7 @@ const clearCanvas = function () {
 };
 
 const drawLeaf = function ( leaf ) {
+  const filter = get( filterStore )
   const x0 = this.scaleX( leaf.x0 );
   const x1 = this.scaleX( leaf.x1 );
   const y0 = this.scaleY( leaf.y0 );
@@ -21,18 +25,30 @@ const drawLeaf = function ( leaf ) {
   const height = y1 - y0;
 
   this.context.clearRect( x0, y0, width, height );
+
+  let isProtestModeOff = !filter || !( filter.key in leaf.data ) || leaf.data[filter.key] != filter.value
+  let hasSearchTerm = leaf.data.subreddit != undefined && get( searchStore ) != undefined && leaf.data.subreddit === get( searchStore ).searchTerm
+
+  if ( hasSearchTerm && isProtestModeOff) {
+    this.context.fillStyle = leaf.data.color;
+  }
+
+  if ( isProtestModeOff && !hasSearchTerm ) {
+    this.context.fillStyle = leaf.data.colorHalf;
+  }
+  if ( !isProtestModeOff ) {
+    this.context.fillStyle = leaf.data.colorQuarter;
+  }
   
-  this.context.fillStyle = leaf.data.colorHalf;
   this.context.fillRect( x0, y0, width, height );
-  
   this.context.strokeRect( x0, y0, width, height );
 };
 
 const labelLeaf = function ( leaf ) {
-  if ( leaf.data.isPrivate === true ) {
+  const filter = get( filterStore )
+  if ( leaf.data.type === "private" ) {
     return;
   }
-
   const x0 = this.scaleX( leaf.x0 );
   const x1 = this.scaleX( leaf.x1 );
   const y0 = this.scaleY( leaf.y0 );
@@ -42,7 +58,12 @@ const labelLeaf = function ( leaf ) {
   const ty = y0 + this.lineHeight;
 
   this.context.fillStyle = "#000000"
-  h.drawWrappedText.call( this, leaf.data.displayLabel, tx, ty, width );
+
+  if ( !filter || !( filter.key in leaf.data ) || leaf.data[filter.key] != filter.value ) {
+    h.drawWrappedText.call( this, leaf.data.displayLabel, tx, ty, width );
+  }
+  
+
 };
 
 const drawLeaves = function () {

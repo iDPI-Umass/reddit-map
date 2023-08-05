@@ -1,46 +1,72 @@
-<script>
+<script >
   import Spinner from "$lib/components/primitives/Spinner.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
+  import Search from "./search/Search.svelte";
   import { onDestroy, onMount } from "svelte";
   import { sourceStore } from "$lib/stores/source.js";
   import { resizeStore } from "$lib/stores/resize.js";
   import { zoomStore } from "$lib/stores/zoom.js";
+  import { searchStore } from "$lib/stores/search.js";
+  import { filterStore } from "$lib/stores/filter.js";
+  import { openResultsStore } from "$lib/stores/open-results.js";
+  import { labelsStore } from "../stores/labels";
+  import { get } from "svelte/store";
   import TreemapEngine from "$lib/helpers/treemap/index.js";
+  import "@shoelace-style/shoelace/dist/components/switch/switch.js";
+  import '@shoelace-style/shoelace/dist/components/breadcrumb/breadcrumb.js';
+  import '@shoelace-style/shoelace/dist/components/icon/icon.js';
+
 
   let canvas, frame, engine;
   let unsubscribeSource;
-  let unsubscribeResize, unsubscribeZoom;
+  let unsubscribeResize, unsubscribeZoom, unsubscribeFilter;
+  let unsubscribeSearch;
+  let unsubscribeOpenResults;
   let canvasWidth, canvasHeight;
   let hidden = true;
   let backDisabled = true;
   let totalCommentCount = 1;
   let tooltipEvent = null;
+  let protestToggle;
+  let isProtestVisible = false;
+  let data;
+  let searchBar;
+  let unsubscribeLabels;
+  let parents = [];
+
 
 
   const handleBack = function ( event ) {
-    event.preventDefault();
-    resetTouchNode();
-    if ( (event.type === "keypress") && (event.key !== "Enter") ) {
-      return;
+    if ( !get( openResultsStore )) {
+      event.preventDefault();
+      resetTouchNode();
+      if ( (event.type === "keypress") && (event.key !== "Enter") ) {
+        return;
+      }
+      zoomStore.push({ type: "back parent" });
     }
-    zoomStore.push({ type: "back parent" });
   };
 
   const handleReset = function ( event ) {
-    event.preventDefault();
-    resetTouchNode();
-    if ( (event.type === "keypress") && (event.key !== "Enter") ) {
-      return;
+    if ( !get( openResultsStore ) ) {
+      event.preventDefault();
+      resetTouchNode();
+      if ( (event.type === "keypress") && (event.key !== "Enter") ) {
+        return;
+      }
+      zoomStore.push({ type: "reset" });
+      parents = [];
     }
-    zoomStore.push({ type: "reset" });
   };
 
   const handleHover = function ( event ) {
-    resetTouchNode();
-    tooltipEvent = {
-      type: "mouse",
-      ...event?.detail
-    };
+    if ( !get( openResultsStore ) ) {
+      resetTouchNode();
+      tooltipEvent = {
+        type: "mouse",
+        ...event?.detail
+      };
+    }
   };
 
   const handleTouchSelect = function ( event ) {
@@ -73,19 +99,31 @@
 
       if ( window.innerWidth > 750 ) {
         //       button panel
-        height -= ( 16 * 5 );
+        height -= ( 16 * 7 );
       } else {
         //       button panel
-        height -= ( 16 * 4 );
+        height -= ( 16 * 6 );
       }
     }
-    
+
     resetTouchNode();
     canvasWidth = `${ width }px`;
     canvasHeight = `${ height }px`;
-    
     return { width, height };
   };
+
+  const handleProtest = function ( event ) {
+    if ( !get( openResultsStore ) ) {
+      event.preventDefault();
+      isProtestVisible = !isProtestVisible
+      if ( isProtestVisible ) {
+        filterStore.push( { key: "type" , value: "protest" } )
+      }
+      else {
+        filterStore.push( null )
+      }
+    }
+  }
 
 
   onMount(() => {
@@ -95,11 +133,21 @@
 
     canvas.addEventListener( "updateview", function ( event ) {
       backDisabled = engine.isTopLevel;
-
       zoomStore.push({
         type: "new selection", 
         subrootID: event.detail.node.data.node_id 
       });
+      let labels = get( labelsStore );
+      if ( labels != undefined && !(labels[0].parent.parent === null) ) {
+        if ( parents.length === 0 ) {
+          parents.push( labels[0].parent )
+        }
+        else {
+          if ( parents[ parent.length - 1 ] !== labels[0].parent ) {
+            parents.push( labels[0].parent )
+          }
+        }
+      }
     });
 
     canvas.addEventListener( "hovernode", handleHover );
@@ -107,6 +155,8 @@
     canvas.addEventListener( "hoverleave", handleHover );
     canvas.addEventListener( "hovermove", handleHover );
     canvas.addEventListener( "touchSelect", handleTouchSelect );
+
+    protestToggle.addEventListener('sl-change', handleProtest);
 
     unsubscribeSource = sourceStore.subscribe( function ( source ) {
       if ( source != null ) {
@@ -144,64 +194,112 @@
       } else if ( zoom.type === "back parent" ) {
         engine.zoom( zoom.type );
         backDisabled = engine.isTopLevel;
+        let labels = get( labelsStore );
+        if ( labels.length != undefined && labels.length > 0 ) {
+          parents.pop()
+        }
       }
     });
+
+    unsubscribeFilter = filterStore.subscribe( function ( filter ) {
+      if ( filter !== undefined ) {
+        engine.render();
+      }
+    });
+
+    unsubscribeSearch = searchStore.subscribe( function ( search ) {
+      if (search != null) {
+        engine.search( search )
+        backDisabled = false
+      }
+    });
+
   });
 
   onDestroy(() => {
     unsubscribeSource();
     unsubscribeResize();
     unsubscribeZoom();
+    unsubscribeFilter();
+    unsubscribeSearch();
+    unsubscribeLabels();
   });
 </script>
 
 
 
+<div class="search-bar" 
+  style:--accordion-width="{canvasWidth ? canvasWidth : 'auto'}">
+  <Search></Search>
+</div>
+
+<div class="breadcrumbs">
+  {#each parents as parent}
+    <sl-button variant="text" size="small">{ parent.taxonomy_label }</sl-button>              
+  {/each}
+</div>
 
 <div 
   bind:this={frame}
   class="spinner-frame">
   
-  {#if hidden === true}
-    <Spinner></Spinner>
-  {/if}
 
-  <Tooltip 
-    event={tooltipEvent}
-    totalCommentCount={totalCommentCount}
-    canvas={canvas}
-    on:dismiss={resetTouchNode}
-    >
-  </Tooltip>
+  <div>
+    {#if hidden === true}
+      <Spinner></Spinner>
+    {/if}
 
-  <canvas 
-    bind:this={canvas}
-    style:width="{canvasWidth ? canvasWidth : 'auto'}"
-    style:height="{canvasHeight ? canvasHeight : 'auto'}"
-    class:hidden="{hidden === true}">
-  </canvas>
+    <Tooltip 
+      event={tooltipEvent}
+      totalCommentCount={totalCommentCount}
+      canvas={canvas} 
+      on:dismiss={resetTouchNode}
+      >
+    </Tooltip>
+
+
+    <canvas 
+      bind:this={canvas}
+      style:width="{canvasWidth ? canvasWidth : 'auto'}"
+      style:height="{canvasHeight ? canvasHeight : 'auto'}"
+      class:hidden="{hidden === true}">
+    </canvas>
+    
+  </div>
+  
 </div>
 
 <section class="control">
-  <sl-button
-    on:click={handleBack}
-    on:keypress={handleBack}
-    class="action"
-    disabled="{backDisabled}"
-    pill>
-    Back
-  </sl-button>
+  <div>
+    <sl-button
+      on:click={handleBack}
+      on:keypress={handleBack}
+      class="action"
+      disabled="{backDisabled}"
+      pill>
+      Up
+    </sl-button>
 
-  <sl-button
-    on:click={handleReset}
-    on:keypress={handleReset}
-    class="action"
-    pill>
-    Top Level
-  </sl-button>
+    <sl-button
+      on:click={handleReset}
+      on:keypress={handleReset}
+      class="action"
+      pill>
+      Top Level
+    </sl-button>
+  </div>
+  <sl-switch 
+    bind:this={protestToggle}
+    size="large">Protest View</sl-switch>
+  
 </section>
 
 <style>
+
+  :root {
+      --accordion-width: var(canvasWidth);
+  }
+
   .hidden {
     display: none;
   }
@@ -220,7 +318,7 @@
     max-height: 3rem;
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
   }
 
@@ -229,11 +327,16 @@
     margin-right: 1rem;
   }
 
+  .control sl-switch {
+    width: 7rem;
+    margin-right: 1rem;
+  }
+
+
   @media( min-width: 750px ) {
     .control {
       max-height: 5rem;
     }
   }
-
 
 </style>
