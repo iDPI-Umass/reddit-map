@@ -69,10 +69,8 @@
     }
 
     function getIsOpen ( header ) {
-        console.log("is open: ", header)
         const subredditIsDefault = getIsDefault( "Subreddits" );
         if ( header === "Subreddits" ) {
-            console.log(subredditIsDefault)
             if ( subredditIsDefault ) {
                 collapseStore.push(headerToId["Subreddits"])
             }
@@ -80,12 +78,10 @@
         }
         if ( !subredditIsDefault ) {
             if ( header === "Clusters" && headerToResults["Clusters"].length > 0 ) {
-                console.log(true)
                 collapseStore.push(headerToId["Clusters"])
                 return true;
             }
         }
-        console.log(false)
         return false;
     }
 
@@ -121,7 +117,6 @@
     function searchInput( search ) {
         if ( search.length > 0 ) {
             searchFilter ( search );
-            console.log("search filter results clusters: ", headerToResults["Clusters"])
             if ( headerToResults["Subreddits"].length > 0 ||
                 headerToResults["Clusters"].length > 0 ||
                 headerToResults["NSFW Subreddits"].length > 0 ) {
@@ -174,16 +169,12 @@
         });
 
         unsubscribeHierarchyMap = hierarchyMapStore.subscribe( function ( hierarchyMap ) {
-            console.log("NEW HIERARCHY")
             const filter = get(filterStore);
             clusters = [];
             subreddits = [];
             nsfwSubreddits = [];
             for (let [key, value] of new Map(hierarchyMap)) {
                 if (Number(key) && value.data.taxonomy_label.length > 0) {
-                    if (value.data.taxonomy_label == "Youth Games and TV Fandom") {
-                            console.log("YOUTH node id: ", value.data.node_id)
-                    }
                     clusters.push(value)
                 }
                 else {
