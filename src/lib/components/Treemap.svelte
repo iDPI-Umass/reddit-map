@@ -8,7 +8,6 @@
   import { zoomStore } from "$lib/stores/zoom.js";
   import { searchStore } from "$lib/stores/search.js";
   import { filterStore } from "$lib/stores/filter.js";
-  import { searchStore } from "$lib/stores/search.js";
   import { openResultsStore } from "$lib/stores/open-results.js";
   import { labelsStore } from "../stores/labels";
   import { get } from "svelte/store";
@@ -20,7 +19,6 @@
 
   let canvas, frame, engine;
   let unsubscribeSource;
-  let unsubscribeSearch;
   let unsubscribeResize, unsubscribeZoom, unsubscribeFilter;
   let unsubscribeSearch;
   let unsubscribeOpenResults;
@@ -58,7 +56,6 @@
       }
       zoomStore.push({ type: "reset" });
       parents = [];
-      console.log("parent after reset: ", parents)
     }
   };
 
@@ -142,19 +139,15 @@
       });
       let labels = get( labelsStore );
       if ( labels != undefined && !(labels[0].parent.parent === null) ) {
-        console.log("before 1: ", parent.length === 0)
         if ( parents.length === 0 ) {
-          console.log(1)
           parents.push( labels[0].parent )
         }
         else {
           if ( parents[ parent.length - 1 ] !== labels[0].parent ) {
-            console.log(2)
             parents.push( labels[0].parent )
           }
         }
       }
-      console.log("parent after push: ", parents)
     });
 
     canvas.addEventListener( "hovernode", handleHover );
@@ -205,14 +198,6 @@
         if ( labels.length != undefined && labels.length > 0 ) {
           parents.pop()
         }
-        console.log("parent after pop: ", parents)
-      }
-    });
-
-    unsubscribeSearch = searchStore.subscribe( function ( search ) {
-      if (search.term != null) {
-        engine.search( search.term )
-        backDisabled = false
       }
     });
 
@@ -227,11 +212,6 @@
         engine.search( search )
         backDisabled = false
       }
-    });
-
-    console.log("TREEMAP DATA: ", engine)
-    unsubscribeLabels = labelsStore.subscribe( function ( labels ) {
-      console.log("label: ", labels, parents)
     });
 
   });

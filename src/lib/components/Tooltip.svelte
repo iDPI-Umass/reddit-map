@@ -192,8 +192,6 @@
       }
       currentNearestNeighborsOne = subredditBadgePairs.slice( 0, 5 );
       currentNearestNeighborsTwo = subredditBadgePairs.slice( 5, 10 );
-      // console.log("currentNearestNeighborsOne: ", currentNearestNeighborsOne)
-      // console.log("currentNearestNeighborsTwo: ", currentNearestNeighborsTwo)
     }
   }
 

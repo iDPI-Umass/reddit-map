@@ -9,7 +9,6 @@
     export let id = null;
     let unsubscribeCollapse;
 
-    console.log("header is open: ", isOpen)
     if (isDefault || isOpen) {
         toggleDown();
     }
@@ -31,7 +30,6 @@
             else {
                 open = true;
             }
-            console.log("subscribed to collabpse", open, id, collapse)
         });
     });
 
