@@ -222,7 +222,6 @@
     unsubscribeZoom();
     unsubscribeFilter();
     unsubscribeSearch();
-    unsubscribeLabels();
   });
 </script>
 
