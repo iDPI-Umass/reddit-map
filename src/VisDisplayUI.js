@@ -28,7 +28,6 @@ function VisDisplayUI() {
   const treemap_width = window.innerHeight
   const bubblemap_height = window.innerHeight - slider_height
   const bubblemap_width = window.innerWidth - treemap_width - 20
-  const overTimeOptions = {"delete": 0, "add": 1, "transform": 2}
   const format = d3.format(",d");
   const get_node_id = d => d.ancestors().reverse().map((d) => {
       if (d.data.node_id.includes("_")) {
