@@ -12,7 +12,6 @@ function VisDisplayUI() {
   const [stack_of_brushes, setZoomInfo] = React.useState(null)
   const [prev_data, setPrevData] = React.useState(null)
   const [curr_data, setCurrData] = React.useState(data)
-  const [bubble_map_svg, setBubbleMapSvg] = React.useState(null)
   const [treemap_svg, setTreemapSvg] = React.useState(null)
   const [initial_bubble_map_render, setInitialBubbleMapRender] = React.useState(false)
   const [node_render, setNodeRender] = React.useState(false)
@@ -337,16 +336,6 @@ function VisDisplayUI() {
     
   }
   
- 
-
-  function setSelectedNodes(node) {
-    if (node.data.clicked) {
-      selected_nodes[node.data.node_id] = node
-    }
-    else {
-      delete selected_nodes[node.data.node_id]
-    }
-  }
 
   function setAllNodeIdToNodes(node_id, subreddit, node_dict) {
     if (!(node_id in all_node_id_to_nodes)) {
@@ -369,7 +358,7 @@ function VisDisplayUI() {
                     <Treemap initial_bubble_map_render={initial_bubble_map_render} 
                     curr_data={curr_data} setLabels={setLabels} 
                     width={treemap_width} 
-                    height={treemap_height} setHighlightLabel={setHighlightLabel}
+                    height={treemap_height}
                     all_node_id_to_nodes={all_node_id_to_nodes}
                     setHandleTooltipEvent={setHandleTooltipEvent}
                     setHandleTooltipNode={setHandleTooltipNode}
@@ -387,9 +376,7 @@ function VisDisplayUI() {
                     labels={labels}
                     setZoomInfo={setZoomInfo} zoom_info={stack_of_brushes}
                     treemap_width={treemap_width}
-                    setAllNodeIdToNodes={setAllNodeIdToNodes}
-                    setBubbleMapSvg={setBubbleMapSvg}
-                    parent_label={parent_label}/>
+                    setAllNodeIdToNodes={setAllNodeIdToNodes}/>
 
                     <Slider setNodeRender={setNodeRender} 
                     setPrevData={setPrevData} setCurrData={setCurrData} curr_data={curr_data} prev_data={prev_data}
