@@ -7,8 +7,6 @@ import {Library} from '@observablehq/stdlib';
 
 function Treemap(props) {
     const svgRef = React.useRef();
-    /* const width = 954;
-    const height = 924; */
     let width = props.width;
     let height = props.height;
     const library = new Library();
@@ -42,8 +40,6 @@ function Treemap(props) {
                 .sort((a, b) => Math.sqrt(b.subreddit_count) - Math.sqrt(a.subreddit_count)));
 
             
-            // hierarchy 
-            console.log("tree data: ", props.curr_data)
             const treemap_data = treemap(props.curr_data)
             
             const svg = d3.select(svgRef.current)
@@ -55,50 +51,10 @@ function Treemap(props) {
                 .style("font", "10px sans-serif")
                 .style("float", "left").style("display", "inline-block")
 
-            
-            /* svg.on("mouseover", (event, d) => {
-                    height += 100
-                    width += 100
-                    svg.attr("height", height).attr("width", width)
-                })
-                .on("mouseout", (event, d) => {
-                    height -= 100
-                    width -= 100
-                    svg.attr("height", height).attr("width", width)
-                }) */
-
-
-
             svg.selectAll("g").remove();
 
             let group = svg.append("g")
                 .call(render, treemap_data);
-
-            
-            /* var tooltip = svg.append("g").attr("id", "g_tooltip")
-            svg.select("#g_tooltip").append("rect")
-            .attr("opacity", 0)
-            .attr("id", "rect_tooltip")
-            .attr("x", 5)
-            .attr("y", 5)
-            .attr("width", 50)
-            .attr("height", 50)
-            .attr("fill", "white")
-            .attr("stroke", "black")
-            .attr("stroke-linejoin", "round")
-
-            svg.select("#g_tooltip")
-                .append("text")
-                    .attr("id", "text_tooltip")
-                    .attr("opacity", 0)
-                    .attr("fill", "black")
-                    .attr("x", 5)
-                    .attr("y", 5)
-                    .text("test") */
-
-            
-
-            
 
             function render(group, root) {
                 var data = root.children.concat(root)
@@ -113,23 +69,14 @@ function Treemap(props) {
                     .data(data)
                     .join("g")
                     .on("mouseenter", (event, d) => {
-                        //props.setHighlightLabel(d.data.node_id)
                         props.setHandleTooltipEvent(event)
                         props.setHandleTooltipNode(d)
                         props.setTooltipIsMouseEnter(true)
-                        //props.setHighlightLabel(d)
                     })
                     .on("mousemove", (event, d) => {
                         props.setHandleTooltipEvent(event)
                         props.setHandleTooltipNode(d)
                         props.setTooltipIsMouseEnter(false)
-                        /* if (d.data.node_id in props.all_node_id_to_nodes) {
-                            let arr_of_nodes = props.all_node_id_to_nodes[d.data.node_id]
-                            arr_of_nodes.forEach((n) => {
-                                n.attr('fill', () => {
-                                    return "yellow"});
-                            })
-                        } */
                         props.setHighlightLabel(d)
                     })
                     .on("mouseout", (event, d) => {
@@ -141,20 +88,10 @@ function Treemap(props) {
                         svg.selectAll("#text_tooltip").remove()   
                         svg.selectAll("#thumbnail").remove()  
                         svg.selectAll("#text_tooltip").attr("opacity", 0)  
-                        /* if (d.data.node_id in props.all_node_id_to_nodes) {
-                            let arr_of_nodes = props.all_node_id_to_nodes[d.data.node_id]
-                            arr_of_nodes.forEach((n) => {
-                                n.attr('fill', () => {
-                                    return d.data.color});
-                            })        
-                        } */
                         props.setHighlightLabel(null)
                     })
                     .on("click", (event, d) => {
                         d.data.clicked = !d.data.clicked
-                        /* props.setSelectedNodes(d)
-                        props.setIsSelected(d.data.clicked)
-                        props.setSelectedNodeId(d.data.node_id) */
                         
                     })
 
@@ -173,15 +110,6 @@ function Treemap(props) {
                         }
                     });
             
-                /* node.append("title")
-                    .text((d) => {
-                        if (d.data.node_id.includes("_")) {
-                            return `${node_id(d)}\n${format(d.data.subreddit_count)}`
-                        }
-                        return `${node_id(d)}\n${format(d.data.cluster_subreddit_count)}`
-                    }); */
-            
-            
             
                 node.append("rect")
                     .attr("id", d => (d.leafUid = library.DOM.uid("leaf")).id)
@@ -190,17 +118,6 @@ function Treemap(props) {
                             return "white"
                         }
                         return d.data.color
-                        /* if(d === root) {
-                            return "#fff"
-                        } 
-                        else {
-                            if (d.children) {
-                                return "#ccc"
-                            } 
-                            else {
-                                return "#ddd"
-                            }
-                        } */
                     })
                     .attr("opacity", 0.5)
                     .attr("stroke", "#fff")
@@ -225,35 +142,9 @@ function Treemap(props) {
                     .join("tspan")
                     .attr("x", 3)
                     .attr("y", (d, i, nodes) => `${(i === nodes.length - 1) * 0.3 + 1.1 + i * 0.9}em`)
-                    //.attr("fill-opacity", (d, i, nodes) => i === nodes.length - 1 ? 0.7 : null)
                     .attr("font-weight", (d, i, nodes) => i === nodes.length - 1 ? "normal" : null)
                     .text(d => d)
                 
-
-                /* data.forEach((n) => {
-                    let text_boundingBox = node.select("#taxonomy_label_text_" + n.data.node_id).node().getBBox()
-                    node.append("rect")
-                        .attr("x", text_boundingBox.x)
-                        .attr("y", text_boundingBox.y)
-                        .attr("width", text_boundingBox.width)
-                        .attr("height", text_boundingBox.height)
-                        .attr("opacity", 0)
-                }) */
-
-                /* node.selectAll(".taxonomy_label_text")
-                    .append("rect")
-                    .attr("x", (d) => {
-                        return node.select("#taxonomy_label_text_" + d.data.node_id).node().getBBox().x
-                    })
-                    .attr("y", (d) => {
-                        return node.select("#taxonomy_label_text_" + d.data.node_id).node().getBBox().y
-                    })
-                    .attr("width", (d) => {
-                        return node.select("#taxonomy_label_text_" + d.data.node_id).node().getBBox().width
-                    })
-                    .attr("height", (d) => {
-                        return node.select("#taxonomy_label_text_" + d.data.node_id).node().getBBox().height
-                    }) */
 
                 group.call(position, root);
                 props.setParentLabel(root)
@@ -270,7 +161,6 @@ function Treemap(props) {
                     .attr("height", d => d === root ? 30 : y(d.y1) - y(d.y0));
             }
         
-            // When zooming in, draw the new nodes on top, and fade them in.
             function zoomin(d) {
                 const group0 = group.attr("pointer-events", "none");
                 const group1 = group = svg.append("g").call(render, d);
@@ -287,7 +177,6 @@ function Treemap(props) {
                         .call(position, d));
             }
         
-            // When zooming out, draw the old nodes on top, and fade them out.
             function zoomout(d) {
                 const group0 = group.attr("pointer-events", "none");
                 const group1 = group = svg.insert("g", "*").call(render, d.parent);
