@@ -119,24 +119,6 @@ function BubbleMap(props) {
             svg.selectAll("rect").remove();
             svg.selectAll("g").remove();
 
-            var tooltip = svg.append("g").attr("class", "tooltip").attr("id", "g_tooltip")
-            svg.select("#g_tooltip").append("rect")
-            .style("opacity", 0)
-            .attr("class", "tooltip")
-            .attr("id", "rect_tooltip")
-            .attr("rx", 5)
-            .attr("ry", 5)
-            .style("fill", "white")
-            .style("stroke", "black")
-            .style("stroke-linejoin", "round")
-
-            svg.select("#g_tooltip")
-                .append("text")
-                    .attr("class", "tooltip")
-                    .attr("id", "text_tooltip")
-                    .attr("opacity", 0)
-                    .text("")
-
             var brush = d3.brush()               
             .extent( [ [0,0], [width,height] ] ) 
             .on("end", function (e) {
@@ -152,9 +134,7 @@ function BubbleMap(props) {
 
         if (props.initial_bubble_map_render && !props.node_render) {
             svg = d3.select(svgRef.current)
-            
-            var tooltip = svg.select("#g_tooltip")
-            
+                        
             var dict_of_prev_subreddits_to_change = {}
 
             var nodes = []
@@ -193,7 +173,7 @@ function BubbleMap(props) {
                     dict_of_subreddits_to_change[curr_nodes[curr_node].data.subreddit] ={"node": curr_nodes[curr_node], "change": overTimeOptions["add"]}
                 }
             }
-            var arr_of_curr_results = append_data(props.curr_data, nodes, arr_of_tsne_boundaries, svg, tooltip, dict_of_subreddits_to_change)
+            var arr_of_curr_results = append_data(props.curr_data, nodes, arr_of_tsne_boundaries, svg, dict_of_subreddits_to_change)
             nodes = arr_of_curr_results[0]
             dict_of_prev_subreddits_to_change = arr_of_curr_results[1]
             arr_of_tsne_boundaries = arr_of_curr_results[2]
@@ -251,7 +231,6 @@ function BubbleMap(props) {
 
         if (props.node_render && props.labels != null) {
             svg = d3.select(svgRef.current)
-            var tooltip = svg.select("#g_tooltip")
 
             if (!svg.selectAll(".label_text_class").empty()) {
                 svg.selectAll(".label_text_class").remove()
@@ -275,7 +254,7 @@ function BubbleMap(props) {
                 }
                 tsne_remapped_x = props.tsne_remapped["tsne_remapped_x"]
                 tsne_remapped_y = props.tsne_remapped["tsne_remapped_y"]
-                render_labels_treemap(tsne_remapped_x(render_node.data.tsne_x), tsne_remapped_y(render_node.data.tsne_y), svg, render_node, tooltip, node_id_to_nodes)
+                render_labels_treemap(tsne_remapped_x(render_node.data.tsne_x), tsne_remapped_y(render_node.data.tsne_y), svg, render_node, node_id_to_nodes)
 
             }
 
@@ -286,7 +265,7 @@ function BubbleMap(props) {
         
         
     }, [props.node_render, props.labels]);
-    function append_data(data, prev_nodes, prev_arr_of_tsne_boundaries, svg, tooltip, dict_of_subreddits_to_change) {
+    function append_data(data, prev_nodes, prev_arr_of_tsne_boundaries, svg, dict_of_subreddits_to_change) {
         const root = d3.hierarchy(data);
         svg.selectAll(".g_text_class").remove()
         if (svg.selectAll(".g_text_class").empty()) {
@@ -296,10 +275,6 @@ function BubbleMap(props) {
         
         var nodes = root.descendants();
         var leaves = root.leaves()
-        var set_of_parents = new Set()
-        for (let i = 0; i < leaves.length; i++) {
-            set_of_parents.add(leaves[i].parent)
-        }
 
         const arr_of_tsne_boundaries =  get_boundaries(nodes, "tsne_x");
 
@@ -336,7 +311,7 @@ function BubbleMap(props) {
             if (node.data.hasOwnProperty("tsne_x") && node.data.node_id.includes("_")) {
                 var change = dict_of_subreddits_to_change[subreddit]["change"]
                 var parent = node.parent.data
-                render_nodes_treemap(tsne_remapped_x(node.data.tsne_x), tsne_remapped_y(node.data.tsne_y), 5, svg, node.data, tooltip, change, parent);
+                render_nodes_treemap(tsne_remapped_x(node.data.tsne_x), tsne_remapped_y(node.data.tsne_y), 5, svg, node.data, change, parent);
             }
         })
 
@@ -346,7 +321,7 @@ function BubbleMap(props) {
     }
 
 
-    function render_nodes_treemap(x, y, size, svg, node, tooltip, change, parent) {
+    function render_nodes_treemap(x, y, size, svg, node, change, parent) {
         node["x"] = x
         node["y"] = y
         node["resized_subreddit_count"] = size
@@ -365,28 +340,7 @@ function BubbleMap(props) {
                 .style("stroke-width", 1)
                 .style("stroke-opacity", 0)
                 
-            
-        circle.on("mouseover", (event) => {
-                tooltip.select("#text_tooltip")
-                    .style("opacity", 1)
-                    .attr("dx", (d3.pointer(event)[0]-25))
-                    .attr("dy", (d3.pointer(event)[1]-5))
-                    .text(node.subreddit)
-                const boundingBox = tooltip.select("#text_tooltip").node().getBBox()
-                tooltip.select("#rect_tooltip")
-                    .style("opacity", 1)
-                    .style("x", boundingBox.x - 2.5)
-                    .style("y", boundingBox.y - 2.5)
-                    .style("width", boundingBox.width + 5)
-                    .style("height", boundingBox.height + 5)
-                
-            })
-            .on("mouseout", () => {
-                tooltip.select("#rect_tooltip")
-                    .style("opacity", 0)
-                tooltip.select("#text_tooltip")
-                    .style("opacity", 0)
-            })
+        
         }
         if (change == overTimeOptions["transform"]) {
             svg.select("#circle_class_" + node.subreddit)
@@ -405,7 +359,7 @@ function BubbleMap(props) {
     }
 
 
-    function render_labels_treemap(x, y, svg, node, tooltip, node_id_to_nodes) {
+    function render_labels_treemap(x, y, svg, node, node_id_to_nodes) {
         node["x"] = x
         node["y"] = y
         node["clicked"] = false
@@ -434,21 +388,6 @@ function BubbleMap(props) {
                 svg.select("#circle_class_" + d.classList[2])
                 .attr('fill', (d) => {
                     return d.color})
-                .on("mouseover", (event, d) => {
-                        tooltip.select("#text_tooltip")
-                            .style("opacity", 1)
-                            .attr("dx", (d3.pointer(event)[0]-25))
-                            .attr("dy", (d3.pointer(event)[1]-5))
-                            .text(d.subreddit + "\n" + node.data.taxonomy_label)
-                        const boundingBox = tooltip.select("#text_tooltip").node().getBBox()
-                        tooltip.select("#rect_tooltip")
-                            .style("opacity", 1)
-                            .style("x", boundingBox.x - 2.5)
-                            .style("y", boundingBox.y - 2.5)
-                            .style("width", boundingBox.width + 5)
-                            .style("height", boundingBox.height + 5)
-                        
-                    })
                 
             })
             
@@ -522,7 +461,7 @@ function BubbleMap(props) {
     }
 
 
-
+    // finds the min and max values of the given property or key of all the data stored in the given elements
     function get_boundaries(elements, property) {
         var min_x = null;
         var max_x = null;
