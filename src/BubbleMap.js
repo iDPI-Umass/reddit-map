@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 
 import { render } from 'react-dom';
 
-function BubbleMapTranslate(props) {
+function BubbleMap(props) {
     const svgRef = React.useRef()
     let width = props.width;
     let height = props.height;
@@ -639,4 +639,4 @@ function BubbleMapTranslate(props) {
     );
 }
 
-export default BubbleMapTranslate;
+export default BubbleMap;
