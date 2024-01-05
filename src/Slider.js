@@ -27,22 +27,6 @@ function Slider(props) {
             .tickFormat(utcFormatter)
             .tickValues(times)
             .on('onchange', (d) => {
-                /* console.log("slider data prev before: ", props.prev_data)
-                console.log("slider data curr befre: ", props.curr_data)
-                console.log("compare curr data: ", (props.curr_data))
-                console.log("compare utc data: ", dict_of_data[utcFormatter(d)])
-                if (JSON.stringify(props.curr_data) != JSON.stringify(dict_of_data[utcFormatter(d)])) {
-                    console.log("HERE")
-                    console.log("HERE PREV: ", props.curr_data)
-                    console.log("HERE CURR: ", utcFormatter(d), dict_of_data[utcFormatter(d)])
-                    props.setPrevData(props.curr_data)
-                    props.setCurrData(dict_of_data[utcFormatter(d)])
-                    props.setRerenderTreemap(!props.rerender_treemap)
-                    props.setNodeRender(false)
-                }
-                console.log("slider data prev after: ", props.prev_data)
-                console.log("slider data curr after: ", props.curr_data) */
-                console.log("ON CHANGE: ", dict_of_data[utcFormatter(d)])
                 props.setTriggerTransition(dict_of_data[utcFormatter(d)])
                 
             })
