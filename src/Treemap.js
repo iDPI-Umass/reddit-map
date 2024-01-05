@@ -147,7 +147,6 @@ function Treemap(props) {
                 
 
                 group.call(position, root);
-                props.setParentLabel(root)
                 props.setLabels(data)
                 
 
