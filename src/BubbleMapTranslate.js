@@ -116,13 +116,6 @@ function BubbleMapTranslate(props) {
                 svg.attr("height", height).attr("width", width)
             })
 
-            svg.on("mouseover", (event, d) => {
-                props.setResize(-100)
-            })
-            .on("mouseout", (event, d) => {
-                props.setResize(0)
-            })
-
             svg.selectAll("rect").remove();
             svg.selectAll("g").remove();
 
