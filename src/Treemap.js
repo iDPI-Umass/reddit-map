@@ -77,7 +77,6 @@ function Treemap(props) {
                         props.setHandleTooltipEvent(event)
                         props.setHandleTooltipNode(d)
                         props.setTooltipIsMouseEnter(false)
-                        props.setHighlightLabel(d)
                     })
                     .on("mouseout", (event, d) => {
                         props.setHandleTooltipEvent(null)
@@ -88,7 +87,6 @@ function Treemap(props) {
                         svg.selectAll("#text_tooltip").remove()   
                         svg.selectAll("#thumbnail").remove()  
                         svg.selectAll("#text_tooltip").attr("opacity", 0)  
-                        props.setHighlightLabel(null)
                     })
                     .on("click", (event, d) => {
                         d.data.clicked = !d.data.clicked
