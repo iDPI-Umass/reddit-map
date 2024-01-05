@@ -9,39 +9,25 @@ import data from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
 function VisDisplayUI() {
 
   const [labels, setLabels] = React.useState(null);
-  const [selected_nodes, setSelected] = React.useState({});
-  const [is_selected, setIsSelected] = React.useState({});
-  const [selected_node_id, setSelectedNodeId] = React.useState("");
   const [stack_of_brushes, setZoomInfo] = React.useState(null)
   const [prev_data, setPrevData] = React.useState(null)
   const [curr_data, setCurrData] = React.useState(data)
-  const [highlight_label, setHighlightLabel] = React.useState(null)
-  const [prev_highlight_label, setPrevHighlightLabel] = React.useState(null)
   const [bubble_map_svg, setBubbleMapSvg] = React.useState(null)
   const [treemap_svg, setTreemapSvg] = React.useState(null)
   const [initial_bubble_map_render, setInitialBubbleMapRender] = React.useState(false)
   const [node_render, setNodeRender] = React.useState(false)
   const [tsne_remapped, setTsneRemapped] = React.useState({})
   const [all_node_id_to_nodes, setAllNodeIdToNodesDict] = React.useState({})
-  const [curr_node_id_to_nodes, setCurrNodeIdToNodes] = React.useState({})
-  const [set_highlight_label_subreddit, setHighlightLabelSubreddit] = React.useState(null)
-  const [set_highlight_label_cluster, setHighlightLabelCluster] = React.useState(null)
   const [handle_tooltip_event, setHandleTooltipEvent] = React.useState(null)
   const [handle_tooltip_node, setHandleTooltipNode] = React.useState(null)
   const [tooltip_is_mouse_enter, setTooltipIsMouseEnter] = React.useState(null)
   const [rerender_treemap, setRerenderTreemap] = React.useState(false)
-  const [resize, setResize] = React.useState(null)
-  const [is_bubble_map_increased, setIsBubbleMapIncreased] = React.useState(false)
-  const [is_highlighted, setIsHighlighted] = React.useState(false)
-  const [parent_label, setParentLabel] = React.useState(null)
-  const [color_dict, setColorDict] = React.useState({})
   const [trigger_transition, setTriggerTransition] = React.useState(null)
   const slider_height = 75
   const treemap_height = window.innerHeight
   const treemap_width = window.innerHeight
   const bubblemap_height = window.innerHeight - slider_height
   const bubblemap_width = window.innerWidth - treemap_width - 20
-  const [move_slider, setMoveSlider] = React.useState(bubblemap_width / 3)
   const overTimeOptions = {"delete": 0, "add": 1, "transform": 2}
   const format = d3.format(",d");
   const get_node_id = d => d.ancestors().reverse().map((d) => {
@@ -382,9 +368,8 @@ function VisDisplayUI() {
                     
 
                     <Treemap initial_bubble_map_render={initial_bubble_map_render} 
-                    prev_data={prev_data} curr_data={curr_data} setLabels={setLabels} 
-                    setSelectedNodes={setSelectedNodes} setIsSelected={setIsSelected} 
-                    setSelectedNodeId={setSelectedNodeId} width={treemap_width} 
+                    curr_data={curr_data} setLabels={setLabels} 
+                    width={treemap_width} 
                     height={treemap_height} setHighlightLabel={setHighlightLabel}
                     all_node_id_to_nodes={all_node_id_to_nodes}
                     setHandleTooltipEvent={setHandleTooltipEvent}
@@ -392,8 +377,7 @@ function VisDisplayUI() {
                     setTooltipIsMouseEnter={setTooltipIsMouseEnter}
                     setTreemapSvg={setTreemapSvg}
                     treemap_svg={treemap_svg}
-                    rerender_treemap={rerender_treemap}
-                    setParentLabel={setParentLabel}/>
+                    rerender_treemap={rerender_treemap}/>
 
 
                     <BubbleMapTranslate prev_data={prev_data} curr_data={curr_data} 
@@ -405,17 +389,13 @@ function VisDisplayUI() {
                     setZoomInfo={setZoomInfo} zoom_info={stack_of_brushes}
                     treemap_width={treemap_width}
                     setAllNodeIdToNodes={setAllNodeIdToNodes}
-                    resize={resize} setResize={setResize}
                     setBubbleMapSvg={setBubbleMapSvg}
-                    parent_label={parent_label}
-                    setCurrNodeIdToNodes={setCurrNodeIdToNodes}/>
+                    parent_label={parent_label}/>
 
-                    <Slider setRerenderTreemap={setRerenderTreemap} 
-                    rerender_treemap={rerender_treemap} setNodeRender={setNodeRender} 
+                    <Slider setNodeRender={setNodeRender} 
                     setPrevData={setPrevData} setCurrData={setCurrData} curr_data={curr_data} prev_data={prev_data}
                     treemap_width={treemap_width} treemap_height={treemap_height} 
                     bubblemap_width={bubblemap_width} bubblemap_height={bubblemap_height}
-                    move_slider={move_slider}
                     slider_height={slider_height}
                     setTriggerTransition={setTriggerTransition}></Slider>
 
