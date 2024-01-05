@@ -1,7 +1,7 @@
 import React from 'react';
 import * as d3 from 'd3';
 import Treemap from './Treemap';
-import BubbleMap from "./BubbleMap";
+import BubbleMapTranslate from "./BubbleMapTranslate";
 import Slider from './Slider';
 import data from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
 
@@ -396,7 +396,7 @@ function VisDisplayUI() {
                     setParentLabel={setParentLabel}/>
 
 
-                    <BubbleMap prev_data={prev_data} curr_data={curr_data} 
+                    <BubbleMapTranslate prev_data={prev_data} curr_data={curr_data} 
                     initial_bubble_map_render={initial_bubble_map_render} setInitialBubbleMapRender={setInitialBubbleMapRender} 
                     setNodeRender={setNodeRender} node_render={node_render} 
                     tsne_remapped={tsne_remapped} setTsneRemapped={setTsneRemapped}
