@@ -429,8 +429,6 @@ function BubbleMap(props) {
                 }
                 node_id_to_nodes[node.data.node_id][d.classList[2]] = {"selection": svg.select("#circle_class_" + d.classList[2]), "color": svg.select("#circle_class_" + d.classList[2]).attr("fill")}
                 node_id_to_nodes[node.parent.data.node_id][d.classList[2]] = {"selection": svg.select("#circle_class_" + d.classList[2]), "color": svg.select("#circle_class_" + d.classList[2]).attr("fill")}
-                props.setAllNodeIdToNodes(node.data.node_id, d.classList[2], {"selection": svg.select("#circle_class_" + d.classList[2]), "color": svg.select("#circle_class_" + d.classList[2]).attr("fill")})
-                props.setAllNodeIdToNodes(node.parent.data.node_id, d.classList[2], {"selection": svg.select("#circle_class_" + d.classList[2]), "color": svg.select("#circle_class_" + d.classList[2]).attr("fill")})
             });
             g_text.selectAll(".circle_text_class")._groups[0].forEach(function(d) {
                 svg.select("#circle_class_" + d.classList[2])
