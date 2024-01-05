@@ -1,14 +1,10 @@
 import React from 'react';
 import * as d3 from 'd3';
-import data_4 from "./data/RC_2021-04_KMeans_Agglom_100_Clusters.json"
-import data_5 from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
-import data_6 from "./data/RC_2021-06_KMeans_Agglom_100_Clusters_Cut_Tsne.json"
 
 import { render } from 'react-dom';
 
 function BubbleMapTranslate(props) {
     const svgRef = React.useRef()
-    //const width = 1200
     let width = props.width;
     let height = props.height;
     const overTimeOptions = {"delete": 0, "add": 1, "transform": 2}
@@ -36,13 +32,9 @@ function BubbleMapTranslate(props) {
     var tsne_remapped_y = null
     var tsne_remapped_size = null
     let svg = null
-    
-    //const months = [2021-04, 2021-05, 2021-06]
-    
-    // note: might need to make changes later to add more groupings to add interactions with other clusters
+        
     React.useEffect(() => { 
         function updateChartBrush(e) {
-            // If no selection, back to initial coordinate. Otherwise, update X axis domain
             if (e == null) {
                 var prev_brush = stack_of_brushes.pop()
                 stack_of_brushes.push(prev_brush)
@@ -76,14 +68,10 @@ function BubbleMapTranslate(props) {
                 stack_of_brushes.push(new_brush)
                 remapped_x.domain([ new_brush["min_x"], new_brush["max_x"] ])
                 remapped_y.domain([ new_brush["min_y"], new_brush["max_y"] ])
-                svg.select(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
+                svg.select(".brush").call(brush.move, null) 
                 
             }
             props.setZoomInfo(stack_of_brushes)
-
-            // Update axis and circle position
-
-
             
             svg
             .selectAll("circle")
@@ -101,17 +89,6 @@ function BubbleMapTranslate(props) {
                 return remapped_x(d.x); } )
             .attr("dy", function (d) { 
                 return remapped_y(d.y); } )
-
-            /*
-
-            svg
-            .selectAll(".label_rect_class")
-            .attr("x", function (d) {
-                return remapped_x(d.x - 2.5); } )
-            .attr("y", function (d) { 
-                return remapped_y(d.y - 2.5); } ) */
-
-
 
         }  
         if (props.zoom_info != null && props.zoom_info.length > 1) {
@@ -167,8 +144,8 @@ function BubbleMapTranslate(props) {
                     .attr("opacity", 0)
                     .text("")
 
-            var brush = d3.brush()                 // Add the brush feature using the d3.brush function
-            .extent( [ [0,0], [width,height] ] ) // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+            var brush = d3.brush()               
+            .extent( [ [0,0], [width,height] ] ) 
             .on("end", function (e) {
                 updateChartBrush(e)
 
@@ -187,17 +164,6 @@ function BubbleMapTranslate(props) {
             
             var dict_of_prev_subreddits_to_change = {}
 
-            
-
-        /*   
-            var clip = svg.append("defs").append("SVG:clipPath")
-            .attr("id", "clip")
-            .append("SVG:rect")
-            .attr("width", width )
-            .attr("height", height )
-            .attr("x", 0)
-            .attr("y", 0); */
-            
             var nodes = []
             var arr_of_tsne_boundaries = []
             let dict_of_subreddits_to_change = {}
@@ -207,7 +173,6 @@ function BubbleMapTranslate(props) {
             if (props.prev_data != null) {   
                 var prev_root = d3.hierarchy(props.prev_data)
                 var prev_nodes = prev_root.descendants()                
-                // TODO: CHANGE THE FOLLOWING SO YOU DON"T HAVE TO RECALC THE DATA EACH TIME
                 for (const prev_node in prev_nodes) {
                     dict_of_prev_subreddits_to_change[prev_nodes[prev_node].data.subreddit] ={"node": prev_nodes[prev_node], "change": overTimeOptions["add"]}
                 }
@@ -273,7 +238,6 @@ function BubbleMapTranslate(props) {
             }
                 
             function updateChart(e) {
-                // recover the new scale
                 var newX = e.transform.rescaleX(remapped_x);
                 var newY = e.transform.rescaleY(remapped_y);
                 svg.selectAll("circle")
@@ -300,12 +264,8 @@ function BubbleMapTranslate(props) {
                 svg.selectAll(".label_text_class").remove()
             }
             svg.selectAll(".circle_class").attr("fill", "#808080")
-             /* set_of_parents.forEach((parent) => {
-                render_labels(tsne_remapped_x(parent.data.tsne_x), tsne_remapped_y(parent.data.tsne_y), svg, parent.data, highlight_label, tooltip)
-            }) */
             let node_id_to_nodes = {}
-            
-            //node_id_to_nodes[props.parent_label.data.node_id] = 
+        
             for (let i = 0; i < props.labels.length - 1; i++) {
                 let node = props.labels[i]
                 let render_node = null
@@ -327,36 +287,6 @@ function BubbleMapTranslate(props) {
             }
 
             props.setCurrNodeIdToNodes(node_id_to_nodes)
-            
-            
-            /* Object.keys(props.selected_labels).forEach(function(node_id) {
-                if (node_id.includes("_")) {
-                    let node = props.selected_labels[node_id]
-                    svg.select("#circle_class_" + node.data.subreddit)
-                                .style("opacity", 1).style("stroke-opacity", 1)
-                }
-            });
-            if (props.highlight_label != null) {
-                if (props.highlight_label.includes("_")) {
-                    svg.select(".node_id_" + props.highlight_label)
-                    .attr('fill', () => {
-                        return "yellow"});
-                }
-                else {
-                    svg.select("#g_text_class_" + props.highlight_label)
-                    .selectAll(".circle_text_class")._groups[0].forEach(function(d) {
-                        svg.select("#circle_class_" + d.classList[2])
-                        .attr('fill', () => {
-                            return "yellow"});
-                    
-                })
-                }
-                    
-                
-    
-    
-            } */
-            
             props.setBubbleMapSvg(svg)
         }
         
@@ -365,9 +295,6 @@ function BubbleMapTranslate(props) {
         
     }, [props.node_render, props.labels]);
     function append_data(data, prev_nodes, prev_arr_of_tsne_boundaries, svg, tooltip, dict_of_subreddits_to_change) {
-        /* if (!svg.selectAll("circle").empty()) {
-            svg.selectAll("circle").style("opacity", .25).style("stroke-opacity", 0)
-        } */
         const root = d3.hierarchy(data);
         svg.selectAll(".g_text_class").remove()
         if (svg.selectAll(".g_text_class").empty()) {
@@ -421,20 +348,7 @@ function BubbleMapTranslate(props) {
             }
         })
 
-        // needs to be converted into a function
-        /* svg.call(d3.zoom()
-            .scaleExtent([1, 5])
-            .translateExtent([[0, 0], [width, height]])
-            .on("zoom", function (e) {
-                updateChart(e)
-                })) */
-       
-
         
-
-
-        
-
         return [nodes, dict_of_subreddits_to_change, arr_of_tsne_boundaries]
 
     }
@@ -523,7 +437,6 @@ function BubbleMapTranslate(props) {
                 }
                 node_id_to_nodes[node.data.node_id][d.classList[2]] = {"selection": svg.select("#circle_class_" + d.classList[2]), "color": svg.select("#circle_class_" + d.classList[2]).attr("fill")}
                 node_id_to_nodes[node.parent.data.node_id][d.classList[2]] = {"selection": svg.select("#circle_class_" + d.classList[2]), "color": svg.select("#circle_class_" + d.classList[2]).attr("fill")}
-                //props.setNodeIdToNodes(node.node_id, svg.select("#circle_class_" + d.classList[2]))
                 props.setAllNodeIdToNodes(node.data.node_id, d.classList[2], {"selection": svg.select("#circle_class_" + d.classList[2]), "color": svg.select("#circle_class_" + d.classList[2]).attr("fill")})
                 props.setAllNodeIdToNodes(node.parent.data.node_id, d.classList[2], {"selection": svg.select("#circle_class_" + d.classList[2]), "color": svg.select("#circle_class_" + d.classList[2]).attr("fill")})
             });
@@ -568,17 +481,9 @@ function BubbleMapTranslate(props) {
                             return "yellow"});
                         
                     });
-                    /* svg.selectAll(".parent_" + node.data.node_id)
-                    .attr('fill', () => {
-                        return "yellow"}); */
-                
-                   
          
                 })
                 .on("mousemove", (event) => {
-                    /* svg.selectAll(".parent_" + node.data.node_id)
-                    .attr('fill', () => {
-                        return "yellow"}); */
 
                     g_text.selectAll(".circle_text_class")._groups[0].forEach(function(d) {
                         svg.select("#circle_class_" + d.classList[2])
@@ -589,9 +494,6 @@ function BubbleMapTranslate(props) {
 
                 })
                 .on("mouseout", (d) => {
-                    /* svg.selectAll(".parent_" + node.data.node_id)
-                    .attr('fill', () => {
-                        return node.data.color}); */
                     g_text.selectAll(".circle_text_class")._groups[0].forEach(function(d) {
                         svg.select("#circle_class_" + d.classList[2])
                         .attr('fill', (d) => {
@@ -606,7 +508,6 @@ function BubbleMapTranslate(props) {
                             svg.select("#circle_class_" + d.classList[2])
                             .style("opacity", .25).style("stroke-opacity", 0)  
                         });
-                        // svg.selectAll(".parent_" + node.data.node_id).style("opacity", .25).style("stroke-opacity", 0)
                         node.data.clicked = false
                     
                     }
@@ -615,7 +516,6 @@ function BubbleMapTranslate(props) {
                             svg.select("#circle_class_" + d.classList[2])
                             .style("opacity", 1).style("stroke-opacity", 1) 
                         });
-                        //svg.selectAll(".parent_" + node.data.node_id).style("opacity", 1).style("stroke-opacity", 1)
                         node.data.clicked = true
                     
 
