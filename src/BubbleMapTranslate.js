@@ -286,7 +286,6 @@ function BubbleMapTranslate(props) {
 
             }
 
-            props.setCurrNodeIdToNodes(node_id_to_nodes)
             props.setBubbleMapSvg(svg)
         }
         
