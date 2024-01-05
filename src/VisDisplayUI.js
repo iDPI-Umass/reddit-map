@@ -1,13 +1,9 @@
 import React from 'react';
 import * as d3 from 'd3';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
-import Tree from "./Tree"
 import Treemap from './Treemap';
 import BubbleMapTranslate from "./BubbleMapTranslate";
 import Slider from './Slider';
 import data from "./data/RC_2021-05_KMeans_Agglom_100_Clusters_Cut.json"
-import Thumbnail from "react-webpage-thumbnail";
 
 
 function VisDisplayUI() {
@@ -286,24 +282,6 @@ function VisDisplayUI() {
           .attr("width", boundingBox.width)
           .attr("href", thumbnail)
   }
-
-  function add_image(prefix, x, y, thumbnail, isMouseEnter) {
-      let image = null
-      if (treemap_svg.select("#" + prefix + "thumbnail").empty()) {
-          image = treemap_svg.append("image")
-              .attr("id", prefix + "thumbnail")
-              .attr("class", "tooltip_class")
-      }
-      else {
-          image = treemap_svg.select("#" + prefix + "thumbnail")
-      }
-      const boundingBox = treemap_svg.select("#text_tooltip").node().getBBox()
-      image
-          .attr("x", x)
-          .attr("y", y)
-          .attr("width", boundingBox.width)
-          .attr("href", thumbnail)
-  }
   
 
   function handleTooltip(event, d, isMouseEnter) {
@@ -396,72 +374,6 @@ function VisDisplayUI() {
   if (handle_tooltip_event != null) {
     treemap_svg.append("g").attr("id", "g_rect_tooltip")
     handleTooltip(handle_tooltip_event, handle_tooltip_node, tooltip_is_mouse_enter)
-  }
-
-  function highlightNodes(highlight_label_cluster, highlight_node, highlight_label_subreddit, color_dict) {
-    setPrevHighlightLabel(highlight_label)
-    if (highlight_label.data.node_id.includes("_")) {
-      highlight_label_cluster = highlight_label.data.node_id.split("_")[0]
-      setHighlightLabelCluster(highlight_label_cluster)
-      if (highlight_label_cluster in all_node_id_to_nodes) {
-        highlight_node = all_node_id_to_nodes[highlight_label_cluster][highlight_label.data.subreddit]["selection"]
-        if (!(highlight_label_cluster in color_dict)) {
-          color_dict[highlight_label_cluster] = highlight_node.attr('fill')
-        }
-        
-        highlight_node.attr('fill', () => {
-          return "yellow"});
-        highlight_label_subreddit = highlight_label.data.subreddit
-        setHighlightLabelSubreddit(highlight_label_subreddit)
-        setIsHighlighted(true)
-      }
-      
-    }
-    else {
-      highlight_label_subreddit = null
-      highlight_label_cluster = highlight_label.data.node_id
-      setHighlightLabelCluster(highlight_label_cluster)
-      
-      if (highlight_label_cluster in 
-        all_node_id_to_nodes) {
-        let highlight_nodes = all_node_id_to_nodes[highlight_label_cluster]
-        Object.keys(highlight_nodes).forEach(function(subreddit) {
-          highlight_node = highlight_nodes[subreddit]["selection"]
-          if (!(subreddit in color_dict)) {
-            color_dict[subreddit] = highlight_node.attr('fill')
-          }
-          highlight_node.attr('fill', () => {
-            return "yellow"});
-        })
-      }
-      setHighlightLabelSubreddit(null)
-      setIsHighlighted(true)
-
-      
-    }
-
-  }
-
-  function dehighlightNodes(color_dict) {
-    setPrevHighlightLabel(highlight_label)
-    if (set_highlight_label_subreddit == null) {
-      Object.keys(all_node_id_to_nodes[set_highlight_label_cluster]).forEach(function(subreddit) {
-        all_node_id_to_nodes[set_highlight_label_cluster][subreddit]["selection"].attr('fill', () => {
-          if (!(set_highlight_label_cluster in curr_node_id_to_nodes)) {
-            return "#808080"
-          }
-          return color_dict[subreddit]});
-      })
-    }
-    else {
-      all_node_id_to_nodes[set_highlight_label_cluster][set_highlight_label_subreddit]["selection"].attr('fill', () => {
-        if (!(set_highlight_label_cluster in curr_node_id_to_nodes)) {
-          return "#808080"
-        }
-        return color_dict[set_highlight_label_subreddit]});
-    }
-    setIsHighlighted(false)
-    
   }
 
     return (
