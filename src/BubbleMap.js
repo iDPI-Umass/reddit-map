@@ -173,7 +173,7 @@ function BubbleMap(props) {
                     dict_of_subreddits_to_change[curr_nodes[curr_node].data.subreddit] ={"node": curr_nodes[curr_node], "change": overTimeOptions["add"]}
                 }
             }
-            var arr_of_curr_results = append_data(props.curr_data, nodes, arr_of_tsne_boundaries, svg, dict_of_subreddits_to_change)
+            var arr_of_curr_results = append_data(props.curr_data, arr_of_tsne_boundaries, svg, dict_of_subreddits_to_change)
             nodes = arr_of_curr_results[0]
             dict_of_prev_subreddits_to_change = arr_of_curr_results[1]
             arr_of_tsne_boundaries = arr_of_curr_results[2]
@@ -258,14 +258,13 @@ function BubbleMap(props) {
 
             }
 
-            props.setBubbleMapSvg(svg)
         }
         
         
         
         
     }, [props.node_render, props.labels]);
-    function append_data(data, prev_nodes, prev_arr_of_tsne_boundaries, svg, dict_of_subreddits_to_change) {
+    function append_data(data, prev_arr_of_tsne_boundaries, svg, dict_of_subreddits_to_change) {
         const root = d3.hierarchy(data);
         svg.selectAll(".g_text_class").remove()
         if (svg.selectAll(".g_text_class").empty()) {
