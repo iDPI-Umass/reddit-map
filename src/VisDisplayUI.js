@@ -359,7 +359,6 @@ function VisDisplayUI() {
                     curr_data={curr_data} setLabels={setLabels} 
                     width={treemap_width} 
                     height={treemap_height}
-                    all_node_id_to_nodes={all_node_id_to_nodes}
                     setHandleTooltipEvent={setHandleTooltipEvent}
                     setHandleTooltipNode={setHandleTooltipNode}
                     setTooltipIsMouseEnter={setTooltipIsMouseEnter}
@@ -375,8 +374,7 @@ function VisDisplayUI() {
                     width={bubblemap_width} height={bubblemap_height} 
                     labels={labels}
                     setZoomInfo={setZoomInfo} zoom_info={stack_of_brushes}
-                    treemap_width={treemap_width}
-                    setAllNodeIdToNodes={setAllNodeIdToNodes}/>
+                    treemap_width={treemap_width}/>
 
                     <Slider setNodeRender={setNodeRender} 
                     setPrevData={setPrevData} setCurrData={setCurrData} curr_data={curr_data} prev_data={prev_data}
